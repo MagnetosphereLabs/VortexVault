@@ -373,9 +373,16 @@ This project is open source under GNU AGPL v3.0. See **LICENSE** for details.
 Contributions are welcome — especially in areas like:
 
 - expanding safe privacy transformations for additional file types
-- improving large-file handling and streaming workflows
+- improving large-file (2GB+) handling
 - UX improvements that preserve the “offline-first” posture
 - security review and hardening
+
+### Guidelines
+Please keep feedback constructive and focused on real user impact.
+
+- If you’re proposing a change, include the reason (security, performance, correctness, UX).
+- Avoid style-only refactors or subjective rewrites unless they clearly improve the software.
+- For larger changes, open an issue first so we can collaborate before a PR.
 
 ---
 
