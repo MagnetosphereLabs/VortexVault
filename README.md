@@ -1,19 +1,25 @@
 <img src="/VortexVaultLogo.png" alt="Vortex Vault" width="200">
 
-**Vortex Vault** is an offline, client-side encrypted vault that stores an entire file system inside a single `vortex.vault` container. Encrypted end-to-end in your browser using modern **WebCrypto (AES-256-GCM)**.
+**Vortex Vault** is an offline, client-side encrypted vault that stores an entire file system inside a single `vortex.vault` container — like a portable encrypted drive, but as one file.
 
-Unlock your vault locally, manage files like in a file explorer. Rename, or delete folders or files in your vault quickly and easily. View notes, images, videos, documents, and even audio all inside Vortex Vault. Vortex supports storing all conventional file types from .zip files to .wav files. Pressing **Save & log out** downloads your encrypted vault and clears the active browser session.
+Everything encrypts/decrypts locally in your browser using modern **WebCrypto (AES-256-GCM)**. No accounts. No storage server. Just a vault you control.
+
+**Try it on almost any device:** https://vortex.mglabs.dev (client loads there, vault decrypts locally)
+
+Unlock your vault locally, manage files like in a file explorer. Rename or delete folders or files in your vault quickly and easily. View notes, images, videos, documents, and even audio all inside Vortex Vault. Vortex supports all common file types (from `.zip` to `.wav`). Pressing **Save & log out** downloads your encrypted vault and clears the active browser session.
 
 No accounts. No storage server. Just a vault you control.
 
+### File Browser UI
 <img src="/VortexVaultMainUI.png" alt="Vortex Vault" width="720">
-
 
 ### In-vault encrypted notes
 <img src="VortexVaultSecureNote.png" width="720" />
 
-### Direct Share (P2P, end-to-end encrypted)
+### Direct Share Receive (P2P, end-to-end encrypted)
 <img src="/VortexVaultReceive.png" width="720" />
+
+### Direct Share Send (P2P, end-to-end encrypted)
 <img src="/VortexVaultSend.png" width="720" />
 
 ### Media previews (images / video / PDF / audio)
@@ -85,14 +91,14 @@ A `.vault` file is simply a file, so you can store it anywhere. On your local di
 ### Direct Share (peer-to-peer, encrypted, no file servers)
 Vortex Vault includes **Direct Share**: a practical way to transfer a file directly between devices without uploading it to a third-party storage service.
 
-<video src="VortexVaultSecureSend.mp4" width="720" controls></video>
-
 - **Peer-to-peer transfer over WebRTC DataChannels**
 - **No file hosting, no upload server, no storage backend**
 - Application-layer encryption **in addition to** WebRTC transport encryption
 - Receiver can either:
-  - **download the decrypted file to their device** if they directly visit a share link in their browser), or
-  - **import directly into their vault** if they already loaded their .vault file. In Vortex Vault you can click direct share on any file, then switch it to receive mode. From there you can simply paste the link sent to you and then send your generated link back to the sender.
+  - **download the file to their device** (if they open the share link without a vault loaded), or
+  - **import directly into their vault** (if they already have a vault open)
+
+In Vortex Vault you can click direct share on any file, then switch it to receive mode. From there you can simply paste the link sent to you and then send your generated link back to the sender.
 
 Direct Share is built for real-world usability: generate a link, the receiver opens it, sends back a reply link, and the file transfers directly between browsers securely across the internet.
 
@@ -146,10 +152,10 @@ This is version **1.0**. Over time, privacy transforms may expand to additional 
 
 This is the safest and simplest way to use Vortex Vault.
 
-1. Download the `VortexVault.html` file from this repo, or load it from the offical public link: https://vortex.mglabs.dev, or load it from your self-hosted source.
+1. Download the `VortexVault.html` file from this repo, or load it from the official public link: https://vortex.mglabs.dev, or load it from your self-hosted source.
 2. Open the app:
    - open the html file in a modern browser
-   - or visit the offical public link to load it on almost any device anywhere
+   - or visit the official public link to load it on almost any device anywhere
 3. Click **New vault** to make a new `vortex.vault` file or **Open Vault** to load an existing one.
 4. Use a strong password  
    - minimum **12 characters**
@@ -312,6 +318,10 @@ Vortex Vault is built to protect against:
 
 In other words: if someone obtains your `vortex.vault` file, the design is intended to keep its contents and structure private unless the password is known.
 
+## Security note
+Vortex Vault is designed so your vault data and keys never leave your device.  
+Like any client-side security tool, it can’t protect you if your device/browser is compromised while the vault is unlocked.
+
 ---
 
 ## Practical threat notes (what to keep in mind)
@@ -319,6 +329,7 @@ In other words: if someone obtains your `vortex.vault` file, the design is inten
 - If an attacker can run malicious code on your device while your vault is unlocked, they can potentially access decrypted content.
 - If you load the client from the public internet, your security depends on the integrity of what you loaded (use the official domain, or run it locally/offline).
 - Direct Share is peer-to-peer: the peer you connect to can see your connection metadata (typical for P2P). We recommend using it to send files between people you know and trust.
+- This project has not yet undergone an independent security audit.
 
 ---
 
