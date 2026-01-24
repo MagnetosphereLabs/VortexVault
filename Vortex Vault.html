@@ -1,0 +1,5067 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Vortex Vault</title>
+
+  <style>
+    :root{
+      /* Dark theme palette */
+      --bg0:#050711;
+      --bg1:#0a1022;
+
+      --panel: rgba(10,14,26,.72);
+      --panel2: rgba(8,10,18,.62);
+
+      --border: rgba(255,255,255,.08);
+      --border2: rgba(255,255,255,.12);
+
+      --text:#eef2ff;
+      --muted:#9aa6cf;
+
+      /* Primary accent blue */
+      --accent:#5da8ff;
+      --accent2:#3e7bff;
+
+      --danger:#ff4b6b;
+      --ok:#15d49a;
+
+      --r-lg:18px;
+      --r-md:14px;
+      --r-sm:12px;
+
+      --shadow: 0 26px 70px rgba(0,0,0,.60);
+      --shadow2: 0 14px 40px rgba(0,0,0,.45);
+    }
+
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(900px 620px at 20% 0%, rgba(93,168,255,.20), transparent 60%),
+        radial-gradient(900px 620px at 85% 100%, rgba(93,168,255,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow:hidden;
+    }
+
+    /* App fills viewport */
+    .app{
+      height:100%;
+      width:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Fullscreen shell (no max-width card) */
+    .shell{
+      flex:1;
+      min-height:0;
+      width:100%;
+      height:100%;
+      border-top:1px solid var(--border);
+      background: linear-gradient(140deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      backdrop-filter: blur(14px) saturate(135%);
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      background: rgba(8,10,18,.78);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 220px;
+      min-width: 0;
+    }
+    .mark{
+      /* Wordmark logo (wide + short) */
+      height:60px;
+      width:auto;
+      max-width:280px;
+
+      display:block;
+      flex:0 0 auto;
+
+      object-fit:contain;
+
+      /* “Premium” look on dark bg */
+      filter: drop-shadow(0 10px 26px rgba(93,168,255,.18));
+      opacity: .98;
+    }
+    .brandText{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      line-height:1.05;
+      min-width:0;
+      padding-left: 15px;
+    }
+    .brandText .h{
+      font-weight:800;
+      font-size:18px;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+    }
+    .brandText .s{
+      font-size:18px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 58vw;
+    }
+
+    .controls{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(7,9,18,.64);
+      color:var(--muted);
+      font-size:16px;
+      white-space:nowrap;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;
+      background: var(--danger);
+      box-shadow: 0 0 14px rgba(255,75,107,.30);
+    }
+    .dot.ok{
+      background: var(--ok);
+      box-shadow: 0 0 14px rgba(21,212,154,.26);
+    }
+
+    .btn{
+      border-radius:999px;
+      padding:8px 12px;
+      border:1px solid var(--border);
+      background: rgba(10,12,22,.56);
+      color:var(--text);
+      cursor:pointer;
+      font-size:15px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition: transform .14s ease, background .14s ease, border-color .14s ease, box-shadow .14s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.14);
+      background: rgba(14,18,32,.70);
+      box-shadow: var(--shadow2);
+    }
+    .btn:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none;
+      box-shadow:none;
+    }
+    .btn.primary{
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color:#07142e;
+      font-weight:850;
+      border-color: rgba(140,190,255,.62);
+      box-shadow: 0 16px 36px rgba(93,168,255,.26);
+      margin-top: 7px;
+      margin-bottom: 7px;
+    }
+    .btn.primary:hover{
+      box-shadow: 0 20px 44px rgba(93,168,255,.36);
+    }
+    .btn.ghost{
+      background: transparent;
+      color:var(--muted);
+      border-color: rgba(255,255,255,.08);
+    }
+    .btn.ghost:hover{
+      color:var(--text);
+      background: rgba(255,255,255,.03);
+    }
+    .btn.danger{
+      background: linear-gradient(135deg, #ff4b6b, #ff7da0);
+      border-color: rgba(255,120,160,.65);
+      color:#24020b;
+      font-weight:900;
+      box-shadow: 0 16px 34px rgba(255,75,107,.20);
+    }
+    .btn.danger:hover{
+      box-shadow: 0 20px 44px rgba(255,75,107,.26);
+    }
+
+    /* Main layout: Explorer + Preview (no left sidebar) */
+    .main{
+      flex:1;
+      min-height:0;
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      background: rgba(6,8,14,.58);
+    }
+
+    .pane{
+      min-height:0;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      border-right:1px solid var(--border);
+    }
+    .pane:last-child{ border-right:none; }
+
+    .paneHead{
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: rgba(8,10,18,.58);
+    }
+
+    .paneTitle{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
+    .paneTitle .h{
+      font-weight:850;
+      font-size:18px;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 52vw;
+    }
+    .paneTitle .s{
+      font-size:18px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 62vw;
+      margin-top: 7px;
+    }
+
+    /* Breadcrumb look */
+    .crumbs{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:wrap;
+      min-width:0;
+    }
+    .crumb{
+      cursor:pointer;
+      color:rgba(238,242,255,.92);
+      font-weight:800;
+      font-size:15px;
+      letter-spacing:.10em;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.34);
+      transition: transform .14s ease, background .14s ease, border-color .14s ease;
+      user-select:none;
+      max-width: 260px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .crumb:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.03);
+      border-color: rgba(255,255,255,.14);
+    }
+    .sep{
+      color: rgba(154,166,207,.60);
+      font-weight:900;
+      user-select:none;
+    }
+
+    .headTools{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      min-width: 260px;
+    }
+
+    .search{
+      flex: 1 1 260px;
+      max-width: 420px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.55);
+      transition: border-color .14s ease, box-shadow .14s ease, background .14s ease;
+      min-width: 220px;
+    }
+    .search:focus-within{
+      border-color: rgba(93,168,255,.72);
+      box-shadow: 0 0 0 1px rgba(93,168,255,.34);
+      background: rgba(8,12,22,.74);
+    }
+    .search svg{
+      width:16px; height:16px;
+      color: rgba(154,166,207,.92);
+      flex:0 0 auto;
+    }
+    .search input{
+      flex:1;
+      border:0;
+      outline:none;
+      background: transparent;
+      color:var(--text);
+      font-size:14px;
+      padding:0;
+      min-width:0;
+    }
+    .search input::placeholder{ color: rgba(154,166,207,.78); }
+
+    /* Compact vault meta strip */
+    .metaStrip{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      background: rgba(7,9,18,.36);
+    }
+    .metaLeft{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .metaLeft .title{
+      font-weight:900;
+      font-size:15px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 52vw;
+    }
+    .metaLeft .sub{
+      font-size:15px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 62vw;
+    }
+    .metaStats{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .stat{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width: 88px;
+      text-align:right;
+    }
+    .stat .k{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      color: rgba(154,166,207,.88);
+    }
+    .stat .v{
+      font-size:12px;
+      color: rgba(238,242,255,.96);
+    }
+
+    /* Add/New menu */
+    .menuWrap{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .menu{
+      position:absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 220px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(10,12,22,.96);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      display:none;
+      z-index: 20;
+      backdrop-filter: blur(10px) saturate(140%);
+    }
+    .menu.on{ display:block; }
+    .menuItem{
+      width:100%;
+      text-align:left;
+      padding:10px 12px;
+      font-size:15px;
+      color: rgba(238,242,255,.92);
+      background: transparent;
+      border:0;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      transition: background .14s ease;
+    }
+    .menuItem:hover{
+      background: rgba(255,255,255,.04);
+    }
+    .menuItem small{
+      margin-left:auto;
+      color: rgba(154,166,207,.85);
+      font-size:13px;
+    }
+
+    /* Table */
+    .tableWrap{
+      flex:1;
+      min-height:0;
+      overflow:auto;
+      background: rgba(7,9,18,.36);
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:15px;
+    }
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:2;
+      background: rgba(8,10,18,.90);
+      border-bottom:1px solid var(--border);
+      color:rgba(154,166,207,.92);
+      font-size:14px;
+      text-transform:uppercase;
+      letter-spacing:.13em;
+      padding:10px 10px;
+      text-align:left;
+      white-space:nowrap;
+      user-select:none;
+      cursor:pointer;
+    }
+    thead th:hover{
+      color: rgba(238,242,255,.92);
+    }
+    tbody tr{
+      border-bottom:1px solid rgba(255,255,255,.06);
+      transition: background .14s ease;
+    }
+    tbody tr:hover{
+      background: rgba(255,255,255,.03);
+    }
+    tbody tr.sel{
+      background: rgba(93,168,255,.10);
+    }
+    tbody td{
+      padding:10px 10px;
+      color:rgba(238,242,255,.92);
+      vertical-align:middle;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 1px;
+    }
+
+    .nameCell{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .fileIco{
+      width:26px;height:26px;
+      border-radius:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+      flex:0 0 auto;
+    }
+    .nameText{
+      min-width:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      font-weight:800;
+      color: rgba(238,242,255,.98);
+    }
+    .mutedCell{ color:rgba(154,166,207,.92); }
+
+    .emptyState{
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      color:var(--muted);
+    }
+    .emptyState .big{
+      color:rgba(238,242,255,.95);
+      font-weight:900;
+      font-size:14px;
+    }
+
+    /* Preview pane */
+    .paneBody{
+      flex:1;
+      min-height:0;
+      overflow:auto;
+      padding:12px;
+    }
+
+    .preview{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .previewCard{
+      border:1px solid var(--border);
+      background: rgba(10,12,22,.58);
+      border-radius: var(--r-lg);
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .metaRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .metaRow .title{
+      font-weight:900;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 320px;
+    }
+    .metaRow .sub{
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 360px;
+    }
+
+    .previewTools{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .editorName{
+      width:100%;
+      padding:9px 10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.55);
+      color:var(--text);
+      outline:none;
+      font-size:15px;
+      font-weight:800;
+    }
+    .editorName:focus{
+      border-color: rgba(93,168,255,.72);
+      box-shadow: 0 0 0 1px rgba(93,168,255,.34);
+      background: rgba(8,12,22,.76);
+    }
+
+    .editor{
+      width:100%;
+      min-height: 220px;
+      resize: vertical;
+      padding:10px 10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.55);
+      color:var(--text);
+      outline:none;
+      font-size:15px;
+      line-height:1.55;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      margin-top: 8px;
+    }
+    .editor:focus{
+      border-color: rgba(93,168,255,.72);
+      box-shadow: 0 0 0 1px rgba(93,168,255,.34);
+      background: rgba(8,12,22,.76);
+    }
+
+    .previewMedia{
+      width:100%;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.46);
+      overflow:hidden;
+    }
+    .previewMedia img, .previewMedia video{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+
+    .hintBox{
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.46);
+      border-radius: 16px;
+      padding:10px;
+      color:var(--muted);
+      line-height:1.45;
+      font-size:15px;
+      margin-top: 14px;
+    }
+
+    /* Toast */
+    .toasts{
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      z-index: 999;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      pointer-events:none;
+    }
+    .toast{
+      pointer-events:auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      max-width: 380px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(7,9,18,.88);
+      box-shadow: var(--shadow2);
+      color:rgba(238,242,255,.95);
+      font-size:15px;
+      opacity:0;
+      transform: translateY(10px);
+      animation: toastIn .14s ease-out forwards;
+    }
+    .toast.err{
+      border-color: rgba(255,140,170,.22);
+      background: rgba(18,7,12,.92);
+    }
+    .tDot{
+      width:10px;height:10px;border-radius:999px;
+      background: var(--ok);
+      box-shadow: 0 0 14px rgba(21,212,154,.22);
+      flex:0 0 auto;
+    }
+    .toast.err .tDot{
+      background: var(--danger);
+      box-shadow: 0 0 14px rgba(255,75,107,.24);
+    }
+    @keyframes toastIn{ to{ opacity:1; transform: translateY(0);} }
+
+    /* Modal */
+    .overlay{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      background: rgba(0,0,0,.50);
+      z-index: 1000;
+    }
+    .overlay.on{ display:flex; }
+    .modal{
+      width:min(520px, 100%);
+      border-radius: 22px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(10,12,22,.92);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .modalHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 14px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .modalHead .h{ font-weight:900; }
+    .modalHead .s{ font-size:15px; color:var(--muted); margin-top:7px; }
+    .modalBody{
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .fieldLabel{ font-size:15px; color:rgba(238,242,255,.95); }
+    .fieldInput{
+      width:100%;
+      padding:10px 10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.65);
+      color:var(--text);
+      outline:none;
+      font-size:15px;
+    }
+    .fieldInput:focus{
+      border-color: rgba(93,168,255,.72);
+      box-shadow: 0 0 0 1px rgba(93,168,255,.34);
+      background: rgba(8,12,22,.80);
+    }
+    .modalFoot{
+      padding:12px 14px;
+      border-top:1px solid rgba(255,255,255,.08);
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    /* Responsive: stacked layout on smaller screens */
+    @media (max-width: 980px){
+      .main{
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr min(42vh, 420px);
+      }
+      header{
+        align-items:flex-start;
+      }
+      .brandText .s{ max-width: 70vw; }
+    }
+
+    /* ---------- Direct Share UX cleanup ---------- */
+    .shareIntro{
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.34);
+      border-radius: 18px;
+      padding:10px 12px;
+    }
+    .shareIntro .h{
+      font-weight:900;
+      font-size:15px;
+    }
+    .shareIntro .s{
+      color: var(--muted);
+      font-size:14px;
+      margin-top:4px;
+      line-height:1.4;
+    }
+
+    .shareTabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .shareTabs .btn{
+      flex: 1 1 180px;
+      justify-content:center;
+      margin: 0 !important; /* fixes Send/Receive size mismatch */
+    }
+    .shareTabs .btn.primary{
+      margin: 0 !important; /* overrides .btn.primary margins globally */
+    }
+
+    .shareCard{
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.38);
+      border-radius: 18px;
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top: 14px;
+    }
+    .shareCardTitle{
+      font-weight:900;
+      font-size:15px;
+    }
+
+    .shareLinkRow{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .shareLink{
+      flex: 1 1 320px;
+      display:block;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.55);
+      color: rgba(238,242,255,.95);
+      text-decoration:none;
+      font-size:14px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .shareLink:hover{
+      border-color: rgba(93,168,255,.55);
+      box-shadow: 0 0 0 1px rgba(93,168,255,.22);
+    }
+
+    .shareActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .shareDetails{
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.28);
+      border-radius: 16px;
+      padding: 10px;
+    }
+    .shareDetails summary{
+      cursor:pointer;
+      color: var(--muted);
+      font-size: 14px;
+      user-select:none;
+    }
+    .shareDetails[open] summary{
+      color: rgba(238,242,255,.92);
+    }
+    /* --- during an auto direct share hide manual controls from the ui --- */
+    #btnShareCreateOffer,
+    #btnShareCreateAnswer,
+    #btnShareAcceptAnswer{
+      display:none !important;
+    }
+    /* Hide one-time code UI (still used internally in link fragment c=...) */
+    #shareMyCodeWrap,
+    #sharePeerCodeWrap{
+      display:none !important;
+    }
+
+    /* Hide all manual/advanced code panels (link-only UX) */
+    .shareDetails{
+      display:none !important;
+    }
+
+    /* Transfer progress bar */
+    .shareProgress{
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.38);
+      border-radius: 18px;
+      padding: 10px 12px;
+      display:none;
+    }
+    .shareProgressTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-size:14px;
+    }
+    .shareProgressLabel{
+      font-weight:900;
+      color: rgba(238,242,255,.92);
+    }
+    .shareProgressPct{
+      color: var(--muted);
+      font-weight:850;
+    }
+    .shareBar{
+      margin-top:8px;
+      height:10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+    }
+    .shareBarFill{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 18px rgba(93,168,255,.22);
+      transition: width .12s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="shell">
+      <header>
+        <div class="brand">
+          <img class="mark" src="/enc/vault/logo.png" alt="Vortex Vault" />
+          <div class="brandText">
+            <div class="h"></div>
+            <div class="s" id="subtitle"></div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="pill" title="Session state">
+            <span class="dot" id="statusDot"></span>
+            <span id="statusLabel">No vault open</span>
+          </div>
+          <button class="btn ghost" id="btnOpen">Open vault</button>
+          <button class="btn ghost" id="btnNewVault">New vault</button>
+          <button class="btn primary" id="btnSave" disabled>Save & log out</button>
+        </div>
+      </header>
+
+      <div class="main">
+        <!-- Explorer Pane -->
+        <div class="pane">
+          <div class="paneHead">
+            <div class="paneTitle" style="min-width: 220px;">
+              <div class="crumbs" id="pathLabel"></div>
+              <div class="s" id="pathSub">Open a vault to begin.</div>
+            </div>
+
+            <div class="headTools">
+              <div class="search" title="Search by name/type/mime">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M10.5 18.5a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <input id="search" autocomplete="off" placeholder="Search…" />
+              </div>
+
+              <button class="btn ghost" id="btnUp" disabled>Parent Directory</button>
+
+              <div class="menuWrap">
+                <button class="btn" id="btnAdd" disabled>Add Content</button>
+                <div class="menu" id="addMenu">
+                  <button class="menuItem" id="miImport">Import files <small>I</small></button>
+                  <button class="menuItem" id="miPaste">Paste <small>V</small></button>
+                  <button class="menuItem" id="miNewFolder">New folder <small>F</small></button>
+                  <button class="menuItem" id="miNewText">New text note <small>N</small></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="metaStrip" id="metaStrip">
+            <div class="metaLeft">
+              <div class="title" id="vaultName"></div>
+              <div class="sub" id="vaultFileLabel"></div>
+            </div>
+
+            <div class="metaStats">
+              <div class="stat">
+                <div class="k">Items</div>
+                <div class="v" id="metaItems">0</div>
+              </div>
+              <div class="stat">
+                <div class="k">Vault Size</div>
+                <div class="v" id="metaSize">0 KB</div>
+              </div>
+              <div class="stat">
+                <div class="k">Created</div>
+                <div class="v" id="metaCreated">–</div>
+              </div>
+              <div class="stat">
+                <div class="k">Updated</div>
+                <div class="v" id="metaUpdated">–</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tableWrap" id="tableWrap">
+            <div class="emptyState" id="emptyState">
+              <div class="big">No vault unlocked</div>
+            </div>
+
+            <table id="table" style="display:none;">
+              <thead>
+                <tr>
+                  <th data-sort="name">Name</th>
+                  <th data-sort="kind">Type</th>
+                  <th data-sort="size">Size</th>
+                  <th data-sort="updated">Modified</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Preview Pane -->
+        <div class="pane previewPane" id="previewPane">
+          <div class="paneHead">
+            <div class="paneTitle">
+              <div class="h">Preview</div>
+              <div class="s" id="previewSub">Select an item.</div>
+            </div>
+          </div>
+          <div class="paneBody">
+            <div class="preview" id="preview">
+              <div class="previewCard">
+                <div class="metaRow">
+                  <div style="min-width:0;">
+                    <div class="title" id="pvTitle">No selection</div>
+                    <div class="sub" id="pvMeta">—</div>
+                  </div>
+                </div>
+
+                <div class="hintBox" id="pvBody">
+                  Select an item to preview it here. Text notes are editable in-place.
+                </div>
+
+                <div class="previewTools" id="pvTools"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /main -->
+    </div><!-- /shell -->
+  </div><!-- /app -->
+
+  <!-- Toasts -->
+  <div class="toasts" id="toasts"></div>
+
+  <!-- Unlock modal -->
+  <div class="overlay" id="ovUnlock">
+    <div class="modal">
+      <div class="modalHead">
+        <div>
+          <div class="h" id="unlockTitle">Unlock vault</div>
+          <div class="s" id="unlockSub">Enter the password for this vault.</div>
+        </div>
+      </div>
+      <div class="modalBody">
+        <div class="fieldLabel">Password</div>
+        <input class="fieldInput" id="pw" type="password" placeholder="Enter Vault Password" />
+        <div class="fieldLabel" id="pw2Label" style="display:none; margin-top:10px;">Confirm Password</div>
+        <input class="fieldInput" id="pw2" type="password" placeholder="Repeat Password" style="display:none;" />
+      </div>
+      <div class="modalFoot">
+        <button class="btn ghost" data-close="ovUnlock">Cancel</button>
+        <button class="btn primary" id="btnUnlockGo">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt modal (rename/new folder) -->
+  <div class="overlay" id="ovPrompt">
+    <div class="modal">
+      <div class="modalHead">
+        <div>
+          <div class="h" id="promptTitle">Prompt</div>
+          <div class="s" id="promptSub">—</div>
+        </div>
+      </div>
+      <div class="modalBody">
+        <div class="fieldLabel" id="promptLabel">Value</div>
+        <input class="fieldInput" id="promptValue" type="text" placeholder="" />
+      </div>
+      <div class="modalFoot">
+        <button class="btn ghost" data-close="ovPrompt">Cancel</button>
+        <button class="btn primary" id="btnPromptOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paste modal -->
+  <div class="overlay" id="ovPaste">
+    <div class="modal">
+      <div class="modalHead">
+        <div>
+          <div class="h">Paste</div>
+          <div class="s">Press Ctrl+V (or system paste) now.</div>
+        </div>
+        <button class="btn ghost" data-close="ovPaste" style="padding:6px 10px;">Close</button>
+      </div>
+      <div class="modalBody">
+        <div class="hintBox">
+          Click inside the field below, then paste.
+          Supported: images + plain text.
+        </div>
+        <div class="fieldLabel">Paste target</div>
+        <textarea class="fieldInput" id="pasteCatcher" style="min-height:120px; resize:vertical;" placeholder="Click here, then paste…"></textarea>
+      </div>
+      <div class="modalFoot">
+        <button class="btn ghost" data-close="ovPaste">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share modal (Direct Share) -->
+  <div class="overlay" id="ovShare">
+    <div class="modal" style="width:min(860px, 100%);">
+      <div class="modalHead">
+        <div style="min-width:0;">
+          <div class="h">Direct Share</div>
+          <div class="s" id="shareItemInfo">—</div>
+          <div class="s" id="shareStatus" style="margin-top:6px;">Idle.</div>
+        </div>
+        <button class="btn ghost" data-close="ovShare" style="padding:6px 10px;">Close</button>
+      </div>
+
+      <div class="modalBody" style="gap:12px;">
+
+        <div class="shareIntro">
+          <div class="h">Private, peer-to-peer transfer.</div>
+          <div class="s">
+            Share a link. The receiver opens it and sends a reply link back.
+            The file transfers directly between devices — nothing is stored on servers.
+          </div>
+        </div>
+
+        <div class="shareTabs">
+          <button class="btn primary" id="shareTabSend">Send</button>
+          <button class="btn ghost" id="shareTabRecv">Receive</button>
+        </div>
+
+        <div class="shareProgress" id="shareProgress">
+          <div class="shareProgressTop">
+            <div class="shareProgressLabel" id="shareProgressLabel">Transfer</div>
+            <div class="shareProgressPct" id="shareProgressPct"></div>
+          </div>
+          <div class="shareBar">
+            <div class="shareBarFill" id="shareProgressFill"></div>
+          </div>
+        </div>
+
+        <!-- Hidden networking config (still used internally) -->
+        <div style="display:none;">
+          <div class="fieldLabel">ICE servers (advanced)</div>
+          <textarea class="fieldInput" id="shareStun" style="min-height:92px; resize:vertical;"></textarea>
+        </div>
+
+        <div id="shareMyCodeWrap">
+          <div class="fieldLabel" style="margin-top:10px;">Your one-time code</div>
+          <div class="shareLinkRow">
+            <input class="fieldInput" id="shareMyCode" type="text" readonly />
+            <button class="btn ghost" id="btnShareCopyMyCode">Copy</button>
+          </div>
+        </div>
+
+        <div id="sharePeerCodeWrap">
+          <div class="fieldLabel">Security code (auto-filled)</div>
+          <input
+            class="fieldInput"
+            id="sharePeerCode"
+            type="text"
+            placeholder="Auto-filled from the link you paste"
+        />
+          <div class="hintBox" style="margin-top:-2px;">
+            Paste the link again if this field stays empty.
+          </div>
+        </div>
+
+        <!-- SEND -->
+        <div id="shareSendPane">
+          <div class="shareCard">
+            <div class="shareCardTitle">Share this link</div>
+
+            <div class="shareLinkRow">
+              <a
+                id="shareOfferAnchor"
+                class="shareLink"
+                href="#"
+                target="_blank"
+                rel="noopener"
+              >Generating link…</a>
+
+              <button class="btn ghost" id="btnShareCopyOfferLink">Copy Link</button>
+            </div>
+
+            <!-- keep underlying storage for copy operations -->
+            <textarea
+              class="fieldInput"
+              id="shareOfferLink"
+              style="display:none;"
+              readonly
+            ></textarea>
+
+            <div class="shareActions">
+              <button class="btn" id="btnShareCreateOffer">Create Link</button>
+            </div>
+          </div>
+
+          <div class="shareCard">
+            <div class="shareCardTitle">Paste receiver reply</div>
+
+            <textarea
+              class="fieldInput"
+              id="shareAnswerIn"
+              style="min-height:66px; resize:none;"
+              placeholder="Paste reply link here…"
+            ></textarea>
+
+            <div class="shareActions">
+              <button class="btn" id="btnShareAcceptAnswer">Apply Reply</button>
+              <button class="btn primary" id="btnShareSendNow" disabled>Send File</button>
+            </div>
+          </div>
+
+          <details class="shareDetails">
+            <summary>Advanced</summary>
+
+            <div class="fieldLabel" style="margin-top:10px;">Offer code</div>
+            <textarea
+              class="fieldInput"
+              id="shareOfferOut"
+              style="min-height:120px; resize:vertical;"
+              readonly
+              placeholder="Create Link to generate…"
+            ></textarea>
+
+            <div class="shareActions">
+              <button class="btn ghost" id="btnShareCopyOffer">Copy Offer Code</button>
+            </div>
+          </details>
+        </div>
+
+        <!-- RECEIVE -->
+        <div id="shareRecvPane" style="display:none;">
+          <div class="shareCard">
+            <div class="shareCardTitle">The sender’s cryptographic signature</div>
+
+            <textarea
+              class="fieldInput"
+              id="shareOfferIn"
+              style="min-height:90px; resize:vertical;"
+              placeholder="Paste sender link here…"
+            ></textarea>
+
+            <div class="shareActions">
+              <button class="btn" id="btnShareCreateAnswer">Create Reply</button>
+            </div>
+          </div>
+
+          <div class="shareCard">
+            <div class="shareCardTitle">Share this reply link back to the sender</div>
+
+            <div class="shareLinkRow">
+              <a
+                id="shareAnswerAnchor"
+                class="shareLink"
+                href="#"
+                target="_blank"
+                rel="noopener"
+              >Reply link will appear here…</a>
+
+              <button class="btn ghost" id="btnShareCopyAnswerLink">Copy Link</button>
+            </div>
+
+            <!-- keep underlying storage for copy operations -->
+            <textarea
+              class="fieldInput"
+              id="shareAnswerLink"
+              style="display:none;"
+              readonly
+            ></textarea>
+
+            <details class="shareDetails">
+              <summary>Advanced</summary>
+
+              <div class="fieldLabel" style="margin-top:10px;">Reply code</div>
+              <textarea
+                class="fieldInput"
+                id="shareAnswerOut"
+                style="min-height:120px; resize:vertical;"
+                readonly
+                placeholder="Create Reply to generate…"
+              ></textarea>
+
+              <div class="shareActions">
+                <button class="btn ghost" id="btnShareCopyAnswer">Copy Reply Code</button>
+              </div>
+            </details>
+          </div>
+
+          <div class="hintBox" id="shareRecvInfo">Waiting for sender…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden file inputs -->
+  <input id="fileVault" type="file" style="display:none" />
+  <input id="fileImport" type="file" multiple style="display:none" />
+
+<script>
+
+  const KDF_ITER_DEFAULT = 1000000;
+
+  const V2_MAGIC = "AVLT";
+  const V2_VERSION = 2;
+  const V2_HEADER_SIZE = 64;
+
+  // Sanitization caps / behavior
+  const MAX_IMAGE_DIM = 4000; // max resolution in any direction
+  const SAFE_TRAILING_PAD_VIDEO_MIME = new Set([
+    "video/mp4",
+    "video/webm",
+    "video/ogg",
+    "video/quicktime"
+  ]);
+  const SAFE_TRAILING_PAD_VIDEO_EXT = new Set(["mp4","m4v","mov","webm","ogg","ogv"]);
+  const VIDEO_PAD_MIN = 24;
+  const VIDEO_PAD_MAX = 80;
+
+  const $ = (id) => document.getElementById(id);
+
+  const ui = {
+    subtitle: $("subtitle"),
+    statusDot: $("statusDot"),
+    statusLabel: $("statusLabel"),
+
+    btnOpen: $("btnOpen"),
+    btnNewVault: $("btnNewVault"),
+    btnSave: $("btnSave"),
+
+    // meta strip
+    metaStrip: $("metaStrip"),
+    vaultFileLabel: $("vaultFileLabel"),
+    vaultName: $("vaultName"),
+    metaItems: $("metaItems"),
+    metaSize: $("metaSize"),
+    metaCreated: $("metaCreated"),
+    metaUpdated: $("metaUpdated"),
+
+    pathLabel: $("pathLabel"),
+    pathSub: $("pathSub"),
+    btnUp: $("btnUp"),
+
+    search: $("search"),
+
+    // Add/New menu
+    btnAdd: $("btnAdd"),
+    addMenu: $("addMenu"),
+    miImport: $("miImport"),
+    miPaste: $("miPaste"),
+    miNewFolder: $("miNewFolder"),
+    miNewText: $("miNewText"),
+
+    emptyState: $("emptyState"),
+    table: $("table"),
+    tbody: $("tbody"),
+    tableWrap: $("tableWrap"),
+
+    previewPane: $("previewPane"),
+    previewSub: $("previewSub"),
+    pvTitle: $("pvTitle"),
+    pvMeta: $("pvMeta"),
+    pvBody: $("pvBody"),
+    pvTools: $("pvTools"),
+
+    toasts: $("toasts"),
+
+    ovUnlock: $("ovUnlock"),
+    unlockTitle: $("unlockTitle"),
+    unlockSub: $("unlockSub"),
+    pw: $("pw"),
+    pw2: $("pw2"),
+    pw2Label: $("pw2Label"),
+    btnUnlockGo: $("btnUnlockGo"),
+
+    ovPrompt: $("ovPrompt"),
+    promptTitle: $("promptTitle"),
+    promptSub: $("promptSub"),
+    promptLabel: $("promptLabel"),
+    promptValue: $("promptValue"),
+    btnPromptOk: $("btnPromptOk"),
+
+    ovPaste: $("ovPaste"),
+    pasteCatcher: $("pasteCatcher"),
+
+    fileVault: $("fileVault"),
+    fileImport: $("fileImport"),
+
+    // Share (WebRTC)
+    ovShare: $("ovShare"),
+    shareTabSend: $("shareTabSend"),
+    shareTabRecv: $("shareTabRecv"),
+    shareStatus: $("shareStatus"),
+    shareStun: $("shareStun"),
+
+    shareSendPane: $("shareSendPane"),
+    shareRecvPane: $("shareRecvPane"),
+
+    shareItemInfo: $("shareItemInfo"),
+
+    shareOfferOut: $("shareOfferOut"),
+    shareAnswerIn: $("shareAnswerIn"),
+    shareOfferIn: $("shareOfferIn"),
+    shareAnswerOut: $("shareAnswerOut"),
+
+    btnShareCreateOffer: $("btnShareCreateOffer"),
+    btnShareCopyOffer: $("btnShareCopyOffer"),
+    btnShareAcceptAnswer: $("btnShareAcceptAnswer"),
+    btnShareSendNow: $("btnShareSendNow"),
+
+    btnShareCreateAnswer: $("btnShareCreateAnswer"),
+    btnShareCopyAnswer: $("btnShareCopyAnswer"),
+    shareRecvInfo: $("shareRecvInfo"),
+
+    // Share link + password UX
+    shareOfferLink: $("shareOfferLink"),
+    btnShareCopyOfferLink: $("btnShareCopyOfferLink"),
+    shareAnswerLink: $("shareAnswerLink"),
+    btnShareCopyAnswerLink: $("btnShareCopyAnswerLink"),
+    shareOfferAnchor: $("shareOfferAnchor"),
+    shareAnswerAnchor: $("shareAnswerAnchor"),
+
+    shareMyCode: $("shareMyCode"),
+    btnShareCopyMyCode: $("btnShareCopyMyCode"),
+    sharePeerCode: $("sharePeerCode"),
+
+    // Share progress UI
+    shareProgress: $("shareProgress"),
+    shareProgressFill: $("shareProgressFill"),
+    shareProgressPct: $("shareProgressPct"),
+    shareProgressLabel: $("shareProgressLabel"),
+
+  };
+
+  // state.mode:
+  // - "none"
+  // - "v1" legacy JSON envelope
+  // - "v2" container (encrypted index + records)
+  let state = {
+    unlocked: false,
+    mode: "none",
+    password: null,
+    fileName: null,
+
+    // Explorer
+    currentFolderId: null,     // null = root
+    selectedId: null,
+    sortKey: "name",
+    sortDir: "asc",            // "asc" | "desc"
+
+    dirty: false,
+
+    pendingOpenFile: null,
+
+    // v1
+    v1Vault: null,
+
+    // V2 file layout:
+    // [64-byte header][encrypted index][record1][record2]...
+    // Header stores KDF params + encrypted index length + index IV
+    // Index is JSON metadata for items + record offsets/lengths
+    // Each record is: [12-byte IV][AES-GCM ciphertext]
+    v2: {
+      fileRef: null,            // File
+      kdfIter: KDF_ITER_DEFAULT,
+      kdfSalt: null,            // Uint8Array(16)
+      key: null,                // CryptoKey (AES-GCM)
+      index: null,              // { meta, items: [...] }
+      indexLen: 0,
+      dataStart: 0,             // V2_HEADER_SIZE + indexLen
+
+      pendingRecords: new Map(),// id -> Uint8Array(recordBytes = iv12 + cipher)
+      pendingText: new Map(),   // id -> string (plaintext)
+      objectUrls: new Set()     // urls to revoke
+    },
+
+    // prompt modal
+    prompt: {
+      kind: null,               // "rename" | "newFolder"
+      targetId: null
+    },
+
+    webrtc: {
+      pc: null,
+      dc: null,
+      role: null,      // "send" | "recv"
+      itemId: null,
+
+      connected: false,
+
+      recvMeta: null,
+      recvChunks: [],
+      recvBytes: 0,
+      recvExpect: 0,
+
+      myCode: null,
+
+      // Hard cap to prevent unbounded memory usage in the browser.
+      recvLimitBytes: 2 * 1024 * 1024 * 1024
+    }
+  };
+
+  /* ---------- utilities ---------- */
+  function toast(msg, isErr=false){
+    const el = document.createElement("div");
+    el.className = "toast" + (isErr ? " err" : "");
+    el.innerHTML = `<div class="tDot"></div><div>${escapeHtml(msg)}</div>`;
+    ui.toasts.appendChild(el);
+    setTimeout(() => {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(6px)";
+      el.style.transition = "opacity .16s ease, transform .16s ease";
+      setTimeout(() => el.remove(), 180);
+    }, 3200);
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, (c) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  function humanSize(bytes){
+    const n = Number(bytes || 0);
+    if (n <= 0) return "0 KB";
+    const units = ["B","KB","MB","GB","TB"];
+    let i = 0, v = n;
+    while (v >= 1024 && i < units.length-1){ v /= 1024; i++; }
+    return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+  }
+
+  function fmtTime(ms){
+    if (!ms) return "–";
+    try { return new Date(ms).toLocaleString(); } catch { return "–"; }
+  }
+
+  function randomId(){
+    return (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  }
+
+  // Crockford Base32: avoids ambiguity by allowing O->0 and I/L->1 normalization.
+  const SHARE_CODE_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+
+  function makeShareCode(len = 8){
+    const u8 = crypto.getRandomValues(new Uint8Array(len));
+    let out = "";
+    for (let i = 0; i < len; i++){
+      out += SHARE_CODE_ALPHABET[u8[i] & 31]; // 0..31
+    }
+    return out;
+  }
+
+  function normalizeShareCode(s){
+    return String(s || "")
+      .toUpperCase()
+      .replace(/[\s-]/g, "")
+      .replace(/O/g, "0")
+      .replace(/[IL]/g, "1")
+      .replace(/[^0-9A-Z]/g, "");
+  }
+
+  // Order-independent so sender/receiver compute the same key.
+  function sessionSecretFromCodes(myCode, peerCode){
+      const a = normalizeShareCode(myCode);
+      const b = normalizeShareCode(peerCode);
+      if (!a || !b) return "";
+      return (a < b) ? `${a}|${b}` : `${b}|${a}`;
+    }
+
+  function bytesToB64(bytes){
+    let bin = "";
+    const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+    for (let i=0;i<u8.length;i++) bin += String.fromCharCode(u8[i]);
+    return btoa(bin);
+  }
+
+  function b64ToBytes(b64){
+    const bin = atob(b64);
+    const u8 = new Uint8Array(bin.length);
+    for (let i=0;i<bin.length;i++) u8[i] = bin.charCodeAt(i);
+    return u8;
+  }
+
+  function concatU8(a, b){
+    const out = new Uint8Array(a.length + b.length);
+    out.set(a, 0);
+    out.set(b, a.length);
+    return out;
+  }
+
+  function u32leRead(dv, off){ return dv.getUint32(off, true); }
+  function u32leWrite(dv, off, v){ dv.setUint32(off, v >>> 0, true); }
+
+  async function readSlice(file, off, len){
+    return new Uint8Array(await file.slice(off, off + len).arrayBuffer());
+  }
+
+  async function deriveKeyPBKDF2(password, saltU8, iter){
+    const enc = new TextEncoder();
+    const keyMat = await crypto.subtle.importKey(
+      "raw",
+      enc.encode(password),
+      { name: "PBKDF2" },
+      false,
+      ["deriveKey"]
+    );
+    return crypto.subtle.deriveKey(
+      { name:"PBKDF2", salt: saltU8, iterations: iter, hash:"SHA-256" },
+      keyMat,
+      { name:"AES-GCM", length:256 },
+      false,
+      ["encrypt","decrypt"]
+    );
+  }
+
+  // Note: this is client-side encryption. Security depends on password strength,
+  // browser integrity, and a trusted delivery path for this HTML/JS.
+  async function aesGcmEncrypt(key, iv12, plainU8){
+    const cipherBuf = await crypto.subtle.encrypt({ name:"AES-GCM", iv: iv12 }, key, plainU8);
+    return new Uint8Array(cipherBuf);
+  }
+
+  async function aesGcmDecrypt(key, iv12, cipherU8){
+    const plainBuf = await crypto.subtle.decrypt({ name:"AES-GCM", iv: iv12 }, key, cipherU8);
+    return new Uint8Array(plainBuf);
+  }
+
+  function revokeAllObjectUrls(){
+    for (const url of state.v2.objectUrls){
+      try { URL.revokeObjectURL(url); } catch {}
+    }
+    state.v2.objectUrls.clear();
+  }
+
+  function sanitizeName(name, fallback){
+    let s = String(name || "").replace(/\u0000/g, "");
+    // Remove characters illegal on Windows, and common path separators/control chars.
+    s = s.replace(/[\u0000-\u001f\u007f<>:"/\\|?*]/g, " ");
+    s = s.replace(/\s+/g, " ").trim();
+    if (!s) s = fallback || "file.bin";
+    return s.slice(0, 180);
+  }
+
+  function extOf(name){
+    const n = String(name || "");
+    const dot = n.lastIndexOf(".");
+    if (dot < 0) return "";
+    return n.slice(dot+1).toLowerCase();
+  }
+
+  function appendRandomPadding(u8, minLen=16, maxLen=64){
+    try{
+      const span = Math.max(0, maxLen - minLen);
+      const padLen = minLen + Math.floor(Math.random() * (span + 1));
+      const pad = crypto.getRandomValues(new Uint8Array(padLen));
+      const out = new Uint8Array(u8.byteLength + padLen);
+      out.set(u8, 0);
+      out.set(pad, u8.byteLength);
+      return out;
+    } catch {
+      // If RNG unavailable, still return original bytes rather than corrupting.
+      return u8;
+    }
+  }
+
+  /* ---------- V1 (legacy) ---------- */
+  async function v1Decrypt(envelopeText, password){
+    let env;
+    try { env = JSON.parse(envelopeText); } catch { throw new Error("Vault file is not valid JSON"); }
+    if (!env || env.v !== 1 || !env.kdf || !env.enc || !env.cipher) throw new Error("Vault header missing fields");
+    const salt = b64ToBytes(env.kdf.salt);
+    const iv = b64ToBytes(env.enc.iv);
+    const cipherU8 = b64ToBytes(env.cipher);
+    const key = await deriveKeyPBKDF2(password, salt, Number(env.kdf.iter || KDF_ITER_DEFAULT));
+    let plainU8;
+    try { plainU8 = await aesGcmDecrypt(key, iv, cipherU8); }
+    catch { throw new Error("Wrong password or corrupted vault"); }
+    const plainText = new TextDecoder().decode(plainU8);
+    return normalizeV1(JSON.parse(plainText));
+  }
+
+  function normalizeV1(v){
+    const now = Date.now();
+    if (!v || typeof v !== "object") v = {};
+    if (!v.meta || typeof v.meta !== "object") v.meta = {};
+    if (!v.meta.created) v.meta.created = now;
+    if (!v.meta.updated) v.meta.updated = now;
+    if (!v.meta.name) v.meta.name = "Vault";
+    if (!Array.isArray(v.items)) v.items = [];
+    for (const it of v.items){
+      if (!it.id) it.id = randomId();
+      if (!it.created) it.created = now;
+      if (!it.updated) it.updated = now;
+      if (!it.kind) it.kind = "file";
+      if (!it.name) it.name = "unnamed";
+      if (!("folderId" in it)) it.folderId = null;
+      if (typeof it.size !== "number"){
+        if (it.kind === "text") it.size = (it.text || "").length;
+        else if (it.data) { try { it.size = atob(it.data).length; } catch { it.size = 0; } }
+        else it.size = 0;
+      }
+      it.name = sanitizeName(it.name, it.kind === "folder" ? "Folder" : "file.bin");
+    }
+    return v;
+  }
+
+  /* ---------- V2 container ---------- */
+  function v2WriteHeader({kdfIter, kdfSalt, indexLen, indexIv}){
+    const u8 = new Uint8Array(64);
+    const dv = new DataView(u8.buffer);
+    u8[0] = V2_MAGIC.charCodeAt(0);
+    u8[1] = V2_MAGIC.charCodeAt(1);
+    u8[2] = V2_MAGIC.charCodeAt(2);
+    u8[3] = V2_MAGIC.charCodeAt(3);
+    u8[4] = V2_VERSION;
+    u32leWrite(dv, 8, kdfIter >>> 0);
+    u8.set(kdfSalt, 12);              // 12..27
+    u32leWrite(dv, 28, indexLen >>> 0);
+    u8.set(indexIv, 32);              // 32..43
+    return u8;
+  }
+
+  function v2ParseHeader(headerU8){
+    if (headerU8.length < 64) throw new Error("Vault header too small");
+    const magic = String.fromCharCode(headerU8[0], headerU8[1], headerU8[2], headerU8[3]);
+    if (magic !== V2_MAGIC) throw new Error("Not a v2 vault");
+    const ver = headerU8[4];
+    if (ver !== V2_VERSION) throw new Error("Unsupported vault version");
+    const dv = new DataView(headerU8.buffer, headerU8.byteOffset, headerU8.byteLength);
+    const kdfIter = u32leRead(dv, 8);
+    const kdfSalt = headerU8.slice(12, 28);
+    const indexLen = u32leRead(dv, 28);
+    const indexIv = headerU8.slice(32, 44);
+    return { kdfIter, kdfSalt, indexLen, indexIv };
+  }
+
+  async function v2EncryptIndex(key, indexObj){
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const plain = new TextEncoder().encode(JSON.stringify(indexObj));
+    const cipher = await aesGcmEncrypt(key, iv, plain);
+    return { iv, cipher };
+  }
+
+  async function v2DecryptIndex(key, indexIv, indexCipherU8){
+    const plainU8 = await aesGcmDecrypt(key, indexIv, indexCipherU8);
+    const plainText = new TextDecoder().decode(plainU8);
+    const obj = JSON.parse(plainText);
+    return normalizeV2Index(obj);
+  }
+
+  function normalizeV2Index(idx){
+    const now = Date.now();
+    if (!idx || typeof idx !== "object") idx = {};
+    if (!idx.meta || typeof idx.meta !== "object") idx.meta = {};
+    if (!idx.meta.created) idx.meta.created = now;
+    if (!idx.meta.updated) idx.meta.updated = now;
+    if (!idx.meta.name) idx.meta.name = "Vault";
+    if (!Array.isArray(idx.items)) idx.items = [];
+
+    for (const it of idx.items){
+      if (!it.id) it.id = randomId();
+      if (!it.created) it.created = now;
+      if (!it.updated) it.updated = now;
+      if (!it.kind) it.kind = "file";
+      if (!it.name) it.name = "unnamed";
+
+      if (!("folderId" in it)) it.folderId = null;  // root default
+      if (!("order" in it)) it.order = 0;
+
+      if (typeof it.size !== "number") it.size = 0;
+      if (typeof it.recRelOff !== "number") it.recRelOff = 0;
+      if (typeof it.recLen !== "number") it.recLen = 0;
+
+      it.name = sanitizeName(it.name, it.kind === "folder" ? "Folder" : "file.bin");
+
+      // Folder has no record
+      if (it.kind === "folder"){
+        it.size = 0;
+        it.recRelOff = 0;
+        it.recLen = 0;
+        it.mime = "";
+      }
+    }
+    return idx;
+  }
+
+  async function v2EncryptRecord(key, plainU8){
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const cipher = await aesGcmEncrypt(key, iv, plainU8);
+    return concatU8(iv, cipher); // recordBytes
+  }
+
+  async function v2DecryptRecordBytes(key, recordU8){
+    if (!recordU8 || recordU8.length < 12 + 16) throw new Error("Record corrupted");
+    const iv = recordU8.slice(0, 12);
+    const cipher = recordU8.slice(12);
+    return aesGcmDecrypt(key, iv, cipher);
+  }
+
+const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
+
+  function v2PendingBytesTotal(){
+    let sum = 0;
+    for (const u8 of state.v2.pendingRecords.values()) sum += u8.byteLength;
+    for (const t of state.v2.pendingText.values()) sum += t.length;
+    return sum;
+  }
+
+  function v2EnsurePendingCapacityOrThrow(incomingBytes){
+    const now = v2PendingBytesTotal();
+    if (now + incomingBytes > MAX_PENDING_BYTES){
+      throw new Error(
+        `Too much unsaved data for this device. ` +
+        `Pending ~${humanSize(now)}, incoming ~${humanSize(incomingBytes)}, limit ~${humanSize(MAX_PENDING_BYTES)}.`
+      );
+    }
+  }
+
+  /* ---------- image sanitize: decode -> resize -> PNG re-encode (metadata strip) ---------- */
+  async function decodeImageToBitmap(blob){
+    // Prefer createImageBitmap for correct EXIF orientation in supporting browsers.
+    if (window.createImageBitmap){
+      try{
+        return await createImageBitmap(blob, {
+          imageOrientation: "from-image",
+          colorSpaceConversion: "default",
+          premultiplyAlpha: "default"
+        });
+      } catch {
+        // fallthrough
+      }
+    }
+
+    // Fallback: HTMLImageElement
+    const url = URL.createObjectURL(blob);
+    try{
+      const img = await new Promise((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = () => reject(new Error("Image decode failed"));
+        im.src = url;
+      });
+      return img;
+    } finally {
+      try { URL.revokeObjectURL(url); } catch {}
+    }
+  }
+
+  async function canvasToBlob(canvas, type, quality){
+    // OffscreenCanvas supports convertToBlob()
+    if (typeof OffscreenCanvas !== "undefined" && canvas instanceof OffscreenCanvas && canvas.convertToBlob){
+      return canvas.convertToBlob({ type, quality });
+    }
+    return new Promise((resolve) => {
+      // HTMLCanvasElement toBlob
+      canvas.toBlob(resolve, type, quality);
+    });
+  }
+
+  async function sanitizeRasterImageToPng(file){
+    // Decode the raster image into pixels (strips metadata by definition when re-encoding).
+    const blob = file instanceof Blob ? file : new Blob([file], { type: file.type || "image/*" });
+    const bitmapOrImg = await decodeImageToBitmap(blob);
+
+    const srcW = (bitmapOrImg.naturalWidth || bitmapOrImg.width || 1);
+    const srcH = (bitmapOrImg.naturalHeight || bitmapOrImg.height || 1);
+
+    const scale = Math.min(1, MAX_IMAGE_DIM / Math.max(srcW, srcH));
+    const outW = Math.max(1, Math.round(srcW * scale));
+    const outH = Math.max(1, Math.round(srcH * scale));
+
+    // Use OffscreenCanvas if available (memory-friendly), else HTML canvas.
+    const canvas = (typeof OffscreenCanvas !== "undefined")
+      ? new OffscreenCanvas(outW, outH)
+      : Object.assign(document.createElement("canvas"), { width: outW, height: outH });
+
+    const ctx = canvas.getContext("2d", { alpha:true });
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    // Draw with resizing (if needed).
+    ctx.drawImage(bitmapOrImg, 0, 0, outW, outH);
+
+    // If we created an ImageBitmap, allow GC faster.
+    try { if (bitmapOrImg && typeof bitmapOrImg.close === "function") bitmapOrImg.close(); } catch {}
+
+    const outBlob = await canvasToBlob(canvas, "image/png");
+    if (!outBlob) throw new Error("Re-encode failed");
+
+    const outBuf = await outBlob.arrayBuffer();
+    return { bytes: new Uint8Array(outBuf), mime: "image/png", width: outW, height: outH };
+  }
+
+  async function makeThumbnailFromImageBytes(imgBytes, imgMime, maxDim=256){
+    const blob = new Blob([imgBytes], { type: imgMime || "image/png" });
+    const bitmapOrImg = await decodeImageToBitmap(blob);
+
+    const w = (bitmapOrImg.naturalWidth || bitmapOrImg.width || 1);
+    const h = (bitmapOrImg.naturalHeight || bitmapOrImg.height || 1);
+    const scale = Math.min(1, maxDim / Math.max(w, h));
+    const tw = Math.max(1, Math.round(w * scale));
+    const th = Math.max(1, Math.round(h * scale));
+
+    const canvas = (typeof OffscreenCanvas !== "undefined")
+      ? new OffscreenCanvas(tw, th)
+      : Object.assign(document.createElement("canvas"), { width: tw, height: th });
+
+    const ctx = canvas.getContext("2d", { alpha:true });
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(bitmapOrImg, 0, 0, tw, th);
+
+    try { if (bitmapOrImg && typeof bitmapOrImg.close === "function") bitmapOrImg.close(); } catch {}
+
+    // Prefer webp, fallback to png
+    let mime = "image/webp";
+    let outBlob = await canvasToBlob(canvas, mime, 0.82);
+    if (!outBlob){
+      mime = "image/png";
+      outBlob = await canvasToBlob(canvas, mime);
+    }
+    if (!outBlob) throw new Error("Thumb encode failed");
+
+    const outBuf = await outBlob.arrayBuffer();
+    return { bytes: new Uint8Array(outBuf), mime };
+  }
+
+  function baseNameToPng(name){
+    const n = sanitizeName(name || "image", "image");
+    const dot = n.lastIndexOf(".");
+    const base = dot > 0 ? n.slice(0, dot) : n;
+    return base + ".png";
+  }
+
+  /* ---------- video best-effort hash change ---------- */
+  async function maybePadVideoBytes(file, u8){
+    const mime = String(file.type || "").toLowerCase();
+    const ext = extOf(file.name);
+
+    const okByMime = SAFE_TRAILING_PAD_VIDEO_MIME.has(mime);
+    const okByExt = SAFE_TRAILING_PAD_VIDEO_EXT.has(ext);
+
+    // Only pad when we have a high confidence the container ignores trailing bytes.
+    if (okByMime || okByExt){
+      return appendRandomPadding(u8, VIDEO_PAD_MIN, VIDEO_PAD_MAX);
+    }
+    return u8;
+  }
+
+  /* ---------- data model helpers ---------- */
+  function getItems(){
+    if (state.mode === "v2" && state.v2.index) return state.v2.index.items;
+    if (state.mode === "v1" && state.v1Vault) return state.v1Vault.items;
+    return [];
+  }
+
+  function getMeta(){
+    if (state.mode === "v2" && state.v2.index) return state.v2.index.meta;
+    if (state.mode === "v1" && state.v1Vault) return state.v1Vault.meta;
+    return { name:"Vault", created:0, updated:0 };
+  }
+
+  function getItemById(id){
+    const items = getItems();
+    return items.find(x => x.id === id) || null;
+  }
+
+  function computeApproxSize(){
+    const items = getItems();
+    return items.reduce((a, it) => a + (it.kind === "folder" ? 0 : (it.size || 0)), 0);
+  }
+
+  function kindLabel(it){
+    if (!it) return "—";
+    if (it.kind === "folder") return "Folder";
+    if (it.kind === "image") return "Image";
+    if (it.kind === "video") return "Video";
+    if (it.kind === "text") return "Text";
+    return "File";
+  }
+
+  function iconForKind(kind){
+    const c = 'currentColor';
+    if (kind === "folder"){
+      return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3.5 7.5h6l2 2H20a2 2 0 0 1 2 2v6A3 3 0 0 1 19 20H6a3 3 0 0 1-3-3v-7A2.5 2.5 0 0 1 3.5 7.5Z" stroke="${c}" stroke-width="2" stroke-linejoin="round"/>
+      </svg>`;
+    }
+    if (kind === "text"){
+      return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="${c}" stroke-width="2"/>
+        <path d="M8 9h8M8 13h8M8 17h6" stroke="${c}" stroke-width="2" stroke-linecap="round"/>
+      </svg>`;
+    }
+    if (kind === "image"){
+      return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="${c}" stroke-width="2"/>
+        <path d="M8 14l2.5-3 3 3 2-2 2.5 3" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9.5 9.5h.01" stroke="${c}" stroke-width="4" stroke-linecap="round"/>
+      </svg>`;
+    }
+    if (kind === "video"){
+      return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M5 7h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" stroke="${c}" stroke-width="2"/>
+        <path d="M17 10.5 21 8.5v7l-4-2" stroke="${c}" stroke-width="2" stroke-linejoin="round"/>
+      </svg>`;
+    }
+    return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M7 3h7l4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="${c}" stroke-width="2"/>
+      <path d="M14 3v5h5" stroke="${c}" stroke-width="2" stroke-linejoin="round"/>
+    </svg>`;
+  }
+
+  /* ---------- list + folder navigation ---------- */
+  function listFolders(){
+    return getItems().filter(it => it.kind === "folder");
+  }
+
+  function listItemsInFolder(folderId){
+    return getItems().filter(it => (it.folderId || null) === (folderId || null));
+  }
+
+  function filteredAndSortedItems(){
+    const q = (ui.search.value || "").trim().toLowerCase();
+    let items = q ? getItems() : listItemsInFolder(state.currentFolderId);
+    if (q){
+      items = items.filter(it => {
+        const s = `${it.name || ""} ${it.kind || ""} ${it.mime || ""}`.toLowerCase();
+        return s.includes(q);
+      });
+    }
+
+    const dir = state.sortDir === "asc" ? 1 : -1;
+    const key = state.sortKey;
+
+    items.sort((a,b) => {
+      const va = a[key];
+      const vb = b[key];
+
+      // folders first
+      const af = a.kind === "folder" ? 0 : 1;
+      const bf = b.kind === "folder" ? 0 : 1;
+      if (af !== bf) return af - bf;
+
+      if (key === "name" || key === "kind" || key === "mime"){
+        return String(va || "").localeCompare(String(vb || "")) * dir;
+      }
+      if (key === "size" || key === "updated"){
+        return (Number(va || 0) - Number(vb || 0)) * dir;
+      }
+      return 0;
+    });
+
+    return items;
+  }
+
+  function selectItem(id){
+    state.selectedId = id;
+
+    // Update highlight without rebuilding the whole table
+    for (const tr of ui.tbody.querySelectorAll("tr")){
+      tr.classList.toggle("sel", tr.dataset.id === id);
+    }
+
+    // Only update the preview pane (so dblclick still works)
+    renderPreview();
+  }
+
+
+  function openFolder(id){
+    const it = getItemById(id);
+    if (!it || it.kind !== "folder") return;
+    state.currentFolderId = it.id;
+    state.selectedId = null;
+    ui.search.value = "";
+    render();
+  }
+
+  function goUp(){
+    if (!state.currentFolderId) return;
+    const cur = getItemById(state.currentFolderId);
+    state.currentFolderId = (cur && cur.folderId) ? cur.folderId : null;
+    state.selectedId = null;
+    render();
+  }
+
+  function moveSelectedToFolder(folderId){
+    const it = getItemById(state.selectedId);
+    if (!it) return;
+    if (it.kind === "folder" && it.id === folderId) return;
+
+    // prevent moving folder into itself or its descendants
+    if (it.kind === "folder" && folderId){
+      let p = folderId;
+      while (p){
+        if (p === it.id){
+          toast("Cannot move a folder into itself", true);
+          return;
+        }
+        const parent = getItemById(p);
+        p = parent ? (parent.folderId || null) : null;
+      }
+    }
+
+    it.folderId = folderId || null;
+    it.updated = Date.now();
+    markDirty();
+    render();
+    toast("Moved");
+  }
+
+  /* ---------- breadcrumbs ---------- */
+  function buildTrail(folderId){
+    const trail = [];
+    let cur = folderId || null;
+    while (cur){
+      const it = getItemById(cur);
+      if (!it) break;
+      trail.unshift(it);
+      cur = it.folderId || null;
+    }
+    return trail;
+  }
+
+  function renderBreadcrumbs(){
+    ui.pathLabel.innerHTML = "";
+    const on = state.unlocked;
+
+    const root = document.createElement("span");
+    root.className = "crumb";
+    root.textContent = "Root: /";
+    root.onclick = () => { state.currentFolderId = null; state.selectedId = null; ui.search.value=""; render(); };
+    ui.pathLabel.appendChild(root);
+
+    if (!on) return;
+
+    const trail = buildTrail(state.currentFolderId);
+    for (const seg of trail){
+      const sep = document.createElement("span");
+      sep.className = "sep";
+      sep.textContent = "/";
+      ui.pathLabel.appendChild(sep);
+
+      const c = document.createElement("span");
+      c.className = "crumb";
+      c.textContent = seg.name || "Folder";
+      c.onclick = () => { state.currentFolderId = seg.id; state.selectedId = null; ui.search.value=""; render(); };
+      ui.pathLabel.appendChild(c);
+    }
+  }
+
+  /* ---------- UI render ---------- */
+  function markDirty(){
+    state.dirty = true;
+    const meta = getMeta();
+    meta.updated = Date.now();
+  }
+
+  function renderHeaderMeta(){
+    const on = state.unlocked;
+    ui.statusDot.className = "dot" + (on ? " ok" : "");
+    ui.statusLabel.textContent = on ? "Vault file loaded" : "Open a vault file to continue";
+    ui.subtitle.textContent = on ? "Unlocked" : "Locked";
+
+    ui.btnSave.disabled = !on;
+    ui.btnUp.disabled = !on || !state.currentFolderId;
+
+    ui.btnAdd.disabled = !on;
+  }
+
+  function renderMetaStrip(){
+    const on = state.unlocked;
+    ui.vaultFileLabel.textContent = state.fileName
+      ? state.fileName
+      : (on ? "Unsaved vault (download to save)" : "");
+    ui.vaultName.textContent = on ? (getMeta().name || "Vault File:") : "";
+
+    ui.metaItems.textContent = String(getItems().length);
+    ui.metaSize.textContent = humanSize(computeApproxSize());
+    ui.metaCreated.textContent = fmtTime(getMeta().created);
+    ui.metaUpdated.textContent = fmtTime(getMeta().updated);
+  }
+
+  function renderPath(){
+    const on = state.unlocked;
+    renderBreadcrumbs();
+
+    if (!on){
+      ui.pathSub.textContent = "Open a vault file to begin.";
+      return;
+    }
+    ui.pathSub.textContent = "";
+  }
+
+  function renderTable(){
+    const on = state.unlocked;
+
+    if (!on || state.mode === "none"){
+      ui.table.style.display = "none";
+      ui.emptyState.style.display = "flex";
+      ui.emptyState.querySelector(".big").textContent = "No vault loaded";
+      return;
+    }
+
+    const items = filteredAndSortedItems();
+
+    if (!items.length){
+      ui.table.style.display = "none";
+      ui.emptyState.style.display = "flex";
+      ui.emptyState.querySelector(".big").textContent =
+        ui.search.value.trim() ? "No matches" : "This folder is empty";
+      return;
+    }
+
+    ui.emptyState.style.display = "none";
+    ui.table.style.display = "table";
+    ui.tbody.innerHTML = "";
+
+    for (const it of items){
+      const tr = document.createElement("tr");
+      tr.dataset.id = it.id;
+      if (state.selectedId === it.id) tr.classList.add("sel");
+
+      tr.draggable = true;
+
+      tr.addEventListener("click", () => selectItem(it.id));
+      tr.addEventListener("dblclick", () => {
+        if (it.kind === "folder") openFolder(it.id);
+      });
+
+      tr.addEventListener("dragstart", (e) => {
+        if (!state.unlocked) return;
+        e.dataTransfer.setData("text/plain", it.id);
+        e.dataTransfer.effectAllowed = "move";
+      });
+
+      tr.addEventListener("dragover", (e) => {
+        if (!state.unlocked) return;
+        const draggedId = e.dataTransfer.getData("text/plain");
+        if (!draggedId) return;
+
+        if (it.kind === "folder"){
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+        }
+      });
+
+      tr.addEventListener("drop", (e) => {
+        if (!state.unlocked) return;
+        const draggedId = e.dataTransfer.getData("text/plain");
+        if (!draggedId) return;
+        const dragged = getItemById(draggedId);
+        if (!dragged) return;
+
+        if (it.kind === "folder"){
+          e.preventDefault();
+          dragged.folderId = it.id;
+          dragged.updated = Date.now();
+          markDirty();
+          toast("Moved");
+          render();
+        }
+      });
+
+      const nameTd = document.createElement("td");
+      nameTd.innerHTML = `
+        <div class="nameCell">
+          <div class="fileIco">${iconForKind(it.kind)}</div>
+          <div class="nameText">${escapeHtml(it.name || "(untitled)")}</div>
+        </div>
+      `;
+
+      const typeTd = document.createElement("td");
+      typeTd.className = "mutedCell";
+      typeTd.textContent = kindLabel(it);
+
+      const sizeTd = document.createElement("td");
+      sizeTd.className = "mutedCell";
+      sizeTd.textContent = it.kind === "folder" ? "—" : humanSize(it.size || 0);
+
+      const modTd = document.createElement("td");
+      modTd.className = "mutedCell";
+      modTd.textContent = fmtTime(it.updated);
+
+      tr.appendChild(nameTd);
+      tr.appendChild(typeTd);
+      tr.appendChild(sizeTd);
+      tr.appendChild(modTd);
+
+      ui.tbody.appendChild(tr);
+    }
+  }
+
+  function renderPreview(){
+    const on = state.unlocked;
+
+    if (!on || !state.selectedId){
+      ui.previewSub.textContent = "Select an item.";
+      ui.pvTitle.textContent = "No selection";
+      ui.pvMeta.textContent = "—";
+      ui.pvBody.innerHTML = "Select an item to preview it here.";
+      ui.pvTools.innerHTML = "";
+      return;
+    }
+
+    const it = getItemById(state.selectedId);
+    if (!it){
+      ui.previewSub.textContent = "Select an item.";
+      ui.pvTitle.textContent = "No selection";
+      ui.pvMeta.textContent = "—";
+      ui.pvBody.innerHTML = "Select an item to preview it here.";
+      ui.pvTools.innerHTML = "";
+      return;
+    }
+
+    ui.previewSub.textContent = "";
+    ui.pvTitle.textContent = it.name || "(untitled)";
+    ui.pvMeta.textContent = `${kindLabel(it)} • ${it.kind === "folder" ? "—" : humanSize(it.size || 0)} • ${it.mime || "—"} • updated ${fmtTime(it.updated)}`;
+
+    revokeAllObjectUrls();
+
+    ui.pvTools.innerHTML = "";
+    const tools = [];
+
+    const bRename = document.createElement("button");
+    bRename.className = "btn ghost";
+    bRename.textContent = "Rename";
+    bRename.onclick = () => promptRename(it.id);
+    tools.push(bRename);
+
+    const bDelete = document.createElement("button");
+    bDelete.className = "btn danger";
+    bDelete.textContent = "Delete";
+    bDelete.onclick = () => deleteItem(it.id);
+    tools.push(bDelete);
+
+    if (it.kind !== "folder" && ui.ovShare){
+      const bShare = document.createElement("button");
+      bShare.className = "btn";
+      bShare.textContent = "Direct Share";
+      bShare.onclick = () => openShareForSelectedItem(it.id);
+      tools.unshift(bShare);
+    }
+
+    const moveSel = document.createElement("select");
+    moveSel.style.padding = "8px 10px";
+    moveSel.style.borderRadius = "999px";
+    moveSel.style.border = "1px solid rgba(255,255,255,.08)";
+    moveSel.style.background = "rgba(10,12,22,.56)";
+    moveSel.style.color = "rgba(238,242,255,.95)";
+    moveSel.style.fontSize = "13px";
+    moveSel.style.outline = "none";
+
+    const optRoot = document.createElement("option");
+    optRoot.value = "";
+    optRoot.textContent = "Move to: Root";
+    moveSel.appendChild(optRoot);
+
+    for (const f of listFolders().filter(x => x.id !== it.id).sort((a,b) => String(a.name).localeCompare(String(b.name)))){
+      const o = document.createElement("option");
+      o.value = f.id;
+      o.textContent = `Move this file to: ${f.name}`;
+      moveSel.appendChild(o);
+    }
+
+    moveSel.value = it.folderId || "";
+    moveSel.onchange = () => moveSelectedToFolder(moveSel.value || null);
+    tools.unshift(moveSel);
+
+    if (it.kind !== "folder"){
+      const bExport = document.createElement("button");
+      bExport.className = "btn";
+      bExport.textContent = "Export & Download";
+      bExport.onclick = () => exportItem(it.id);
+      tools.unshift(bExport);
+    }
+
+    for (const t of tools) ui.pvTools.appendChild(t);
+
+    if (it.kind === "folder"){
+      ui.pvBody.innerHTML = `
+        <div class="hintBox">
+          Folder contains <b>${listItemsInFolder(it.id).length}</b> item(s).
+          Double-click the folder in the list to open it.
+        </div>
+      `;
+      return;
+    }
+
+    if (it.kind === "text"){
+      renderTextEditor(it);
+      return;
+    }
+
+    if (it.kind === "image"){
+      renderImagePreview(it);
+      return;
+    }
+
+    if (it.kind === "video"){
+      renderVideoPreview(it);
+      return;
+    }
+
+    const mt = String(it.mime || "").toLowerCase();
+    const ex = extOf(it.name);
+
+    if (mt === "application/pdf" || ex === "pdf"){
+      renderPdfPreview(it);
+      return;
+    }
+
+    if (mt.startsWith("audio/") || ["mp3","wav","m4a","aac","oga","ogg","opus","flac","weba"].includes(ex)){
+      renderAudioPreview(it);
+      return;
+    }
+
+    ui.pvBody.innerHTML = `
+      <div class="hintBox">
+        Binary file. Use <b>Export</b> to download it.
+      </div>
+    `;
+  }
+
+  function openShareForSelectedItem(itemId){
+    if (!state.unlocked){
+      toast("Unlock a vault first", true);
+      return;
+    }
+
+    ui.shareStun.value = DEFAULT_STUN_LINES;
+
+    state.webrtc.itemId = itemId;
+
+    const it = getItemById(itemId);
+    ui.shareItemInfo.textContent = it
+      ? `${it.name || "file"} • ${kindLabel(it)} • ${humanSize(it.size || 0)}`
+      : "No item selected.";
+
+    // reset fields
+    ui.shareOfferOut.value = "";
+    ui.shareAnswerIn.value = "";
+    ui.shareOfferIn.value = "";
+    ui.shareAnswerOut.value = "";
+    ui.shareOfferLink.value = "";
+    ui.shareAnswerLink.value = "";
+    ui.shareRecvInfo.textContent = "Waiting for sender…";
+
+    // default to SEND tab
+    ui.shareSendPane.style.display = "block";
+    ui.shareRecvPane.style.display = "none";
+    ui.shareTabSend.className = "btn primary";
+    ui.shareTabRecv.className = "btn ghost";
+
+    // Generate a fresh local code for this share session
+    state.webrtc.myCode = makeShareCode(8);
+    if (ui.shareMyCode) ui.shareMyCode.value = state.webrtc.myCode;
+    if (ui.sharePeerCode) ui.sharePeerCode.value = "";
+
+    setShareAnchor(ui.shareOfferAnchor, "", "Creating a secure share link...");
+    setShareAnchor(ui.shareAnswerAnchor, "", "Creating a reply to the sender...");
+
+    // prevent placeholder anchors from navigating
+    if (ui.shareOfferAnchor){
+      ui.shareOfferAnchor.onclick = (e) => {
+        if (!ui.shareOfferAnchor.dataset.ready) e.preventDefault();
+      };
+    }
+    if (ui.shareAnswerAnchor){
+      ui.shareAnswerAnchor.onclick = (e) => {
+        if (!ui.shareAnswerAnchor.dataset.ready) e.preventDefault();
+      };
+    }
+
+    if (ui.btnShareCopyMyCode){
+      ui.btnShareCopyMyCode.onclick = () => copyTextToClipboard(ui.shareMyCode.value);
+    }
+
+    if (ui.sharePeerCode){
+      ui.sharePeerCode.addEventListener("input", () => {
+        ui.sharePeerCode.value = normalizeShareCode(ui.sharePeerCode.value);
+      });
+    }
+
+    shareProgressHide();
+    webrtcSetStatus("Ready. Share your link.");
+
+    openOverlay("ovShare");
+
+    // auto-generate the sender offer link immediately
+    try { ui.btnShareCreateOffer.click(); } catch {}
+  }
+
+  function shareSwitchTab(which){
+    if (which === "send"){
+      ui.shareSendPane.style.display = "block";
+      ui.shareRecvPane.style.display = "none";
+      ui.shareTabSend.className = "btn primary";
+      ui.shareTabRecv.className = "btn ghost";
+      return;
+    }
+    ui.shareSendPane.style.display = "none";
+    ui.shareRecvPane.style.display = "block";
+    ui.shareTabSend.className = "btn ghost";
+    ui.shareTabRecv.className = "btn primary";
+  }
+
+  async function renderTextEditor(it){
+    ui.pvBody.innerHTML = "";
+
+    const name = document.createElement("input");
+    name.className = "editorName";
+    name.value = it.name || "note.txt";
+    name.placeholder = "note.txt";
+
+    const editor = document.createElement("textarea");
+    editor.className = "editor";
+    editor.placeholder = "Write…";
+
+    try{
+      let text = "";
+      if (state.mode === "v2"){
+        if (state.v2.pendingText.has(it.id)){
+          text = state.v2.pendingText.get(it.id) || "";
+        } else {
+          const bytes = await v2GetPlainBytes(it);
+          text = new TextDecoder().decode(bytes);
+        }
+      } else {
+        text = it.text || "";
+      }
+      editor.value = text;
+    } catch (e){
+      editor.value = "";
+      toast(e.message || "Failed to load text", true);
+    }
+
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.gap = "8px";
+    row.style.flexWrap = "wrap";
+    row.style.justifyContent = "flex-end";
+
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "btn primary";
+    saveBtn.textContent = "Save note";
+    saveBtn.onclick = () => {
+      const nextName = sanitizeName((name.value || "note.txt").trim(), "note.txt");
+      const nextText = editor.value || "";
+      saveTextInline(it.id, nextName, nextText);
+    };
+
+    row.appendChild(saveBtn);
+
+    ui.pvBody.appendChild(name);
+    ui.pvBody.appendChild(editor);
+    ui.pvBody.appendChild(row);
+  }
+
+  async function renderImagePreview(it){
+    ui.pvBody.innerHTML = "";
+    try{
+      const bytes = await v2OrV1PlainBytes(it);
+      const blob = new Blob([bytes], { type: it.mime || "image/png" });
+      const url = URL.createObjectURL(blob);
+      state.v2.objectUrls.add(url);
+
+      const box = document.createElement("div");
+      box.className = "previewMedia";
+      const img = document.createElement("img");
+      img.src = url;
+      box.appendChild(img);
+      ui.pvBody.appendChild(box);
+    } catch (e){
+      ui.pvBody.innerHTML = `<div class="hintBox">Failed to preview image.</div>`;
+      toast(e.message || "Failed to preview image", true);
+    }
+  }
+
+  async function renderVideoPreview(it){
+    ui.pvBody.innerHTML = "";
+    try{
+      const bytes = await v2OrV1PlainBytes(it);
+      const blob = new Blob([bytes], { type: it.mime || "video/mp4" });
+      const url = URL.createObjectURL(blob);
+      state.v2.objectUrls.add(url);
+
+      const box = document.createElement("div");
+      box.className = "previewMedia";
+      const vid = document.createElement("video");
+      vid.controls = true;
+      vid.src = url;
+      box.appendChild(vid);
+      ui.pvBody.appendChild(box);
+    } catch (e){
+      ui.pvBody.innerHTML = `<div class="hintBox">Failed to preview video.</div>`;
+      toast(e.message || "Failed to preview video", true);
+    }
+  }
+
+  async function renderAudioPreview(it){
+    ui.pvBody.innerHTML = "";
+    try{
+      const bytes = await v2OrV1PlainBytes(it);
+      const blob = new Blob([bytes], { type: it.mime || "audio/mpeg" });
+      const url = URL.createObjectURL(blob);
+      state.v2.objectUrls.add(url);
+
+      const box = document.createElement("div");
+      box.className = "previewMedia";
+
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.preload = "metadata";
+      audio.src = url;
+      audio.style.width = "100%";
+      audio.style.display = "block";
+
+      box.appendChild(audio);
+      ui.pvBody.appendChild(box);
+    } catch (e){
+      ui.pvBody.innerHTML = `<div class="hintBox">Failed to preview audio.</div>`;
+      toast(e.message || "Failed to preview audio", true);
+    }
+  }
+
+  async function renderPdfPreview(it){
+    ui.pvBody.innerHTML = "";
+    try{
+      const bytes = await v2OrV1PlainBytes(it);
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      state.v2.objectUrls.add(url);
+
+      const box = document.createElement("div");
+      box.className = "previewMedia";
+      box.style.height = "520px";
+
+      // Embed PDF viewer (works in Chrome/Edge/most modern browsers)
+      const frame = document.createElement("iframe");
+      frame.src = url;
+      frame.title = "PDF preview";
+      frame.style.width = "100%";
+      frame.style.height = "520px";
+      frame.style.border = "0";
+      frame.loading = "lazy";
+
+      box.appendChild(frame);
+      ui.pvBody.appendChild(box);
+    } catch (e){
+      ui.pvBody.innerHTML = `<div class="hintBox">Failed to preview PDF.</div>`;
+      toast(e.message || "Failed to preview PDF", true);
+    }
+  }
+
+  function render(){
+    renderHeaderMeta();
+    renderMetaStrip();
+    renderPath();
+    renderTable();
+    renderPreview();
+  }
+
+  /* ---------- record access ---------- */
+  async function v2GetRecordBytes(it){
+    if (state.v2.pendingRecords.has(it.id)) return state.v2.pendingRecords.get(it.id);
+    if (!state.v2.fileRef) throw new Error("Missing vault file reference");
+    const absOff = state.v2.dataStart + it.recRelOff;
+    return readSlice(state.v2.fileRef, absOff, it.recLen);
+  }
+
+  async function v2GetPlainBytes(it){
+    if (it.kind === "text" && state.v2.pendingText.has(it.id)){
+      return new TextEncoder().encode(state.v2.pendingText.get(it.id) || "");
+    }
+    if (it.kind === "folder") return new Uint8Array();
+    const record = await v2GetRecordBytes(it);
+    return v2DecryptRecordBytes(state.v2.key, record);
+  }
+
+  async function v2OrV1PlainBytes(it){
+    if (state.mode === "v2"){
+      return v2GetPlainBytes(it);
+    }
+    if (it.kind === "text"){
+      return new TextEncoder().encode(it.text || "");
+    }
+    if (it.data){
+      return b64ToBytes(it.data);
+    }
+    return new Uint8Array();
+  }
+
+  function downloadBlob(blob, name){
+    const a = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = sanitizeName(name || "download.bin", "download.bin");
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      try { URL.revokeObjectURL(url); } catch {}
+      a.remove();
+    }, 120);
+  }
+
+  /* ---------- vault lifecycle ---------- */
+  async function openVaultFile(file, password){
+    const head4 = await readSlice(file, 0, 4);
+    const sig = String.fromCharCode(head4[0], head4[1], head4[2], head4[3]);
+
+    if (sig === V2_MAGIC){
+      const headerU8 = await readSlice(file, 0, V2_HEADER_SIZE);
+      const hdr = v2ParseHeader(headerU8);
+      const key = await deriveKeyPBKDF2(password, hdr.kdfSalt, hdr.kdfIter);
+
+      const indexCipher = await readSlice(file, V2_HEADER_SIZE, hdr.indexLen);
+      let indexObj;
+      try{
+        indexObj = await v2DecryptIndex(key, hdr.indexIv, indexCipher);
+      } catch {
+        throw new Error("Wrong password or corrupted vault");
+      }
+
+      state.mode = "v2";
+      state.v1Vault = null;
+
+      state.v2.fileRef = file;
+      state.v2.kdfIter = hdr.kdfIter;
+      state.v2.kdfSalt = hdr.kdfSalt;
+      state.v2.key = key;
+      state.v2.index = indexObj;
+      state.v2.indexLen = hdr.indexLen;
+      state.v2.dataStart = V2_HEADER_SIZE + hdr.indexLen;
+
+      state.v2.pendingRecords.clear();
+      state.v2.pendingText.clear();
+      revokeAllObjectUrls();
+
+      state.dirty = false;
+      state.currentFolderId = null;
+      state.selectedId = null;
+      return;
+    }
+
+    // V1 legacy
+    const text = await file.text();
+    const v1 = await v1Decrypt(text, password);
+
+    state.mode = "v1";
+    state.v1Vault = v1;
+
+    state.v2.fileRef = null;
+    state.v2.kdfSalt = null;
+    state.v2.key = null;
+    state.v2.index = null;
+    state.v2.indexLen = 0;
+    state.v2.dataStart = 0;
+    state.v2.pendingRecords.clear();
+    state.v2.pendingText.clear();
+    revokeAllObjectUrls();
+
+    state.dirty = false;
+    state.currentFolderId = null;
+    state.selectedId = null;
+
+    toast("Legacy vault loaded (v1). Saving upgrades to v2.", false);
+  }
+
+  async function startNewV2Vault(password){
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iter = KDF_ITER_DEFAULT;
+    const key = await deriveKeyPBKDF2(password, salt, iter);
+
+    state.mode = "v2";
+    state.v1Vault = null;
+
+    state.v2.fileRef = null;
+    state.v2.kdfIter = iter;
+    state.v2.kdfSalt = salt;
+    state.v2.key = key;
+    state.v2.index = normalizeV2Index({ meta: { name:"Vault", created: Date.now(), updated: Date.now() }, items: [] });
+    state.v2.indexLen = 0;
+    state.v2.dataStart = 0;
+
+    state.v2.pendingRecords.clear();
+    state.v2.pendingText.clear();
+    revokeAllObjectUrls();
+
+    state.dirty = false;
+    state.currentFolderId = null;
+    state.selectedId = null;
+  }
+
+  function hardLogout(keepToast=true){
+    revokeAllObjectUrls();
+
+    state.unlocked = false;
+    state.mode = "none";
+    state.password = null;
+    state.fileName = null;
+
+    state.currentFolderId = null;
+    state.selectedId = null;
+
+    state.dirty = false;
+    state.pendingOpenFile = null;
+
+    state.v1Vault = null;
+    state.v2 = {
+      fileRef: null,
+      kdfIter: KDF_ITER_DEFAULT,
+      kdfSalt: null,
+      key: null,
+      index: null,
+      indexLen: 0,
+      dataStart: 0,
+      pendingRecords: new Map(),
+      pendingText: new Map(),
+      objectUrls: new Set()
+    };
+
+    ui.search.value = "";
+    closeOverlay("ovUnlock");
+    closeOverlay("ovPrompt");
+    closeOverlay("ovPaste");
+    closeAddMenu();
+
+    if (keepToast) toast("Session cleared");
+    render();
+  }
+
+  async function saveAsV2DownloadAndLogout(){
+    if (!state.unlocked || !state.password){
+      toast("Nothing to save", true);
+      return;
+    }
+
+    let kdfSalt, kdfIter, key, indexObj, oldFileRef, oldDataStart;
+
+    if (state.mode === "v2"){
+      kdfSalt = state.v2.kdfSalt;
+      kdfIter = state.v2.kdfIter;
+      key = state.v2.key;
+      indexObj = state.v2.index;
+      oldFileRef = state.v2.fileRef;
+      oldDataStart = state.v2.dataStart;
+    } else if (state.mode === "v1"){
+      // Upgrade v1 -> v2 on save
+      kdfSalt = crypto.getRandomValues(new Uint8Array(16));
+      kdfIter = KDF_ITER_DEFAULT;
+      key = await deriveKeyPBKDF2(state.password, kdfSalt, kdfIter);
+
+      const v1 = state.v1Vault;
+      indexObj = normalizeV2Index({
+        meta: { ...v1.meta, updated: Date.now(), name: v1.meta.name || "Vault" },
+        items: v1.items.map(it => ({
+          id: it.id || randomId(),
+          kind: it.kind || "file",
+          name: sanitizeName(it.name || "unnamed", it.kind === "folder" ? "Folder" : "file.bin"),
+          mime: it.mime || (it.kind === "text" ? "text/plain" : "application/octet-stream"),
+          size: it.size || 0,
+          created: it.created || Date.now(),
+          updated: Date.now(),
+          folderId: it.folderId || null,
+          order: 0,
+          recRelOff: 0,
+          recLen: 0,
+          thumbMime: it.kind === "image" ? "image/png" : undefined,
+          thumbB64: undefined
+        }))
+      });
+
+      state.v2.pendingRecords.clear();
+      state.v2.pendingText.clear();
+
+      for (const it of v1.items){
+        if (it.kind === "folder") continue;
+        if (it.kind === "text"){
+          state.v2.pendingText.set(it.id, it.text || "");
+          continue;
+        }
+        if (it.data){
+          const plain = b64ToBytes(it.data);
+          const rec = await v2EncryptRecord(key, plain);
+          state.v2.pendingRecords.set(it.id, rec);
+        }
+      }
+
+      oldFileRef = null;
+      oldDataStart = 0;
+    } else {
+      toast("Nothing to save", true);
+      return;
+    }
+
+    // Pack records
+    let rel = 0;
+    const dataParts = [];
+
+    for (const it of indexObj.items){
+      if (it.kind === "folder"){
+        it.recRelOff = 0;
+        it.recLen = 0;
+        continue;
+      }
+
+      let part;
+      let partLen = 0;
+
+      if (state.v2.pendingText.has(it.id)){
+        const plain = new TextEncoder().encode(state.v2.pendingText.get(it.id) || "");
+        const rec = await v2EncryptRecord(key, plain);
+        part = rec;
+        partLen = rec.byteLength;
+
+        it.kind = "text";
+        it.mime = "text/plain";
+        it.size = plain.byteLength;
+        it.updated = Date.now();
+      } else if (state.v2.pendingRecords.has(it.id)){
+        const rec = state.v2.pendingRecords.get(it.id);
+        part = rec;
+        partLen = rec.byteLength;
+        it.updated = Date.now();
+      } else if (state.mode === "v2" && oldFileRef){
+        const oldAbs = oldDataStart + it.recRelOff;
+        part = oldFileRef.slice(oldAbs, oldAbs + it.recLen);
+        partLen = it.recLen;
+      } else {
+        toast(`Missing data for ${it.name}`, true);
+        return;
+      }
+
+      it.recRelOff = rel;
+      it.recLen = partLen;
+      rel += partLen;
+      dataParts.push(part);
+    }
+
+    indexObj.meta.updated = Date.now();
+
+    const {iv: indexIv, cipher: indexCipher} = await v2EncryptIndex(key, indexObj);
+    const header = v2WriteHeader({
+      kdfIter,
+      kdfSalt,
+      indexLen: indexCipher.byteLength,
+      indexIv
+    });
+
+    const blob = new Blob([header, indexCipher, ...dataParts], { type:"application/octet-stream" });
+    const outName = state.fileName || `${indexObj.meta.name || "vortex"}.vault`;
+
+    downloadBlob(blob, outName);
+    hardLogout(false);
+    toast("Vault saved and session cleared");
+  }
+
+  /* ---------- import + create ---------- */
+  async function importFiles(fileList){
+    if (!state.unlocked) return;
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+
+    // clear stale selection once
+    state.selectedId = null;
+    let lastAddedId = null;
+
+    const incoming = files.reduce((a, f) => a + (f.size || 0), 0);
+    if (state.mode === "v2"){
+      try { v2EnsurePendingCapacityOrThrow(incoming); }
+      catch (e) { toast(e.message || "Too much unsaved data", true); return; }
+    }
+
+    let ok = 0;
+    for (const f of files){
+      try{
+        const mime = String(f.type || "");
+        const kind =
+          mime.startsWith("image/") ? "image" :
+          mime.startsWith("video/") ? "video" :
+          "file";
+
+        const now = Date.now();
+        const folderId = state.currentFolderId || null;
+
+        if (state.mode === "v2"){
+          if (kind === "image"){
+            const re = await sanitizeRasterImageToPng(f);
+            const th = await makeThumbnailFromImageBytes(re.bytes, re.mime, 256);
+            const rec = await v2EncryptRecord(state.v2.key, re.bytes);
+
+            const id = randomId();
+            state.v2.pendingRecords.set(id, rec);
+
+            state.v2.index.items.push({
+              id,
+              kind: "image",
+              name: baseNameToPng(f.name),
+              mime: "image/png",
+              size: re.bytes.byteLength,
+              created: now,
+              updated: now,
+              folderId,
+              order: 0,
+              recRelOff: 0,
+              recLen: rec.byteLength,
+              thumbMime: th.mime,
+              thumbB64: bytesToB64(th.bytes)
+            });
+            lastAddedId = id; // track newest item
+            ok++;
+          } else {
+            const buf = await f.arrayBuffer();
+            let u8 = new Uint8Array(buf);
+
+            // Optionally append random trailing bytes for common video containers to reduce fingerprint stability.
+            // Only done for formats likely to ignore trailing bytes.
+            if (kind === "video"){
+              u8 = await maybePadVideoBytes(f, u8);
+            }
+
+            const rec = await v2EncryptRecord(state.v2.key, u8);
+
+            const id = randomId();
+            state.v2.pendingRecords.set(id, rec);
+
+            const safeName = sanitizeName(
+              f.name || (kind === "video" ? "video.bin" : "file.bin"),
+              kind === "video" ? "video.bin" : "file.bin"
+            );
+
+            state.v2.index.items.push({
+              id,
+              kind,
+              name: safeName,
+              mime: mime || "application/octet-stream",
+              size: u8.byteLength,
+              created: now,
+              updated: now,
+              folderId,
+              order: 0,
+              recRelOff: 0,
+              recLen: rec.byteLength
+            });
+
+            ok++;
+          }
+
+          state.v2.index.meta.updated = now;
+          state.dirty = true;
+        } else {
+          if (kind === "image"){
+            const re = await sanitizeRasterImageToPng(f);
+            state.v1Vault.items.push({
+              id: randomId(),
+              kind: "image",
+              name: baseNameToPng(f.name),
+              mime: "image/png",
+              size: re.bytes.byteLength,
+              created: now,
+              updated: now,
+              folderId,
+              data: bytesToB64(re.bytes)
+            });
+            ok++;
+          } else {
+            const buf = await f.arrayBuffer();
+            let u8 = new Uint8Array(buf);
+
+            if (kind === "video"){
+              u8 = await maybePadVideoBytes(f, u8);
+            }
+
+            state.v1Vault.items.push({
+              id: randomId(),
+              kind,
+              name: sanitizeName(
+                f.name || (kind === "video" ? "video.bin" : "file.bin"),
+                kind === "video" ? "video.bin" : "file.bin"
+              ),
+              mime: mime || "application/octet-stream",
+              size: u8.byteLength,
+              created: now,
+              updated: now,
+              folderId,
+              data: bytesToB64(u8)
+            });
+            ok++;
+          }
+          state.v1Vault.meta.updated = now;
+          state.dirty = true;
+        }
+      } catch (e){
+        console.error(e);
+        toast(e?.message || "Importing files(s) failed", true);
+      }
+    }
+
+    if (ok) toast(`Imported ${ok} item${ok === 1 ? "" : "s"}`);
+    render();
+  }
+
+  function uniqueNameInFolder(base){
+    const items = listItemsInFolder(state.currentFolderId);
+    const names = new Set(items.map(x => (x.name || "").toLowerCase()));
+    const safeBase = sanitizeName(base, "file.bin");
+    if (!names.has(safeBase.toLowerCase())) return safeBase;
+
+    const dot = safeBase.lastIndexOf(".");
+    const hasExt = dot > 0 && dot < safeBase.length-1;
+    const stem = hasExt ? safeBase.slice(0, dot) : safeBase;
+    const ext = hasExt ? safeBase.slice(dot) : "";
+
+    let i = 2;
+    while (true){
+      const n = `${stem} ${i}${ext}`;
+      if (!names.has(n.toLowerCase())) return n;
+      i++;
+    }
+  }
+
+  function createTextNote(){
+    if (!state.unlocked) return;
+
+    const now = Date.now();
+    const folderId = state.currentFolderId || null;
+    const name = uniqueNameInFolder("note.txt");
+
+    if (state.mode === "v2"){
+      const id = randomId();
+      state.v2.index.items.push({
+        id,
+        kind: "text",
+        name,
+        mime: "text/plain",
+        size: 0,
+        created: now,
+        updated: now,
+        folderId,
+        order: 0,
+        recRelOff: 0,
+        recLen: 0
+      });
+      state.v2.pendingText.set(id, "");
+      state.v2.index.meta.updated = now;
+      state.dirty = true;
+      state.selectedId = id;
+      render();
+      toast("Text note created");
+      return;
+    }
+
+    state.v1Vault.items.push({
+      id: randomId(),
+      kind: "text",
+      name,
+      mime: "text/plain",
+      size: 0,
+      created: now,
+      updated: now,
+      folderId,
+      text: ""
+    });
+    state.v1Vault.meta.updated = now;
+    state.dirty = true;
+    state.selectedId = state.v1Vault.items[state.v1Vault.items.length-1].id;
+    render();
+    toast("Text note created");
+  }
+
+  function saveTextInline(id, nextName, nextText){
+    const it = getItemById(id);
+    if (!it) return;
+
+    const now = Date.now();
+    it.name = sanitizeName(nextName, "note.txt");
+    it.updated = now;
+
+    if (state.mode === "v2"){
+      try { v2EnsurePendingCapacityOrThrow(nextText.length); }
+      catch (e) { toast(e.message || "Too much unsaved data", true); return; }
+
+      it.kind = "text";
+      it.mime = "text/plain";
+      it.size = nextText.length;
+      state.v2.pendingText.set(it.id, nextText);
+      state.v2.index.meta.updated = now;
+      state.dirty = true;
+      toast("Note saved");
+      render();
+      return;
+    }
+
+    it.kind = "text";
+    it.mime = "text/plain";
+    it.text = nextText;
+    it.size = nextText.length;
+    state.v1Vault.meta.updated = now;
+    state.dirty = true;
+    toast("Note saved");
+    render();
+  }
+
+  /* ---------- export/rename/delete ---------- */
+  async function exportItem(id){
+    const it = getItemById(id);
+    if (!it) return;
+
+    try{
+      const bytes = await v2OrV1PlainBytes(it);
+      const blob = new Blob([bytes], { type: it.mime || "application/octet-stream" });
+      downloadBlob(blob, it.name || "download.bin");
+    } catch (e){
+      toast(e.message || "Export failed", true);
+    }
+  }
+
+  function promptRename(id){
+    const it = getItemById(id);
+    if (!it) return;
+
+    state.prompt.kind = "rename";
+    state.prompt.targetId = id;
+
+    ui.promptTitle.textContent = "Rename";
+    ui.promptSub.textContent = "Give this item a new name.";
+    ui.promptLabel.textContent = "Name";
+    ui.promptValue.value = it.name || "";
+    openOverlay("ovPrompt", ui.promptValue);
+  }
+
+  function promptNewFolder(){
+    state.prompt.kind = "newFolder";
+    state.prompt.targetId = null;
+
+    ui.promptTitle.textContent = "New folder";
+    ui.promptSub.textContent = "Folders help you organize the vault.";
+    ui.promptLabel.textContent = "Folder name";
+    ui.promptValue.value = uniqueNameInFolder("Folder");
+    openOverlay("ovPrompt", ui.promptValue);
+  }
+
+  function applyPrompt(){
+    const kind = state.prompt.kind;
+    const raw = (ui.promptValue.value || "").trim();
+    if (!raw){
+      toast("Value required", true);
+      return;
+    }
+
+    const val = sanitizeName(raw, kind === "newFolder" ? "Folder" : "file.bin");
+
+    if (kind === "rename"){
+      const it = getItemById(state.prompt.targetId);
+      if (!it) { closeOverlay("ovPrompt"); return; }
+      it.name = val;
+      it.updated = Date.now();
+      markDirty();
+      toast("Renamed");
+      closeOverlay("ovPrompt");
+      render();
+      return;
+    }
+
+    if (kind === "newFolder"){
+      createFolder(val);
+      closeOverlay("ovPrompt");
+      render();
+      return;
+    }
+  }
+
+  function createFolder(name){
+    if (!state.unlocked) return;
+
+    const now = Date.now();
+    const folderId = state.currentFolderId || null;
+    const finalName = uniqueNameInFolder(name);
+
+    if (state.mode === "v2"){
+      state.v2.index.items.push({
+        id: randomId(),
+        kind: "folder",
+        name: finalName,
+        mime: "",
+        size: 0,
+        created: now,
+        updated: now,
+        folderId,
+        order: 0,
+        recRelOff: 0,
+        recLen: 0
+      });
+      state.v2.index.meta.updated = now;
+      state.dirty = true;
+      toast("Folder created");
+      return;
+    }
+
+    state.v1Vault.items.push({
+      id: randomId(),
+      kind: "folder",
+      name: finalName,
+      mime: "",
+      size: 0,
+      created: now,
+      updated: now,
+      folderId
+    });
+    state.v1Vault.meta.updated = now;
+    state.dirty = true;
+    toast("Folder created");
+  }
+
+  function deleteItem(id){
+    const it = getItemById(id);
+    if (!it) return;
+
+    const ok = confirm(it.kind === "folder"
+      ? "Delete this folder? Items inside will be moved to Root."
+      : "Delete this item from the vault?");
+    if (!ok) return;
+
+    if (state.mode === "v2"){
+      if (it.kind === "folder"){
+        for (const child of getItems()){
+          if ((child.folderId || null) === it.id){
+            child.folderId = null;
+            child.updated = Date.now();
+          }
+        }
+      }
+      state.v2.index.items = state.v2.index.items.filter(x => x.id !== it.id);
+      state.v2.pendingRecords.delete(it.id);
+      state.v2.pendingText.delete(it.id);
+      state.v2.index.meta.updated = Date.now();
+    } else if (state.mode === "v1"){
+      if (it.kind === "folder"){
+        for (const child of getItems()){
+          if ((child.folderId || null) === it.id){
+            child.folderId = null;
+            child.updated = Date.now();
+          }
+        }
+      }
+      state.v1Vault.items = state.v1Vault.items.filter(x => x.id !== it.id);
+      state.v1Vault.meta.updated = Date.now();
+    }
+
+    state.dirty = true;
+    if (state.selectedId === it.id) state.selectedId = null;
+    toast("Deleted");
+    render();
+  }
+
+  /* ---------- paste ---------- */
+  function openPaste(){
+    if (!state.unlocked) return;
+    ui.pasteCatcher.value = "";
+    openOverlay("ovPaste", ui.pasteCatcher);
+  }
+
+  async function handlePasteEvent(e){
+    if (!state.unlocked) return;
+    if (!ui.ovPaste.classList.contains("on")) return;
+
+    e.preventDefault();
+
+    const dt = e.clipboardData;
+    const items = dt && dt.items ? Array.from(dt.items) : [];
+    if (!items.length){
+      toast("Clipboard empty or blocked", true);
+      return;
+    }
+
+    let imported = 0;
+
+    // clear stale selection before paste import
+    state.selectedId = null;
+
+    let lastAddedId = null;
+
+    for (const it of items){
+      if (it.type && it.type.startsWith("image/")){
+        const file = it.getAsFile();
+        if (!file) continue;
+        try{
+          await importFiles([file]);
+          imported++;
+        } catch {}
+      } else if (it.type === "text/plain"){
+        const text = await new Promise((resolve) => it.getAsString(resolve));
+        if (!text || !text.trim()) continue;
+
+        if (state.mode === "v2"){
+          try { v2EnsurePendingCapacityOrThrow(text.length); }
+          catch (e2) { toast(e2.message || "Too much unsaved data", true); continue; }
+
+          const id = randomId();
+          const now = Date.now();
+          state.v2.index.items.push({
+            id,
+            kind: "text",
+            name: uniqueNameInFolder(`pasted-${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.txt`),
+            mime: "text/plain",
+            size: text.length,
+            created: now,
+            updated: now,
+            folderId: state.currentFolderId || null,
+            order: 0,
+            recRelOff: 0,
+            recLen: 0
+          });
+          state.v2.pendingText.set(id, text);
+          state.v2.index.meta.updated = now;
+          state.dirty = true;
+          imported++;
+        } else if (state.mode === "v1"){
+          const now = Date.now();
+          state.v1Vault.items.push({
+            id: randomId(),
+            kind: "text",
+            name: uniqueNameInFolder(`pasted-${new Date().toISOString().slice(0,19).replace(/[:T]/g,"-")}.txt`),
+            mime: "text/plain",
+            size: text.length,
+            created: now,
+            updated: now,
+            folderId: state.currentFolderId || null,
+            text
+          });
+          state.v1Vault.meta.updated = now;
+          state.dirty = true;
+          lastAddedId = id; // track newest item
+          imported++;
+        }
+      }
+    }
+
+    // select pasted item
+    if (lastAddedId) state.selectedId = lastAddedId;
+
+    if (imported) toast(`Pasted ${imported} item${imported === 1 ? "" : "s"}`);
+    closeOverlay("ovPaste");
+    render();
+  }
+
+  /* ---------- drag/drop import to table ---------- */
+  function enableDnD(){
+    ui.tableWrap.addEventListener("dragover", (e) => {
+      if (!state.unlocked) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+    });
+
+    ui.tableWrap.addEventListener("drop", async (e) => {
+      if (!state.unlocked) return;
+      e.preventDefault();
+      const files = e.dataTransfer ? e.dataTransfer.files : null;
+      if (files && files.length) await importFiles(files);
+    });
+  }
+
+  /* ---------- overlays ---------- */
+  function openOverlay(id, focusEl){
+    $(id).classList.add("on");
+    if (focusEl) setTimeout(() => focusEl.focus(), 30);
+  }
+  function closeOverlay(id){
+    $(id).classList.remove("on");
+  }
+
+  document.addEventListener("click", (e) => {
+    const t = e.target;
+    if (t && t.dataset && t.dataset.close){
+      if (t.dataset.close === "ovShare") webrtcCloseSession(true, true);
+      closeOverlay(t.dataset.close);
+    }
+  });
+
+  /* ---------- Add/New menu ---------- */
+  function openAddMenu(){
+    ui.addMenu.classList.add("on");
+  }
+  function closeAddMenu(){
+    ui.addMenu.classList.remove("on");
+  }
+  function toggleAddMenu(){
+    if (ui.addMenu.classList.contains("on")) closeAddMenu();
+    else openAddMenu();
+  }
+
+  document.addEventListener("click", (e) => {
+    const inMenu = ui.addMenu.contains(e.target);
+    const inBtn = ui.btnAdd.contains(e.target);
+    if (!inMenu && !inBtn) closeAddMenu();
+  });
+
+  // Password policy (tweak MIN_PW_LEN to 8 / 12 / 15 or any number you wish)
+  const MIN_PW_LEN = 12;
+
+  function passwordMeetsPolicy(pw){
+    return (
+      pw.length >= MIN_PW_LEN &&
+      /[a-z]/.test(pw) &&           // lower
+      /[A-Z]/.test(pw) &&           // upper
+      /\d/.test(pw) &&              // number
+      /[^A-Za-z0-9]/.test(pw)       // symbol
+    );
+  }
+
+
+  /* ---------- unlock flow ---------- */
+  async function doUnlock(){
+    const pw = ui.pw.value || "";
+    const pw2 = (ui.pw2 && ui.pw2.value) ? ui.pw2.value : "";
+
+    if (!pw){
+      toast("Password required", true);
+      return;
+    }
+
+    // Only enforce password rules + confirmation when creating a NEW vault
+    if (!state.pendingOpenFile){
+      if (pw !== pw2){
+        toast("Passwords do not match — please retype them.", true);
+        return; // keep modal open
+      }
+
+      if (!passwordMeetsPolicy(pw)){
+        toast(
+          `Password must be ${MIN_PW_LEN}+ chars and include uppercase, lowercase, number, and symbol.`,
+          true
+        );
+        return; // keep modal open
+      }
+    }
+
+    closeOverlay("ovUnlock");
+
+    try{
+      state.password = pw;
+
+      if (state.pendingOpenFile){
+        await openVaultFile(state.pendingOpenFile, pw);
+        state.pendingOpenFile = null;
+        state.unlocked = true;
+        toast("Vault unlocked");
+      } else {
+        await startNewV2Vault(pw);
+        state.unlocked = true;
+        toast("New vault session created");
+      }
+
+      ui.pw.value = "";
+      if (ui.pw2) ui.pw2.value = "";
+      render();
+    } catch (e){
+      console.error(e);
+      toast(e.message || "Unlock failed", true);
+      ui.pw.value = "";
+      if (ui.pw2) ui.pw2.value = "";
+      hardLogout(false);
+    }
+  }
+
+  function startNewVaultSession(){
+    state.fileName = "vortex.vault";
+    state.pendingOpenFile = null;
+
+    ui.unlockTitle.textContent = "Start new vault session";
+    ui.unlockSub.textContent = "Set the password for your new vault. The vault file is downloaded when you save and log out.";
+
+    // show confirm box only for NEW vaults
+    ui.pw2Label.style.display = "block";
+    ui.pw2.style.display = "block";
+    ui.pw.value = "";
+    ui.pw2.value = "";
+
+    openOverlay("ovUnlock", ui.pw);
+  }
+
+  async function unlockFromSelectedFile(file){
+    state.fileName = sanitizeName(file.name, "vortex.vault");
+    state.pendingOpenFile = file;
+
+    ui.unlockTitle.textContent = "Unlock vault";
+    ui.unlockSub.textContent = `Enter password for ${state.fileName}`;
+
+    // hide confirm box for EXISTING vaults
+    ui.pw2Label.style.display = "none";
+    ui.pw2.style.display = "none";
+    ui.pw2.value = "";
+    ui.pw.value = "";
+
+    openOverlay("ovUnlock", ui.pw);
+  }
+
+  const DEFAULT_STUN_LINES = [
+    "stun:stun.cloudflare.com:3478",
+    // Optional redundancy (comment out if you want):
+    "stun:stun.l.google.com:19302",
+    "stun:stun1.l.google.com:19302",
+    "stun:stun2.l.google.com:19302",
+    "stun:stun3.l.google.com:19302",
+    "stun:stun4.l.google.com:19302",
+  ].join("\n");
+
+  function webrtcSetStatus(msg, isErr=false){
+    ui.shareStatus.textContent = msg;
+    if (isErr) toast(msg, true);
+  }
+
+  function shareProgressSet(pct, label){
+    if (!ui.shareProgress) return;
+    const p = Math.max(0, Math.min(100, Number(pct || 0)));
+
+    ui.shareProgress.style.display = "block";
+    if (ui.shareProgressFill) ui.shareProgressFill.style.width = `${p}%`;
+    if (ui.shareProgressPct) ui.shareProgressPct.textContent = `${Math.floor(p)}%`;
+    if (ui.shareProgressLabel && label) ui.shareProgressLabel.textContent = label;
+
+    if (p >= 100){
+      setTimeout(() => {
+        if (ui.shareProgress) ui.shareProgress.style.display = "none";
+      }, 1100);
+    }
+  }
+
+  function shareProgressHide(){
+    if (!ui.shareProgress) return;
+    ui.shareProgress.style.display = "none";
+    if (ui.shareProgressFill) ui.shareProgressFill.style.width = "0%";
+    if (ui.shareProgressPct) ui.shareProgressPct.textContent = "";
+    if (ui.shareProgressLabel) ui.shareProgressLabel.textContent = "Transfer";
+  }
+
+  function parseIceServersFromTextarea(){
+    // Ignore any TURN entries (even if someone injects them)
+    const txt = (ui.shareStun.value || DEFAULT_STUN_LINES).trim();
+
+    const raw = txt.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+
+    // Keep only STUN/STUNS
+    const stunLines = raw.filter(line => /^(stun:|stuns:)/i.test(line));
+
+    // If everything got filtered out, fall back to defaults
+    const finalLines = (stunLines.length ? stunLines : DEFAULT_STUN_LINES.split(/\r?\n/).map(x => x.trim()).filter(Boolean));
+
+    return finalLines.map(u => ({ urls: u }));
+  }
+
+  function webrtcCloseSession(clearCodes=false, clearItem=false){
+    try { if (state.webrtc.dc) state.webrtc.dc.close(); } catch {}
+    try { if (state.webrtc.pc) state.webrtc.pc.close(); } catch {}
+    state.webrtc.pc = null;
+    state.webrtc.dc = null;
+    state.webrtc.role = null;
+
+    // do not clear unless explicitly asked
+    if (clearItem){
+        state.webrtc.itemId = null;
+    }
+
+    state.webrtc.connected = false;
+
+    state.webrtc.recvMeta = null;
+    state.webrtc.recvChunks = [];
+    state.webrtc.recvBytes = 0;
+    state.webrtc.recvExpect = 0;
+
+    // reset finalize guard (prevents future transfers from being blocked)
+    state.webrtc.finalizing = false;
+
+    if (clearCodes){
+        state.webrtc.myCode = null;
+        if (ui.shareMyCode) ui.shareMyCode.value = "";
+        if (ui.sharePeerCode) ui.sharePeerCode.value = "";
+    }
+
+    ui.btnShareSendNow.disabled = true;
+    shareProgressHide();
+  }
+
+  async function waitIceGatheringComplete(pc){
+    if (pc.iceGatheringState === "complete") return;
+    await new Promise((resolve) => {
+      const on = () => {
+        if (pc.iceGatheringState === "complete"){
+          pc.removeEventListener("icegatheringstatechange", on);
+          resolve();
+        }
+      };
+      pc.addEventListener("icegatheringstatechange", on);
+      // safety timeout: still resolve (offer works even if not all candidates gathered yet)
+      setTimeout(() => {
+        try { pc.removeEventListener("icegatheringstatechange", on); } catch {}
+        resolve();
+      }, 4500);
+    });
+  }
+
+  /* ---------- Share link helpers (NO SERVER: URL fragment only) ---------- */
+  function b64ToUrlFrag(b64){
+    return String(b64 || "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/g, "");
+  }
+
+  function urlFragToB64(s){
+    let b = String(s || "").replace(/-/g, "+").replace(/_/g, "/");
+    while (b.length % 4) b += "=";
+    return b;
+  }
+
+  const OFFICIAL_SHARE_ORIGIN = "https://vortex.mglabs.dev";
+
+  function shareBaseUrl(){
+    // Always generate vortex.mglabs.dev links, but keep same path.
+    try{
+      const path = location.pathname || "/";
+      return `${OFFICIAL_SHARE_ORIGIN}${path}`;
+    } catch {
+      return `${OFFICIAL_SHARE_ORIGIN}/`;
+    }
+  }
+
+  function makeShareLink(mode, sdpB64, creatorCode){
+    const sp = new URLSearchParams();
+    sp.set("vv", mode);
+    sp.set("s", b64ToUrlFrag(String(sdpB64 || "").trim()));
+
+    // Put the link-creator's code in the URL fragment (never sent to server)
+    const c = normalizeShareCode(creatorCode || "");
+    if (c) sp.set("c", c);
+
+    return `${shareBaseUrl()}#${sp.toString()}`;
+  }
+
+  function setShareAnchor(anchorEl, url, placeholder){
+    if (!anchorEl) return;
+
+    const u = String(url || "").trim();
+    if (u){
+      anchorEl.href = u;
+      anchorEl.textContent = u;
+      anchorEl.dataset.ready = "1";
+    } else {
+      anchorEl.href = "#";
+      anchorEl.textContent = placeholder || "—";
+      anchorEl.dataset.ready = "";
+    }
+  }
+
+  function extractCreatorCodeFromLink(txt){
+    const s = String(txt || "").trim();
+    if (!s) return "";
+    try{
+      if (s.includes("#")){
+        const frag = s.split("#").slice(1).join("#");
+        const sp = new URLSearchParams(frag);
+        return normalizeShareCode(sp.get("c") || "");
+      }
+    } catch {}
+    return "";
+  }
+
+function debounce(fn, ms=250){
+  let t = null;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+
+  function extractSdpFromLinkOrCode(txt){
+    const s = String(txt || "").trim();
+    if (!s) return "";
+
+    // If user pasted a full URL, extract #vv=...&s=...
+    try{
+      if (s.includes("#") && (s.includes("vv=") || s.includes("s="))){
+        const frag = s.split("#").slice(1).join("#");
+        const sp = new URLSearchParams(frag);
+        const enc = sp.get("s");
+        if (enc) return urlFragToB64(enc);
+      }
+    } catch {}
+
+    return s;
+  }
+
+  function parseShareLinkFromHash(){
+    const h = String(location.hash || "").replace(/^#/, "");
+    if (!h) return null;
+
+    const sp = new URLSearchParams(h);
+    const mode = sp.get("vv");
+    const s = sp.get("s");
+    const c = sp.get("c"); // link creator's code
+
+    if (!mode || !s) return null;
+    if (mode !== "recv" && mode !== "send") return null;
+
+    return {
+        mode,
+        sdpB64: urlFragToB64(s),
+        creatorCode: normalizeShareCode(c || "")
+    };
+  }
+
+  function clearHashNoReload(){
+    try{
+      history.replaceState(null, "", location.pathname + location.search);
+    } catch {}
+  }
+
+  async function autoStartFromShareHash(){
+    const parsed = parseShareLinkFromHash();
+    if (!parsed) return;
+
+    // Flag for onboarding script: do NOT auto-open tutorial on share links
+    window.__VV_SKIP_ONBOARD = true;
+
+    ui.shareStun.value = DEFAULT_STUN_LINES;
+
+    // Open share modal regardless of vault state
+    openOverlay("ovShare");
+    shareProgressHide();
+
+    // Ensure a fresh local code exists for this share session (even if vault is locked)
+    state.webrtc.myCode = makeShareCode(8);
+    if (ui.shareMyCode) ui.shareMyCode.value = state.webrtc.myCode;
+
+    // Auto-fill Partner code from the clicked link (sender/receiver convenience)
+    if (ui.sharePeerCode){
+      ui.sharePeerCode.value = parsed.creatorCode || "";
+    }
+
+    if (ui.btnShareCopyMyCode){
+      ui.btnShareCopyMyCode.onclick = () => copyTextToClipboard(ui.shareMyCode.value);
+    }
+
+    // Normalize partner code input (only bind once)
+    if (ui.sharePeerCode && !ui.sharePeerCode.dataset.bound){
+      ui.sharePeerCode.dataset.bound = "1";
+      ui.sharePeerCode.addEventListener("input", () => {
+        ui.sharePeerCode.value = normalizeShareCode(ui.sharePeerCode.value);
+      });
+    }
+
+    // Cosmetic info
+    ui.shareItemInfo.textContent =
+      parsed.mode === "recv"
+        ? "Receive a file via secure direct link."
+        : "Apply receiver answer via secure direct link.";
+
+    if (parsed.mode === "recv"){
+      shareSwitchTab("recv");
+      ui.shareOfferIn.value = parsed.sdpB64;
+
+      // Auto-create answer for receiver
+      setTimeout(() => {
+        try { ui.btnShareCreateAnswer.click(); } catch {}
+      }, 50);
+    } else {
+      shareSwitchTab("send");
+      ui.shareAnswerIn.value = parsed.sdpB64;
+
+      // If sender already has a PC open, auto-apply answer
+      setTimeout(async () => {
+        try{
+          if (state.webrtc.pc){
+            const ans = decodeSignal(ui.shareAnswerIn.value);
+            await state.webrtc.pc.setRemoteDescription(ans);
+            webrtcSetStatus("Answer applied. Waiting for connection…");
+          } else {
+            webrtcSetStatus("Answer loaded. Create an offer first, then Accept Answer (or paste it).");
+          }
+        } catch (e){
+          webrtcSetStatus(e.message || "Failed to apply answer", true);
+        }
+      }, 80);
+    }
+
+    // IMPORTANT: clear so refresh doesn’t re-trigger
+    clearHashNoReload();
+  }
+
+  // base64 encode/decode for SDP blobs
+  function encodeSignal(desc){
+    const json = JSON.stringify(desc);
+    return btoa(unescape(encodeURIComponent(json)));
+  }
+
+  function decodeSignal(txt){
+    const s = extractSdpFromLinkOrCode(txt);
+    if (!s) throw new Error("Empty code");
+
+    let json;
+    if (s.startsWith("{")){
+      json = s;
+    } else {
+      json = decodeURIComponent(escape(atob(s)));
+    }
+    return JSON.parse(json);
+  }
+
+  async function copyTextToClipboard(text){
+    const t = String(text || "");
+    if (!t) return;
+    try{
+      await navigator.clipboard.writeText(t);
+      toast("Copied");
+    } catch {
+      // fallback: select text manually
+      toast("Clipboard blocked — select and copy manually.", true);
+    }
+  }
+
+  function setupPeerCommon(pc){
+    pc.oniceconnectionstatechange = () => {
+      const st = pc.iceConnectionState || "unknown";
+      if (st === "connected" || st === "completed"){
+        state.webrtc.connected = true;
+        if (state.webrtc.role === "send") ui.btnShareSendNow.disabled = false;
+      }
+    };
+    pc.onconnectionstatechange = () => {
+      const st = pc.connectionState || "unknown";
+      if (st === "connected"){
+        webrtcSetStatus("Connected. Encrypted data channel is ready.");
+      }
+    };
+  }
+
+  function setupDataChannel(dc, role){
+    state.webrtc.dc = dc;
+    dc.binaryType = "arraybuffer";
+
+    dc.onopen = () => {
+      state.webrtc.connected = true;
+      if (role === "send") ui.btnShareSendNow.disabled = false;
+      webrtcSetStatus("Data channel open. Ready.");
+    };
+
+    dc.onclose = () => {
+      webrtcSetStatus("Data channel closed.");
+      ui.btnShareSendNow.disabled = true;
+    };
+
+    dc.onerror = () => {
+      webrtcSetStatus("Data channel error.", true);
+    };
+
+    if (role === "recv"){
+      dc.onmessage = (ev) => webrtcHandleIncoming(ev.data);
+    }
+  }
+
+  function webrtcHandleIncoming(data){
+    // text = JSON control messages
+    if (typeof data === "string"){
+      let msg;
+      try { msg = JSON.parse(data); } catch { return; }
+
+      if (msg.t === "meta"){
+        state.webrtc.recvMeta = msg;
+        state.webrtc.recvChunks = [];
+        state.webrtc.recvBytes = 0;
+        state.webrtc.recvExpect = Number(msg.size || 0);
+
+        ui.shareRecvInfo.textContent = `Receiving: ${msg.name} (${humanSize(msg.size || 0)})…`;
+        shareProgressSet(0, "Receiving");
+        webrtcSetStatus(`Receiving ${msg.name}…`);
+      }
+
+      if (msg.t === "done"){
+        webrtcTryFinalizeReceive();
+      }
+      return;
+    }
+
+    // binary chunk
+    const u8 = new Uint8Array(data);
+    if ((state.webrtc.recvBytes + u8.byteLength) > state.webrtc.recvLimitBytes){
+      webrtcSetStatus("Receive aborted: file too large for browser memory cap.", true);
+      webrtcCloseSession();
+      return;
+    }
+
+    state.webrtc.recvChunks.push(u8);
+    state.webrtc.recvBytes += u8.byteLength;
+
+    if (state.webrtc.recvExpect){
+      const pct = Math.min(100, Math.floor((state.webrtc.recvBytes / state.webrtc.recvExpect) * 100));
+      ui.shareRecvInfo.textContent = `Receiving… ${pct}% (${humanSize(state.webrtc.recvBytes)} / ${humanSize(state.webrtc.recvExpect)})`;
+      shareProgressSet(pct, "Receiving");
+    } else {
+      ui.shareRecvInfo.textContent = `Receiving… ${humanSize(state.webrtc.recvBytes)}`;
+    }
+
+    webrtcTryFinalizeReceive();
+  }
+
+  async function webrtcTryFinalizeReceive(){
+    const meta = state.webrtc.recvMeta;
+    if (!meta) return;
+
+    const expect = Number(meta.size || 0);
+    if (!expect) return;
+
+    if (state.webrtc.recvBytes < expect) return;
+
+    // prevent double-download
+    if (state.webrtc.finalizing) return;
+    state.webrtc.finalizing = true;
+
+    // reassemble without overrun
+    const assembled = new Uint8Array(expect);
+    let off = 0;
+    for (const c of state.webrtc.recvChunks){
+      const take = Math.min(c.byteLength, expect - off);
+      if (take <= 0) break;
+      assembled.set(c.subarray(0, take), off);
+      off += take;
+    }
+
+    shareProgressSet(100, "Finalizing");
+    webrtcSetStatus("Received. Finalizing…");
+
+    try{
+      const name = sanitizeName(meta.name || "received.bin", "received.bin");
+      const mime = String(meta.mime || "application/octet-stream");
+
+      let outBytes = assembled;
+
+      // Decrypt payload using the mutual-code-derived secret
+      if (meta.enc === "aesgcm-pbkdf2"){
+        const peerCode = ui.sharePeerCode ? ui.sharePeerCode.value : "";
+        if (!normalizeShareCode(peerCode)){
+          throw new Error("Enter the Partner code (the sender's code) to decrypt this transfer.");
+        }
+
+        const sessionPw = sessionSecretFromCodes(state.webrtc.myCode, peerCode);
+
+        const salt = b64ToBytes(meta.salt || "");
+        const iter = Number(meta.iter || 0) || 250000;
+        const iv   = b64ToBytes(meta.iv || "");
+
+        if (salt.byteLength !== 16 || iv.byteLength !== 12){
+          throw new Error("Bad encryption metadata (salt/iv).");
+        }
+
+        const key = await deriveKeyPBKDF2(sessionPw, salt, iter);
+
+        try{
+          outBytes = await aesGcmDecrypt(key, iv, assembled);
+        } catch {
+          throw new Error("Wrong codes or corrupted transfer.");
+        }
+
+        const plainSize = Number(meta.plainSize || 0);
+        if (plainSize && outBytes.byteLength !== plainSize){
+          throw new Error("Transfer corrupted (size mismatch).");
+        }
+      }
+
+      // allow receiver to start download even when vault is locked
+      if (!state.unlocked){
+        const blob = new Blob([outBytes], { type: mime });
+        downloadBlob(blob, name);
+        toast(`Downloaded: ${name}`);
+        ui.shareRecvInfo.textContent = `Downloaded: ${name}`;
+        webrtcSetStatus("Done.");
+      } else {
+        // If logged into a vault, import the shared file into your vault
+        const f = new File([outBytes], name, { type: mime });
+        await importFiles([f]);
+
+        toast(`Received: ${name}`);
+        ui.shareRecvInfo.textContent = `Imported: ${name}`;
+        webrtcSetStatus("Done.");
+      }
+    } catch (e){
+      webrtcSetStatus(e.message || "Finalize failed.", true);
+    }
+
+    webrtcCloseSession();
+  }
+
+  async function webrtcSendSelectedItem(){
+    const peerCode = ui.sharePeerCode ? ui.sharePeerCode.value : "";
+    if (!normalizeShareCode(peerCode)){
+      toast("Enter the other party's code before sending.", true);
+      return;
+    }
+
+    const sessionPw = sessionSecretFromCodes(state.webrtc.myCode, peerCode);
+
+    const itemId = state.webrtc.itemId || state.selectedId;
+    const it = getItemById(itemId);
+    if (!it) { toast("No file selected", true); return; }
+    if (!state.webrtc.dc || state.webrtc.dc.readyState !== "open"){
+      toast("Not connected", true);
+      return;
+    }
+
+    const plainBytes = await v2OrV1PlainBytes(it);
+
+    // Always encrypt payload using the mutual-code-derived secret (optionally blended w/ Share password)
+    let sendBytes = plainBytes;
+
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iter = 250000;
+    const key = await deriveKeyPBKDF2(sessionPw, salt, iter);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+
+    const cipher = await aesGcmEncrypt(key, iv, plainBytes);
+    sendBytes = cipher;
+
+    const encMeta = {
+      enc: "aesgcm-pbkdf2",
+      salt: bytesToB64(salt),
+      iter,
+      iv: bytesToB64(iv),
+      plainSize: plainBytes.byteLength
+    };
+
+    const meta = {
+      t: "meta",
+      name: it.name || "file.bin",
+      mime: it.mime || "application/octet-stream",
+      size: sendBytes.byteLength,
+      ...encMeta
+    };
+
+    ui.btnShareSendNow.disabled = true;
+    shareProgressSet(0, "Sending");
+    webrtcSetStatus(`Sending ${meta.name} (${humanSize(meta.size)})…`);
+
+    // flow control
+    const dc = state.webrtc.dc;
+    const CHUNK = 16 * 1024;
+    const HIGH_WATER = 4 * 1024 * 1024;
+    const LOW_WATER  = 1 * 1024 * 1024;
+
+    dc.bufferedAmountLowThreshold = LOW_WATER;
+
+    dc.send(JSON.stringify(meta));
+
+    for (let off = 0; off < sendBytes.byteLength; off += CHUNK){
+      const slice = sendBytes.subarray(off, Math.min(sendBytes.byteLength, off + CHUNK));
+      dc.send(slice);
+
+      if (dc.bufferedAmount > HIGH_WATER){
+        await new Promise((resolve) => {
+          const onLow = () => {
+            dc.removeEventListener("bufferedamountlow", onLow);
+            resolve();
+          };
+          dc.addEventListener("bufferedamountlow", onLow);
+        });
+      }
+
+      const pct = Math.min(100, Math.floor(((off + slice.byteLength) / sendBytes.byteLength) * 100));
+      shareProgressSet(pct, "Sending");
+      webrtcSetStatus(`Sending… ${pct}%`);
+    }
+
+    dc.send(JSON.stringify({ t:"done" }));
+    shareProgressSet(100, "Complete");
+    webrtcSetStatus("Sent.");
+    toast("Transfer complete");
+    ui.btnShareSendNow.disabled = false;
+  }
+
+  /* ---------- events ---------- */
+  ui.btnOpen.onclick = () => ui.fileVault.click();
+  ui.btnNewVault.onclick = () => startNewVaultSession();
+
+  ui.fileVault.addEventListener("change", async () => {
+    const f = ui.fileVault.files && ui.fileVault.files[0];
+    ui.fileVault.value = "";
+    if (!f) return;
+    await unlockFromSelectedFile(f);
+  });
+
+  ui.btnUnlockGo.onclick = () => doUnlock();
+  ui.pw.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") doUnlock();
+  });
+
+  ui.pw2.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") doUnlock();
+  });
+
+  ui.btnSave.onclick = () => saveAsV2DownloadAndLogout();
+
+  ui.btnUp.onclick = () => goUp();
+
+  ui.search.addEventListener("input", () => renderTable());
+
+  ui.btnAdd.onclick = () => { if (!ui.btnAdd.disabled) toggleAddMenu(); };
+
+  ui.miImport.onclick = () => { closeAddMenu(); ui.fileImport.click(); };
+  ui.fileImport.addEventListener("change", async () => {
+    const files = Array.from(ui.fileImport.files || []);
+    ui.fileImport.value = "";
+    await importFiles(files);
+  });
+
+  ui.miPaste.onclick = () => { closeAddMenu(); openPaste(); };
+  ui.miNewFolder.onclick = () => { closeAddMenu(); promptNewFolder(); };
+  ui.miNewText.onclick = () => { closeAddMenu(); createTextNote(); };
+
+  ui.pasteCatcher.addEventListener("paste", handlePasteEvent);
+
+  ui.btnPromptOk.onclick = () => applyPrompt();
+  ui.promptValue.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") applyPrompt();
+  });
+
+  // WebRTC Share UI may not be present on this page.
+  // Only bind handlers if the share modal exists.
+  if (ui.ovShare) {
+    ui.shareTabSend.onclick = () => shareSwitchTab("send");
+    ui.shareTabRecv.onclick = () => shareSwitchTab("recv");
+
+    // Link-only auto-flow:
+    // - Paste sender link -> auto-fill security code + auto-generate reply link
+    // - Paste reply link -> auto-fill security code + auto-apply reply (if sender already created offer)
+    if (ui.shareOfferIn && !ui.shareOfferIn.dataset.bound){
+      ui.shareOfferIn.dataset.bound = "1";
+      ui.shareOfferIn.addEventListener("input", debounce(() => {
+        const v = (ui.shareOfferIn.value || "").trim();
+        if (!v) return;
+
+        const c = extractCreatorCodeFromLink(v);
+        if (c && ui.sharePeerCode && !normalizeShareCode(ui.sharePeerCode.value)){
+          ui.sharePeerCode.value = c;
+        }
+
+        if (!ui.shareAnswerOut.value && ui.btnShareCreateAnswer){
+          try { ui.btnShareCreateAnswer.click(); } catch {}
+        }
+      }, 220));
+    }
+
+    if (ui.shareAnswerIn && !ui.shareAnswerIn.dataset.bound){
+      ui.shareAnswerIn.dataset.bound = "1";
+      ui.shareAnswerIn.addEventListener("input", debounce(() => {
+        // always keep the textarea showing the start of the link
+        setTimeout(() => { try { ui.shareAnswerIn.scrollTop = 0; } catch {} }, 0);
+        const v = (ui.shareAnswerIn.value || "").trim();
+        if (!v) return;
+
+        const c = extractCreatorCodeFromLink(v);
+        if (c && ui.sharePeerCode && !normalizeShareCode(ui.sharePeerCode.value)){
+          ui.sharePeerCode.value = c;
+        }
+
+        if (state.webrtc.pc && ui.btnShareAcceptAnswer){
+          try { ui.btnShareAcceptAnswer.click(); } catch {}
+        }
+      }, 220));
+    }
+
+    ui.btnShareCreateOffer.onclick = async () => {
+      try{
+        webrtcCloseSession();
+
+        const pc = new RTCPeerConnection({ iceServers: parseIceServersFromTextarea() });
+        state.webrtc.pc = pc;
+        state.webrtc.role = "send";
+        setupPeerCommon(pc);
+
+        const dc = pc.createDataChannel("vv", { ordered:true });
+        setupDataChannel(dc, "send");
+
+        webrtcSetStatus("Creating offer…");
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        await waitIceGatheringComplete(pc);
+
+        ui.shareOfferOut.value = encodeSignal(pc.localDescription);
+        ui.shareOfferLink.value = makeShareLink("recv", ui.shareOfferOut.value, state.webrtc.myCode);
+        setShareAnchor(ui.shareOfferAnchor, ui.shareOfferLink.value, "Create a link to begin…");
+        webrtcSetStatus("Offer created. Send it to the receiver.");
+      } catch (e){
+        webrtcSetStatus(e.message || "Failed to create offer", true);
+        webrtcCloseSession();
+      }
+
+    // Bind auto-fill listeners ONCE (prevents duplicate handlers)
+    if (ui.shareOfferIn && !ui.shareOfferIn.dataset.bound){
+      ui.shareOfferIn.dataset.bound = "1";
+
+      ui.shareOfferIn.addEventListener("input", debounce(() => {
+        const v = (ui.shareOfferIn.value || "").trim();
+        if (!v) return;
+
+        // Partner code comes from the pasted link's fragment (c=)
+        const c = extractCreatorCodeFromLink(v);
+        if (c && ui.sharePeerCode && !normalizeShareCode(ui.sharePeerCode.value)){
+          ui.sharePeerCode.value = c;
+        }
+
+        // Auto-create answer if not already created
+        if (!ui.shareAnswerOut.value && ui.btnShareCreateAnswer){
+          try { ui.btnShareCreateAnswer.click(); } catch {}
+        }
+      }, 220));
+    }
+
+    if (ui.shareAnswerIn && !ui.shareAnswerIn.dataset.bound){
+      ui.shareAnswerIn.dataset.bound = "1";
+
+      ui.shareAnswerIn.addEventListener("input", debounce(() => {
+        const v = (ui.shareAnswerIn.value || "").trim();
+        if (!v) return;
+
+        const c = extractCreatorCodeFromLink(v);
+        if (c && ui.sharePeerCode && !normalizeShareCode(ui.sharePeerCode.value)){
+          ui.sharePeerCode.value = c;
+        }
+
+        // Auto-apply answer if sender already has an offer PC
+        if (state.webrtc.pc && ui.btnShareAcceptAnswer){
+          try { ui.btnShareAcceptAnswer.click(); } catch {}
+        }
+      }, 220));
+    }
+      
+    };
+
+    ui.btnShareCopyOffer.onclick = () => copyTextToClipboard(ui.shareOfferOut.value);
+
+    ui.btnShareCopyOfferLink.onclick = () => copyTextToClipboard(ui.shareOfferLink.value);
+    ui.btnShareCopyAnswerLink.onclick = () => copyTextToClipboard(ui.shareAnswerLink.value);
+
+    ui.btnShareAcceptAnswer.onclick = async () => {
+      try{
+        const pc = state.webrtc.pc;
+        if (!pc) throw new Error("Create an offer first.");
+
+        const ans = decodeSignal(ui.shareAnswerIn.value);
+        await pc.setRemoteDescription(ans);
+
+        webrtcSetStatus("Answer applied. Waiting for connection…");
+      } catch (e){
+        webrtcSetStatus(e.message || "Failed to accept answer", true);
+      }
+    };
+
+    ui.btnShareSendNow.onclick = () => webrtcSendSelectedItem();
+
+    ui.btnShareCreateAnswer.onclick = async () => {
+      try{
+        webrtcCloseSession();
+
+        const offer = decodeSignal(ui.shareOfferIn.value);
+
+        const pc = new RTCPeerConnection({ iceServers: parseIceServersFromTextarea() });
+        state.webrtc.pc = pc;
+        state.webrtc.role = "recv";
+        setupPeerCommon(pc);
+
+        pc.ondatachannel = (ev) => {
+          setupDataChannel(ev.channel, "recv");
+          webrtcSetStatus("Data channel received. Waiting for file…");
+        };
+
+        webrtcSetStatus("Creating answer…");
+
+        await pc.setRemoteDescription(offer);
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        await waitIceGatheringComplete(pc);
+
+        ui.shareAnswerOut.value = encodeSignal(pc.localDescription);
+        ui.shareAnswerLink.value = makeShareLink("send", ui.shareAnswerOut.value, state.webrtc.myCode);
+        setShareAnchor(ui.shareAnswerAnchor, ui.shareAnswerLink.value, "Create a reply to begin…");
+        webrtcSetStatus("Copy this link and send it back to them.");
+      } catch (e){
+        webrtcSetStatus(e.message || "Failed to create answer", true);
+        webrtcCloseSession();
+      }
+    };
+
+    ui.btnShareCopyAnswer.onclick = () => copyTextToClipboard(ui.shareAnswerOut.value);
+  }
+
+  // sortable columns
+  document.querySelectorAll("thead th[data-sort]").forEach(th => {
+    th.addEventListener("click", () => {
+      const key = th.dataset.sort;
+      if (state.sortKey === key){
+        state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
+      } else {
+        state.sortKey = key;
+        state.sortDir = "asc";
+      }
+      renderTable();
+    });
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape"){
+      closeOverlay("ovUnlock");
+      closeOverlay("ovPrompt");
+      closeOverlay("ovPaste");
+      closeOverlay("ovShare");
+      webrtcCloseSession(true, true);
+      closeAddMenu();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f"){
+      e.preventDefault();
+      ui.search.focus();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s"){
+      if (state.unlocked){
+        e.preventDefault();
+        saveAsV2DownloadAndLogout();
+      }
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "n"){
+      if (state.unlocked){
+        e.preventDefault();
+        createTextNote();
+      }
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "i"){
+      if (state.unlocked){
+        e.preventDefault();
+        ui.fileImport.click();
+      }
+    }
+  });
+
+  window.addEventListener("beforeunload", (e) => {
+    if (state.unlocked && state.dirty){
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
+
+  enableDnD();
+
+  if (!window.crypto || !crypto.subtle){
+    toast("WebCrypto unavailable in this browser. Use a modern browser.", true);
+  }
+
+  // Initial render
+  render();
+
+  // Auto-intercept #vv=recv or #vv=send links
+  setTimeout(() => { autoStartFromShareHash(); }, 60);
+</script>
+
+
+<style>
+  .onboardOverlay{
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: none;
+    pointer-events: auto;
+  }
+  .onboardOverlay.on{ display:block; }
+
+  .onboardBackdrop{
+    position:absolute;
+    inset:0;
+    background: rgba(0, 0, 0, 0.49);
+  }
+
+  .onSpotlight{
+    position: fixed;
+    border-radius: 18px;
+    border: 3px solid rgba(93,168,255,.55);
+    box-shadow:
+      0 0 0 9999px rgba(0,0,0,.58),
+      0 22px 60px rgba(0,0,0,.55),
+      0 0 48px rgba(93,168,255,.22);
+    pointer-events: none;
+    transition: left .35s ease, top .35s ease, width .35s ease, height .35s ease, opacity .35s ease;
+    opacity: 0;
+  }
+  .onSpotlight.on{ opacity: 1; }
+
+  .onCard{
+    position: fixed;
+    width: min(460px, calc(100vw - 28px));
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(10,12,22,.94);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+    backdrop-filter: blur(12px) saturate(140%);
+    transition: all 0.35s ease;
+  }
+
+  .onCardHead{
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    font-size: 21px;
+  }
+  .onCardHead .h{
+    font-weight: 950;
+    letter-spacing: .02em;
+  }
+  .onCardHead .s{
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1.35;
+  }
+
+  .onCardBody{
+    padding: 14px;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+
+  .onChecklist{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding: 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(7,9,18,.48);
+    color: rgba(238,242,255,.92);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+  .onChecklist label{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    cursor:pointer;
+    user-select:none;
+  }
+  .onChecklist input{
+    margin-top: 2px;
+    accent-color: var(--accent);
+  }
+
+  .onProgressRow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .onDots{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .onDot{
+    width:8px; height:8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.06);
+  }
+  .onDot.on{
+    background: rgba(93,168,255,.72);
+    border-color: rgba(93,168,255,.72);
+    box-shadow: 0 0 12px rgba(93,168,255,.26);
+  }
+
+  .onCardFoot{
+    padding: 12px 14px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .onFootLeft{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .onFootRight{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+  }
+
+  .onHintPill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(7,9,18,.58);
+    color: rgba(154,166,207,.90);
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
+  .onKbd{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 13px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.04);
+    border-radius: 9px;
+    padding: 2px 7px;
+    color: rgba(238,242,255,.92);
+  }
+
+  /* Keep the tour usable on very small screens */
+  @media (max-width: 560px){
+    .onCardHead .h{ font-size: 15px; }
+  }
+</style>
+
+<script>
+  (function(){
+    // This onboarding is self-contained and does not require access to the original script's lexical variables.
+    // It anchors to existing DOM elements via selectors.
+
+    const TOUR = {
+      open: false,
+      step: 0,
+      ack: false,
+      dismissed: false
+    };
+
+    const steps = [
+      {
+        title: "Welcome to Vortex Vault",
+        body: `
+          For users requiring the highest level of protection against advanced threats, Vortex Vault is recommended for use on an air-gapped system or within a secured intranet environment. All data is continuously protected using AES-256-GCM encryption via the WebCrypto API while at rest. Decryption occurs only when you explicitly unlock your vault, at which point decrypted files are loaded temporarily into memory solely for active use. Decrypted data is never written to disk unless you intentionally export a file to your device’s downloads directory. This architecture ensures that Vortex Vault maintains an exceptionally high security posture.
+
+          When you click <b>Save &amp; log out</b>, an encrypted vortex.vault file is downloaded, and the active session is fully cleared.
+
+          <div class="onHintPill" style="margin-top:10px;">
+          <span class="onKbd">Ctrl</span> + <span class="onKbd">S</span> saves the current vortex.vault file
+          </div>
+        `,
+        checklist: true,
+        target: null
+      },
+      {
+        title: "Open or create a vault",
+        body: `
+          Use <b>Open Vault</b> to unlock an existing vortex.vault file, or <b>New Vault</b> to create a new one.  
+          Vortex Vault’s modular architecture allows you to store your vault anywhere and maintain as many encrypted copies as you choose. You may access this interface locally via the HTML file, host it on your own network, or load it from the official public endpoint at vortex.mglabs.dev to securely access your encrypted vault from anywhere.
+
+          When loading Vortex Vault through the public internet, to prevent client-side code tampering, always verify the domain Vortex Vault is loaded from matches "vortex.mglabs.dev". All data remains fully encrypted, and all processing is performed locally on your device—nothing is transmitted or stored externally.
+        `,
+        target: ["#btnOpen", "#btnNewVault"]
+      },
+      {
+        title: "Add content fast",
+        body: `
+          Use <b>Add Content</b> to import files, paste images or text, create folders, or compose an encrypted text note. Any file added to Vortex Vault is subtly transformed to alter its cryptographic hash and strip residual metadata that could otherwise be used for tracking or fingerprinting. This significantly reduces exposure to advanced file correlation, flagging, and surveillance techniques employed by governments or authoritarian regimes, and is especially valuable for whistleblowers or journalists operating under heightened scrutiny.
+          You may also drag and drop files directly into the file explorer.
+          <div class="onHintPill" style="margin-top:10px;">
+              <span class="onKbd">Ctrl</span> + <span class="onKbd">I</span> Import • <span class="onKbd">Ctrl</span> + <span class="onKbd">N</span> New Note
+          </div>
+        `,
+        target: ["#btnAdd", "#tableWrap"]
+      },
+      {
+        title: "Organize like in a file explorer",
+        body: `
+          Double-click folders to open them. Add an item to any folder directly from the item preview window.
+          Your encrypted vault file is generated when you save and exit the Vortex Vault file explorer. All data is stored exclusively as ciphertext: attackers cannot read it, nor can they modify it without detection. We employ password-based key derivation using PBKDF2 with SHA-256 and a high iteration count to significantly slow and degrade the effectiveness of brute-force password attacks. Additionally, cryptographically secure random initialization vectors (IVs) are enforced throughout the system, ensuring that every encrypted record is assigned a fresh, random 12-byte IV. Even the index of your vortex.vault file is fully encrypted and protected by its own randomly generated IV.
+          Use the breadcrumb trail to instantly navigate back through multiple folders.
+        `,
+        target: ["#pathLabel", "#tbody"]
+      },
+      {
+        title: "Preview, edit, export",
+        body: `
+          Select an item to preview it securely on your local device. Text notes are fully editable within Vortex Vault. Our custom .vault file format encapsulates an entire file system within a single container, functionally comparable to an encrypted virtual disk. It leverages a custom AVLT header, an encrypted JSON-based index, and fully encrypted data records.
+          You may export any file to your downloads folder, rename existing items, or permanently remove them from the vault.
+        `,
+        target: ["#previewPane"]
+      },
+      {
+        title: "Save & clear the session",
+        body: `
+          When you're done, <b>Save &amp; log out</b> downloads your vortex.vault file and clears all data from the browser tab.
+          If you close the tab without saving, changes are lost.
+        `,
+        target: ["#btnSave"]
+      }
+    ];
+
+    function ensureGuideButton(){
+      const controls = document.querySelector("header .controls");
+      if (!controls) return;
+
+      if (document.getElementById("btnGuide")) return;
+
+      const btn = document.createElement("button");
+      btn.className = "btn ghost";
+      btn.id = "btnGuide";
+      btn.textContent = "Guide";
+      btn.title = "Show onboarding";
+      btn.onclick = () => openTour(0);
+
+      const save = document.getElementById("btnSave");
+      if (save) controls.insertBefore(btn, save);
+      else controls.appendChild(btn);
+    }
+
+    function ensureOverlay(){
+      if (document.getElementById("ovOnboard")) return;
+
+      const overlay = document.createElement("div");
+      overlay.id = "ovOnboard";
+      overlay.className = "onboardOverlay";
+      overlay.innerHTML = `
+        <div class="onboardBackdrop" aria-hidden="true"></div>
+        <div class="onSpotlight" id="onSpotlight" aria-hidden="true"></div>
+
+        <div class="onCard" id="onCard" role="dialog" aria-modal="true" aria-label="Onboarding">
+          <div class="onCardHead">
+            <div style="min-width:0;">
+              <div class="h" id="onTitle">Welcome</div>
+              <div class="s" id="onBody"></div>
+            </div>
+          </div>
+
+          <div class="onCardBody" id="onExtra"></div>
+
+          <div class="onCardFoot">
+            <div class="onFootLeft">
+              <div class="onDots" id="onDots"></div>
+              <div class="onHintPill" id="onStepLabel">Tutorial</div>
+            </div>
+            <div class="onFootRight">
+              <button class="btn ghost" id="onBack">Back</button>
+              <button class="btn primary" id="onNext">Next</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+
+      overlay.addEventListener("click", (e) => {
+        const card = document.getElementById("onCard");
+        if (!card) return;
+      });
+      document.getElementById("onBack").onclick = () => prevStep();
+      document.getElementById("onNext").onclick = () => nextStep();
+
+      window.addEventListener("resize", () => {
+        if (TOUR.open) positionStep();
+      });
+    }
+
+    function openTour(step=0){
+      ensureOverlay();
+      TOUR.open = true;
+      TOUR.step = clamp(step, 0, steps.length-1);
+
+      const ov = document.getElementById("ovOnboard");
+      ov.classList.add("on");
+
+      renderStep();
+      positionStep();
+    }
+
+    function closeTour(markDismissed=false){
+      TOUR.open = false;
+      if (markDismissed) TOUR.dismissed = true;
+
+      const ov = document.getElementById("ovOnboard");
+      if (ov) ov.classList.remove("on");
+
+      const spot = document.getElementById("onSpotlight");
+      if (spot){
+        spot.classList.remove("on");
+        spot.style.left = "-9999px";
+        spot.style.top = "-9999px";
+        spot.style.width = "0px";
+        spot.style.height = "0px";
+      }
+    }
+
+    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+    function prevStep(){
+      TOUR.step = clamp(TOUR.step - 1, 0, steps.length-1);
+      renderStep();
+      positionStep();
+    }
+
+    function nextStep(){
+      // Enforce acknowledgement on step 0
+      if (TOUR.step === 0 && !TOUR.ack) return;
+
+      if (TOUR.step >= steps.length - 1){
+        closeTour(true);
+        return;
+      }
+      TOUR.step = clamp(TOUR.step + 1, 0, steps.length-1);
+      renderStep();
+      positionStep();
+    }
+
+    function renderDots(){
+      const dots = document.getElementById("onDots");
+      if (!dots) return;
+      dots.innerHTML = "";
+      for (let i=0;i<steps.length;i++){
+        const d = document.createElement("div");
+        d.className = "onDot" + (i === TOUR.step ? " on" : "");
+        d.title = `Step ${i+1}`;
+        d.style.cursor = "pointer";
+        d.onclick = () => {
+          TOUR.step = i;
+          renderStep();
+          positionStep();
+        };
+        dots.appendChild(d);
+      }
+    }
+
+    function renderStep(){
+      const step = steps[TOUR.step];
+
+      const t = document.getElementById("onTitle");
+      const b = document.getElementById("onBody");
+      const extra = document.getElementById("onExtra");
+      const stepLabel = document.getElementById("onStepLabel");
+
+      if (t) t.textContent = step.title;
+      if (b) b.innerHTML = step.body || "";
+      if (stepLabel) stepLabel.textContent = `Tutorial ${TOUR.step + 1} / ${steps.length}`;
+
+      if (extra){
+        extra.innerHTML = "";
+        if (step.checklist){
+          const box = document.createElement("div");
+          box.className = "onChecklist";
+          box.innerHTML = `
+            <label>
+              <input type="checkbox" id="onAck" ${TOUR.ack ? "checked" : ""} />
+              <span>
+                I understand that nothing is stored in the browser between sessions, and I must download the vortex.vault file to keep changes.
+              </span>
+            </label>
+            <div style="color: rgba(179,32,32,.90);">
+              Important: if you refresh or close the tab without saving, unsaved changes are lost.
+            </div>
+          `;
+          extra.appendChild(box);
+
+          const ack = box.querySelector("#onAck");
+          if (ack){
+            ack.onchange = () => {
+              TOUR.ack = !!ack.checked;
+              updateNavButtons();
+            };
+          }
+        }
+      }
+
+      renderDots();
+      updateNavButtons();
+    }
+
+    function updateNavButtons(){
+      const back = document.getElementById("onBack");
+      const next = document.getElementById("onNext");
+      const skip = document.getElementById("onSkip");
+
+      if (back) back.disabled = (TOUR.step === 0);
+      if (skip) skip.textContent = (TOUR.step === steps.length - 1) ? "Close" : "Skip";
+
+      if (!next) return;
+
+      if (TOUR.step === steps.length - 1){
+        next.textContent = "Finish";
+        next.disabled = false;
+        return;
+      }
+
+      next.textContent = "Next";
+      if (TOUR.step === 0){
+        next.disabled = !TOUR.ack;
+      } else {
+        next.disabled = false;
+      }
+    }
+
+    function getUnionRect(selectors){
+      const sels = Array.isArray(selectors) ? selectors : (selectors ? [selectors] : []);
+      const els = sels
+        .map(s => {
+          try{ return document.querySelector(s); } catch { return null; }
+        })
+        .filter(Boolean);
+
+      if (!els.length) return null;
+
+      let minL = Infinity, minT = Infinity, maxR = -Infinity, maxB = -Infinity;
+      for (const el of els){
+        const r = el.getBoundingClientRect();
+        if (!r || !isFinite(r.left)) continue;
+        minL = Math.min(minL, r.left);
+        minT = Math.min(minT, r.top);
+        maxR = Math.max(maxR, r.right);
+        maxB = Math.max(maxB, r.bottom);
+      }
+
+      if (!isFinite(minL)) return null;
+      return { left:minL, top:minT, right:maxR, bottom:maxB, width:(maxR-minL), height:(maxB-minT) };
+    }
+
+    function positionStep(){
+      const step = steps[TOUR.step];
+
+      const spot = document.getElementById("onSpotlight");
+      const card = document.getElementById("onCard");
+      if (!spot || !card) return;
+
+      const pad = 1; // spotlight padding
+      const rect = step.target ? getUnionRect(step.target) : null;
+
+      if (!rect){
+        // Center card, hide spotlight
+        spot.classList.remove("on");
+        spot.style.left = "-9999px";
+        spot.style.top = "-9999px";
+        spot.style.width = "0px";
+        spot.style.height = "0px";
+
+        const vw = window.innerWidth, vh = window.innerHeight;
+        const cw = Math.min(460, vw - 28);
+        const ch = card.offsetHeight || 260;
+
+        const left = Math.round((vw - cw) / 2);
+        const top = Math.round((vh - ch) / 2);
+
+        card.style.left = `${clamp(left, 14, vw - cw - 14)}px`;
+        card.style.top = `${clamp(top, 14, vh - ch - 14)}px`;
+        return;
+      }
+
+      // Spotlight on target(s)
+      const L = Math.max(10, rect.left - pad);
+      const T = Math.max(10, rect.top - pad);
+      const W = Math.min(window.innerWidth - 20, rect.width + pad*2);
+      const H = Math.min(window.innerHeight - 20, rect.height + pad*2);
+
+      spot.style.left = `${Math.round(L)}px`;
+      spot.style.top = `${Math.round(T)}px`;
+      spot.style.width = `${Math.round(W)}px`;
+      spot.style.height = `${Math.round(H)}px`;
+      spot.classList.add("on");
+
+      // Place card near spotlight: prefer right, else left, else below
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const cw = Math.min(460, vw - 28);
+      const ch = card.offsetHeight || 260;
+
+      const gap = 14;
+
+      let x = rect.right + gap;
+      let y = rect.top;
+
+      if (x + cw > vw - 14){
+        x = rect.left - gap - cw;
+      }
+      if (x < 14){
+        x = rect.left;
+        y = rect.bottom + gap;
+      }
+      if (y + ch > vh - 14){
+        y = vh - ch - 14;
+      }
+      if (y < 14){
+        y = 14;
+      }
+
+      card.style.left = `${Math.round(clamp(x, 14, vw - cw - 14))}px`;
+      card.style.top = `${Math.round(clamp(y, 14, vh - ch - 14))}px`;
+    }
+
+    function shouldAutoOpen(){
+      // If opened from a share/receive link, skip tutorial so receiving is instant
+      if (window.__VV_SKIP_ONBOARD) return false;
+
+      try { if (localStorage.getItem("vv_onboard_seen") === "1") return false; } catch {}
+
+      // Auto-open only if locked and not explicitly dismissed.
+      if (TOUR.dismissed) return false;
+      const dot = document.getElementById("statusDot");
+      if (!dot) return true;
+      const unlocked = dot.classList.contains("ok");
+      return !unlocked;
+    }
+
+    // Global helper for dev/testing
+    window.openVaultOnboarding = () => openTour(0);
+
+    // Init
+    ensureGuideButton();
+
+    setTimeout(() => {
+    if (shouldAutoOpen()){
+        try { localStorage.setItem("vv_onboard_seen", "1"); } catch {}
+        openTour(0);
+    }
+    }, 220);
+
+    // Close onboarding with ESC as well (without interfering with existing handlers)
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape"){
+        if (TOUR.open) closeTour();
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>
