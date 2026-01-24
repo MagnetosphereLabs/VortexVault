@@ -318,10 +318,6 @@ Vortex Vault is built to protect against:
 
 In other words: if someone obtains your `vortex.vault` file, the design is intended to keep its contents and structure private unless the password is known.
 
-## Security note
-Vortex Vault is designed so your vault data and keys never leave your device.  
-Like any client-side security tool, it can’t protect you if your device/browser is compromised while the vault is unlocked.
-
 ---
 
 ## Practical threat notes (what to keep in mind)
