@@ -6,6 +6,19 @@ Unlock your vault locally, manage files like in a file explorer. Rename, or dele
 
 No accounts. No storage server. Just a vault you control.
 
+<img src="/VortexVaultMainUI.png" alt="Vortex Vault" width="720">
+
+
+### In-vault encrypted notes
+<img src="VortexVaultSecureNote.png" width="720" />
+
+### Direct Share (P2P, end-to-end encrypted)
+<img src="/VortexVaultReceive.png" width="720" />
+<img src="/VortexVaultSend.png" width="720" />
+
+### Media previews (images / video / PDF / audio)
+<img src="/VortexVaultPDFDocs.png" width="720" />
+
 ---
 
 ## Why Vortex Vault exists
@@ -71,6 +84,8 @@ A `.vault` file is simply a file, so you can store it anywhere. On your local di
 
 ### Direct Share (peer-to-peer, encrypted, no file servers)
 Vortex Vault includes **Direct Share**: a practical way to transfer a file directly between devices without uploading it to a third-party storage service.
+
+<video src="VortexVaultSecureSend.mp4" width="720" controls></video>
 
 - **Peer-to-peer transfer over WebRTC DataChannels**
 - **No file hosting, no upload server, no storage backend**
