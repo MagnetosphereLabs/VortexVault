@@ -1,4 +1,4 @@
-<img src="/banner.png" alt="Vortex Vault" width="500">
+<img src="/VortexVaultLogo.png" alt="Vortex Vault" width="200">
 
 **Vortex Vault** is an offline, client-side encrypted vault that stores an entire file system inside a single `vortex.vault` container. Encrypted end-to-end in your browser using modern **WebCrypto (AES-256-GCM)**.
 
