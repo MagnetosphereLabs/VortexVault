@@ -406,6 +406,7 @@
     .stat .v{
       font-size:12px;
       color: rgba(238,242,255,.96);
+      margin-left: 14px;
     }
 
     /* Add/New menu */
@@ -2153,7 +2154,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
 
     const root = document.createElement("span");
     root.className = "crumb";
-    root.textContent = "Root: /";
+    root.textContent = "Root:";
     root.onclick = () => { state.currentFolderId = null; state.selectedId = null; ui.search.value=""; render(); };
     ui.pathLabel.appendChild(root);
 
