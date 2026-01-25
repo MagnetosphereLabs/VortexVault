@@ -8,7 +8,6 @@ Everything encrypts/decrypts locally in your browser using modern **WebCrypto (A
 
 Unlock your vault locally, manage files like in a file explorer. Rename or delete folders or files in your vault quickly and easily. View notes, images, videos, documents, and even audio all inside Vortex Vault. Vortex supports all common file types (from `.zip` to `.wav`). Pressing **Save & log out** downloads your encrypted vault and clears the active browser session.
 
-No accounts. No storage server. Just a vault you control.
 
 ### File Browser UI
 <img src="/VortexVaultMainUI.png" alt="Vortex Vault" width="720">
@@ -33,13 +32,37 @@ A lot of encryption tools are strong, but the workflow often breaks down when yo
 
 - strong encryption
 - **encrypted metadata** (not just file contents)
-- **tamper detection**
+- **authenticated encryption detects modification**
 - portable storage that works anywhere without installing an app
 - the ability to keep backups wherever you want
 - a clean, file-explorer style interface that doesn’t fight you
 - a way to really securely share files **without uploading them to a server**
 
 Vortex Vault is built to hit that sweet spot: simple enough for daily use, but serious enough for journalists, researchers, engineers, and teams who want strong security without needing a complicated stack.
+
+---
+
+## Start Guide
+
+This is the safest and simplest way to use Vortex Vault.
+
+1. Download the `VortexVault.html` file from this repo, or load it from the official public link: https://vortex.mglabs.dev, or load it from your self-hosted source.
+2. Open the app:
+   - open the html file in a modern browser
+   - or visit the official public link to load it on almost any device anywhere
+3. Click **New vault** to make a new `vortex.vault` file or **Open Vault** to load an existing one.
+4. Use a strong password  
+   - minimum **12 characters**
+   - must include **uppercase, lowercase, numbers, and symbols**
+   - if the password is lost, the vault cannot be recovered.
+5. Add content:
+   - **Add Content** → Import files / Paste files or text / Make new folders / make new text notes 
+   - or drag-and-drop into the file list
+6. When done, click **Save & log out**
+   - your encrypted `vortex.vault` file downloads
+   - the active session is cleared
+
+To reopen later: **Open vault** → select your `vortex.vault` file → enter password.
 
 ---
 
@@ -145,29 +168,6 @@ Current strongest privacy handling is implemented for visual media:
 - **Videos** may receive small randomized trailing padding (only when safe) to change file hashes without breaking playback
 
 This is version **1.0**. Over time, privacy transforms may expand to additional file types where it’s practical and safe (without corrupting the file), while keeping the core offline workflow intact.
-
----
-
-## Start Guide
-
-This is the safest and simplest way to use Vortex Vault.
-
-1. Download the `VortexVault.html` file from this repo, or load it from the official public link: https://vortex.mglabs.dev, or load it from your self-hosted source.
-2. Open the app:
-   - open the html file in a modern browser
-   - or visit the official public link to load it on almost any device anywhere
-3. Click **New vault** to make a new `vortex.vault` file or **Open Vault** to load an existing one.
-4. Use a strong password  
-   - minimum **12 characters**
-   - must include **uppercase, lowercase, numbers, and symbols**
-5. Add content:
-   - **Add Content** → Import files / Paste files or text / Make new folders / make new text notes 
-   - or drag-and-drop into the file list
-6. When done, click **Save & log out**
-   - your encrypted `vortex.vault` file downloads
-   - the active session is cleared
-
-To reopen later: **Open vault** → select your `vortex.vault` file → enter password.
 
 ---
 
