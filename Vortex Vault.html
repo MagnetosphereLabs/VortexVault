@@ -101,7 +101,6 @@
 
       object-fit:contain;
 
-      /* “Premium” look on dark bg */
       filter: drop-shadow(0 10px 26px rgba(93,168,255,.18));
       opacity: .98;
     }
@@ -924,6 +923,136 @@
       box-shadow: 0 0 18px rgba(93,168,255,.22);
       transition: width .12s ease;
     }
+
+    .shareProgressLeft{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width: 0;
+    }
+
+    .shareConn{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color: rgba(154,166,207,.92);
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sDot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background: var(--danger);
+      box-shadow: 0 0 14px rgba(255,75,107,.26);
+      flex:0 0 auto;
+    }
+    .sDot.ok{
+      background: var(--ok);
+      box-shadow: 0 0 14px rgba(21,212,154,.22);
+    }
+
+    .shareBarFill{
+      position: relative;
+      transition: width .18s cubic-bezier(.2,.9,.2,1);
+    }
+    .shareBarFill::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent);
+      transform: translateX(-120%);
+      animation: vvShimmer 1.55s linear infinite;
+      opacity: .55;
+    }
+    @keyframes vvShimmer{
+      to { transform: translateX(120%); }
+    }
+
+    .shareMetrics{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .shareMetrics .m{
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(7,9,18,.28);
+      border-radius: 14px;
+      padding:8px 10px;
+      min-width:0;
+    }
+
+    .shareMetrics .k{
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color: rgba(154,166,207,.85);
+    }
+
+    .shareMetrics .v{
+      font-weight:900;
+      font-size:13px;
+      color: rgba(238,242,255,.96);
+      margin-top:3px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .shareTiny{
+      margin-top:8px;
+      font-size:13px;
+      color: rgba(154,166,207,.92);
+      line-height:1.35;
+    }
+
+    /* Direct Share connection pill */
+    #shareConnPill{
+      font-size:13px;
+      padding:6px 10px;
+      background: rgba(7,9,18,.58);
+    }
+
+    #shareConnPill .dot.mid{
+      background: var(--accent);
+      box-shadow: 0 0 14px rgba(93,168,255,.24);
+    }
+    /* Dark mode scrollbar for "Paste receiver reply" */
+    #shareAnswerIn{
+      overflow:auto;
+      scrollbar-width: thin; /* Firefox */
+      scrollbar-color: rgba(154,166,207,.40) rgba(7,9,18,.55);
+    }
+
+    #shareAnswerIn::-webkit-scrollbar{
+      width: 10px;
+    }
+
+    #shareAnswerIn::-webkit-scrollbar-track{
+      background: rgba(7,9,18,.55);
+      border-radius: 999px;
+    }
+
+    #shareAnswerIn::-webkit-scrollbar-thumb{
+      background: rgba(154,166,207,.32);
+      border-radius: 999px;
+      border: 2px solid rgba(7,9,18,.55);
+    }
+
+    #shareAnswerIn::-webkit-scrollbar-thumb:hover{
+      background: rgba(93,168,255,.40);
+    }
+    /* Glass blur (Direct Share modal) */
+    #ovShare .modal{
+      background: rgba(10,12,22,.78) !important;
+      backdrop-filter: blur(3.5px) saturate(140%);
+      -webkit-backdrop-filter: blur(3.5px) saturate(140%);
+    }
   </style>
 </head>
 
@@ -1136,7 +1265,14 @@
           <div class="s" id="shareItemInfo">—</div>
           <div class="s" id="shareStatus" style="margin-top:6px;">Idle.</div>
         </div>
-        <button class="btn ghost" data-close="ovShare" style="padding:6px 10px;">Close</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="pill" id="shareConnPill" title="Peer connection status">
+            <span class="dot" id="shareConnDot"></span>
+            <span id="shareConnLabel">Not connected</span>
+          </div>
+
+          <button class="btn ghost" data-close="ovShare" style="padding:6px 10px;">Close</button>
+        </div>
       </div>
 
       <div class="modalBody" style="gap:12px;">
@@ -1159,10 +1295,28 @@
             <div class="shareProgressLabel" id="shareProgressLabel">Transfer</div>
             <div class="shareProgressPct" id="shareProgressPct"></div>
           </div>
+
           <div class="shareBar">
             <div class="shareBarFill" id="shareProgressFill"></div>
           </div>
+
+          <div class="shareStatsRow" id="shareStatsRow">
+            <div class="shareStat">
+              <div class="k">Transfer Speed</div>
+              <div class="v" id="shareStatSpeed">—</div>
+            </div>
+            <div class="shareStat">
+              <div class="k">ETA</div>
+              <div class="v" id="shareStatEta">—</div>
+            </div>
+            <div class="shareStat">
+              <div class="k">Encryption Speed</div>
+              <div class="v" id="shareStatCrypto">—</div>
+            </div>
+          </div>
         </div>
+
+          <div class="shareTiny" id="shareTiny">—</div>
 
         <!-- Hidden networking config (still used internally) -->
         <div style="display:none;">
@@ -1456,6 +1610,20 @@
     shareProgressPct: $("shareProgressPct"),
     shareProgressLabel: $("shareProgressLabel"),
 
+    // Share HUD
+    shareConnDot: $("shareConnDot"),
+    shareConnLabel: $("shareConnLabel"),
+    mRate: $("mRate"),
+    mEta: $("mEta"),
+    mCrypto: $("mCrypto"),
+    shareTiny: $("shareTiny"),
+
+    shareConnPill: $("shareConnPill"),
+
+    shareStatSpeed: $("shareStatSpeed"),
+    shareStatEta: $("shareStatEta"),
+    shareStatCrypto: $("shareStatCrypto"),
+
   };
 
   // state.mode:
@@ -1532,12 +1700,20 @@
     el.className = "toast" + (isErr ? " err" : "");
     el.innerHTML = `<div class="tDot"></div><div>${escapeHtml(msg)}</div>`;
     ui.toasts.appendChild(el);
+
     setTimeout(() => {
-      el.style.opacity = "0";
-      el.style.transform = "translateY(6px)";
-      el.style.transition = "opacity .16s ease, transform .16s ease";
-      setTimeout(() => el.remove(), 180);
-    }, 3200);
+      // set transition first
+      el.style.transition = "opacity 3.5s ease, transform 3.5s ease";
+
+      // then trigger the fade on next frame (ensures animation applies)
+      requestAnimationFrame(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(6px)";
+      });
+
+      // remove after fade completes
+      setTimeout(() => el.remove(), 3600);
+    }, 7000);
   }
 
   function escapeHtml(s){
@@ -1553,6 +1729,20 @@
     let i = 0, v = n;
     while (v >= 1024 && i < units.length-1){ v /= 1024; i++; }
     return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+  }
+
+  function fmtRate(bps){
+    // bps = bytes/sec
+    if (!bps || !isFinite(bps) || bps <= 0) return "—";
+    return `${humanSize(bps)}/s`;
+  }
+
+  function fmtEta(sec){
+    if (!sec || !isFinite(sec) || sec <= 0) return "—";
+    sec = Math.max(0, Math.round(sec));
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
   }
 
   function fmtTime(ms){
@@ -2509,6 +2699,9 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     }
 
     shareProgressHide();
+    statsReset();
+    webrtcUpdateConnUI();
+    if (ui.shareTiny) ui.shareTiny.textContent = "Share a link to begin. Transfer is end-to-end encrypted.";
     webrtcSetStatus("Ready. Share your link.");
 
     openOverlay("ovShare");
@@ -3637,6 +3830,201 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     if (isErr) toast(msg, true);
   }
 
+  /* ===== Transfer stats (speed / ETA / crypto) ===== */
+  function fmtRate(bytesPerSec){
+    if (!bytesPerSec || !isFinite(bytesPerSec) || bytesPerSec <= 0) return "—";
+
+    const bitsPerSec = bytesPerSec * 8;
+
+    const units = ["bps", "Kbps", "Mbps", "Gbps", "Tbps"];
+    let v = bitsPerSec;
+    let i = 0;
+
+    while (v >= 1000 && i < units.length - 1){
+      v /= 1000;
+      i++;
+    }
+
+    const dec = (i === 0) ? 0 : (v >= 100 ? 0 : v >= 10 ? 1 : 2);
+    return `${v.toFixed(dec)} ${units[i]}`;
+  }
+
+  function fmtEta(sec){
+    if (!sec || !isFinite(sec) || sec <= 0) return "—";
+    const s = Math.max(0, Math.ceil(sec));
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+
+    if (m >= 60){
+      const h = Math.floor(m / 60);
+      const mm = m % 60;
+      return `${h}:${String(mm).padStart(2,"0")}:${String(r).padStart(2,"0")}`;
+    }
+    return `${m}:${String(r).padStart(2,"0")}`;
+  }
+
+  function shareConnSet(labelOrMode, okFlag){
+    if (!ui.shareConnDot || !ui.shareConnLabel) return;
+
+    // If caller passes explicit okFlag, treat first arg as a label.
+    if (typeof okFlag === "boolean"){
+      let label = String(labelOrMode || "Disconnected");
+
+      const low = label.toLowerCase();
+      if (low === "connected") label = "Connected";
+      if (low === "disconnected") label = "Disconnected";
+      if (low === "not connected") label = "Not connected";
+
+      // If we're not ok, but label indicates an in-between state, show the accent dot.
+      const mid = !okFlag && /(connect|open|reconnect|close)/i.test(label);
+
+      ui.shareConnLabel.textContent = label;
+      ui.shareConnDot.className = "dot" + (okFlag ? " ok" : (mid ? " mid" : ""));
+      return;
+    }
+
+    // Mode-only calls: "connected" | "connecting" | "disconnected" | etc.
+    const mode = String(labelOrMode || "").trim().toLowerCase();
+
+    if (mode === "connected" || mode === "complete"){
+      ui.shareConnLabel.textContent = (mode === "complete") ? "Complete" : "Connected";
+      ui.shareConnDot.className = "dot ok";
+      return;
+    }
+
+    if (mode === "connecting"){
+      ui.shareConnLabel.textContent = "Connecting…";
+      ui.shareConnDot.className = "dot mid";
+      return;
+    }
+
+    if (mode === "reconnecting"){
+      ui.shareConnLabel.textContent = "Reconnecting…";
+      ui.shareConnDot.className = "dot mid";
+      return;
+    }
+
+    if (mode === "closing"){
+      ui.shareConnLabel.textContent = "Closing…";
+      ui.shareConnDot.className = "dot mid";
+      return;
+    }
+
+    // default = Disconnected
+    ui.shareConnLabel.textContent = "Disconnected";
+    ui.shareConnDot.className = "dot";
+  }
+
+  function statsReset(){
+    state.webrtc.stats = {
+      phase: "idle",    // idle|connecting|send|recv|finalizing|done
+      total: 0,
+      done: 0,
+      lastTs: 0,
+      lastDone: 0,
+      emaBps: 0,
+      cryptoLabel: "",
+      cryptoBps: 0,
+      lastUiTs: 0
+    };
+    if (ui.mRate) ui.mRate.textContent = "—";
+    if (ui.mEta) ui.mEta.textContent = "—";
+    if (ui.mCrypto) ui.mCrypto.textContent = "—";
+    if (ui.shareTiny) ui.shareTiny.textContent = "—";
+  }
+
+  function statsStart(phase, totalBytes){
+    const st = state.webrtc.stats || (state.webrtc.stats = {});
+    const now = performance.now();
+    st.phase = phase;
+    st.total = Math.max(0, Number(totalBytes || 0));
+    st.done = 0;
+    st.lastTs = now;
+    st.lastDone = 0;
+    st.emaBps = 0;
+    st.lastUiTs = 0;
+  }
+
+  function statsCrypto(label, bytes, ms){
+    const st = state.webrtc.stats || (state.webrtc.stats = {});
+    st.cryptoLabel = label || "";
+    st.cryptoBps = (ms > 0) ? (Number(bytes || 0) / (ms / 1000)) : 0;
+    if (ui.mCrypto){
+      ui.mCrypto.textContent = st.cryptoLabel
+        ? `${st.cryptoLabel} ${fmtRate(st.cryptoBps)}`
+        : "—";
+    }
+  }
+
+  function statsProgress(doneBytes, label){
+    const st = state.webrtc.stats || (state.webrtc.stats = {});
+    const now = performance.now();
+
+    st.done = Math.max(0, Number(doneBytes || 0));
+
+    // rate update (EMA smoothing)
+    const dt = (now - (st.lastTs || now)) / 1000;
+    const db = st.done - (st.lastDone || 0);
+    if (dt > 0.04 && db >= 0){
+      const inst = db / dt;
+      st.emaBps = st.emaBps ? (st.emaBps * 0.85 + inst * 0.15) : inst;
+      st.lastTs = now;
+      st.lastDone = st.done;
+    }
+
+    // UI throttling (keeps it smooth)
+    if ((now - (st.lastUiTs || 0)) < 90 && st.done < st.total) return;
+    st.lastUiTs = now;
+
+    const pct = st.total ? Math.min(100, (st.done / st.total) * 100) : 0;
+    const etaSec = (st.emaBps > 0 && st.total > 0) ? ((st.total - st.done) / st.emaBps) : NaN;
+
+    shareProgressSet(pct, label || "Transfer");
+    if (ui.mRate) ui.mRate.textContent = fmtRate(st.emaBps);
+    if (ui.mEta) ui.mEta.textContent = fmtEta(etaSec);
+
+    if (ui.mCrypto){
+      ui.mCrypto.textContent = st.cryptoLabel
+        ? `${st.cryptoLabel} ${fmtRate(st.cryptoBps)}`
+        : "—";
+    }
+  }
+
+  function webrtcUpdateConnUI(){
+    const pc = state.webrtc.pc;
+    const dc = state.webrtc.dc;
+
+    // default
+    let label = "Not connected";
+    let ok = false;
+
+    try{
+      if (dc){
+        const ds = dc.readyState;
+        if (ds === "connecting") label = "Opening secure channel…";
+        if (ds === "open"){ label = "Connected"; ok = true; }
+        if (ds === "closing") label = "Closing…";
+        if (ds === "closed") label = "Not connected";
+      } else if (pc){
+        const cs = pc.connectionState || "unknown";
+        if (cs === "connecting") label = "Connecting…";
+        if (cs === "connected"){ label = "Connected"; ok = true; }
+        if (cs === "disconnected") label = "Reconnecting…";
+        if (cs === "failed") label = "Connection failed";
+        if (cs === "closed") label = "Not connected";
+      }
+    } catch {}
+
+    // If transfer completed, do not downgrade UI to "Not connected"
+    const st = state.webrtc.stats;
+    if (st && st.phase === "done"){
+      label = "Complete";
+      ok = true;
+    }
+
+    shareConnSet(label, ok);
+  }
+  
   function shareProgressSet(pct, label){
     if (!ui.shareProgress) return;
     const p = Math.max(0, Math.min(100, Number(pct || 0)));
@@ -3645,12 +4033,6 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     if (ui.shareProgressFill) ui.shareProgressFill.style.width = `${p}%`;
     if (ui.shareProgressPct) ui.shareProgressPct.textContent = `${Math.floor(p)}%`;
     if (ui.shareProgressLabel && label) ui.shareProgressLabel.textContent = label;
-
-    if (p >= 100){
-      setTimeout(() => {
-        if (ui.shareProgress) ui.shareProgress.style.display = "none";
-      }, 1100);
-    }
   }
 
   function shareProgressHide(){
@@ -3677,8 +4059,14 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
   }
 
   function webrtcCloseSession(clearCodes=false, clearItem=false){
+    const completed = !!state.webrtc.__completed;
+
+    // Latch completion so onclose can still see it
+    state.webrtc.__closingCompleted = completed;
+
     try { if (state.webrtc.dc) state.webrtc.dc.close(); } catch {}
     try { if (state.webrtc.pc) state.webrtc.pc.close(); } catch {}
+
     state.webrtc.pc = null;
     state.webrtc.dc = null;
     state.webrtc.role = null;
@@ -3689,6 +4077,10 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     }
 
     state.webrtc.connected = false;
+
+    // If we completed, show Complete instead of Disconnected
+    if (completed) shareConnSet("complete");
+    else shareConnSet("disconnected");
 
     state.webrtc.recvMeta = null;
     state.webrtc.recvChunks = [];
@@ -3705,7 +4097,20 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     }
 
     ui.btnShareSendNow.disabled = true;
+
+    if (!completed) shareStatsReset();
     shareProgressHide();
+
+    // Reset guards for next session
+    state.webrtc.__autoSent = false;
+    state.webrtc.__hadOpen = false;
+
+    // IMPORTANT: do NOT clear __completed immediately
+    // Clear after the close event has had a chance to run
+    setTimeout(() => {
+      state.webrtc.__completed = false;
+      state.webrtc.__closingCompleted = false;
+    }, 0);
   }
 
   async function waitIceGatheringComplete(pc){
@@ -3741,6 +4146,203 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
   }
 
   const OFFICIAL_SHARE_ORIGIN = "https://vortex.mglabs.dev";
+
+  // ============================================================
+  // Same-device Share Relay Bridge (answer-link automation)
+  //
+  // Goal:
+  // - Sender receives receiver reply link on same device
+  // - Clicking it opens a new tab (browser behavior)
+  // - New tab forwards the reply into the already-open sender tab
+  // - New tab closes itself (best-effort)
+  //
+  // Security:
+  // - Uses BroadcastChannel (same-origin only)
+  // - localStorage storage-event fallback
+  // - Only consumes "send" reply links IF an active sender offer exists
+  // ============================================================
+
+  const VV_TAB_ID = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  const VV_RELAY_CHANNEL = "vv_share_relay_v1";
+  const VV_RELAY_LS_KEY = "__vv_share_relay_evt_v1__";
+
+  const vvRelay = ("BroadcastChannel" in window) ? new BroadcastChannel(VV_RELAY_CHANNEL) : null;
+  const vvAckWaiters = new Map();
+
+  // Dedupe incoming relay messages (protects against any double-delivery edge cases)
+  const vvSeenRelayIds = new Set();
+
+  function vvRelayPost(msg){
+    if (!msg) return;
+    msg.from = msg.from || VV_TAB_ID;
+
+    // Prefer BroadcastChannel when available. Only use one transport to avoid duplicates.
+    try{
+      if (vvRelay){
+        vvRelay.postMessage(msg);
+        return;
+      }
+    } catch {}
+
+    // Fallback: localStorage storage-event (older browsers / restricted BC)
+    try{
+      localStorage.setItem(VV_RELAY_LS_KEY, JSON.stringify(msg));
+      localStorage.removeItem(VV_RELAY_LS_KEY);
+    } catch {}
+  }
+
+  function vvRelayWaitAck(id, timeoutMs=2500){
+    return new Promise((resolve) => {
+      if (!id){ resolve(false); return; }
+      const t = setTimeout(() => {
+        vvAckWaiters.delete(id);
+        resolve(false);
+      }, timeoutMs);
+
+      vvAckWaiters.set(id, () => {
+        clearTimeout(t);
+        vvAckWaiters.delete(id);
+        resolve(true);
+      });
+    });
+  }
+
+  function vvRelayHandleIncoming(raw){
+    const msg = raw && raw.data ? raw.data : raw;
+    if (!msg || msg.from === VV_TAB_ID) return;
+
+    // ACK handling
+    if (msg.t === "ack" && msg.id){
+      const fn = vvAckWaiters.get(msg.id);
+      if (fn) fn();
+      return;
+    }
+
+    // share handling
+    if (msg.t !== "share" || !msg.id) return;
+
+    // Ignore duplicates
+    if (vvSeenRelayIds.has(msg.id)) return;
+    vvSeenRelayIds.add(msg.id);
+
+    // Prevent unbounded growth (keep it tiny)
+    if (vvSeenRelayIds.size > 64){
+      const first = vvSeenRelayIds.values().next().value;
+      vvSeenRelayIds.delete(first);
+    }
+
+    // We only auto-relay "send" reply links into a sender tab that already has
+    // a live offer PC open (prevents code mismatch + avoids accidental sends).
+    if (msg.mode === "send"){
+      if (!state.unlocked) return;
+      if (!state.webrtc || !state.webrtc.pc) return;
+      if (state.webrtc.role !== "send") return;
+
+      // Must have an active offer created already
+      try{
+        const hasOffer = !!(state.webrtc.pc && state.webrtc.pc.localDescription);
+        if (!hasOffer) return;
+      } catch { return; }
+
+      // ACK back so the link-tab knows it can close
+      vvRelayPost({ t:"ack", id: msg.id, from: VV_TAB_ID });
+
+      // Apply the answer into the existing sender session
+      vvApplyAnswerFromRelay(msg.sdpB64, msg.creatorCode);
+      return;
+    }
+
+    // For "recv" links (offer links), we intentionally do not relay.
+    // That tab is allowed to function as a standalone receive UI.
+  }
+
+  function vvInstallRelayListeners(){
+    try{
+      if (vvRelay){
+        vvRelay.addEventListener("message", vvRelayHandleIncoming);
+      }
+    } catch {}
+
+    window.addEventListener("storage", (e) => {
+      if (e.key !== VV_RELAY_LS_KEY || !e.newValue) return;
+      try { vvRelayHandleIncoming(JSON.parse(e.newValue)); } catch {}
+    });
+  }
+
+  vvInstallRelayListeners();
+
+  async function vvTryForwardAnswerToExistingTab(parsed){
+    // parsed = { mode:"send", sdpB64, creatorCode }
+    try{
+      const id = randomId();
+      vvRelayPost({
+        t: "share",
+        id,
+        mode: "send",
+        sdpB64: String(parsed.sdpB64 || "").trim(),
+        creatorCode: normalizeShareCode(parsed.creatorCode || "")
+      });
+      return await vvRelayWaitAck(id, 700);
+    } catch {
+      return false;
+    }
+  }
+
+  function vvApplyAnswerFromRelay(sdpB64, creatorCode){
+    try{
+      // Bring share modal forward (do NOT reset session state)
+      openOverlay("ovShare");
+      shareSwitchTab("send");
+
+      // Fill the reply + peer code
+      ui.shareAnswerIn.value = String(sdpB64 || "").trim();
+
+      const c = normalizeShareCode(creatorCode || "");
+      if (c && ui.sharePeerCode){
+        // Always update from the link's code (prevents stale/wrong codes breaking auto-send)
+        ui.sharePeerCode.value = c;
+      }
+
+      // Auto-apply the answer using existing handler
+      try { ui.btnShareAcceptAnswer.click(); } catch {}
+
+      // Auto-send as soon as channel is open (best-effort)
+      vvAutoSendWhenReady();
+
+      toast("Reply link received and applied.");
+    } catch (e){
+      console.error(e);
+      toast(e?.message || "Failed to apply reply link", true);
+    }
+  }
+
+  function vvAutoSendWhenReady(){
+    // Prevent double-send across multiple clicks
+    if (state.webrtc.__autoSent) return;
+
+    const started = Date.now();
+    const MAX_MS = 30000;
+
+    const tick = () => {
+      try{
+        if (state.webrtc.__autoSent) return;
+
+        const dc = state.webrtc.dc;
+        if (dc && dc.readyState === "open"){
+          state.webrtc.__autoSent = true;
+          // send immediately
+          webrtcSendSelectedItem();
+          return;
+        }
+      } catch {}
+
+      if ((Date.now() - started) < MAX_MS){
+        setTimeout(tick, 220);
+      }
+    };
+
+    setTimeout(tick, 70);
+  }
 
   function shareBaseUrl(){
     // Always generate vortex.mglabs.dev links, but keep same path.
@@ -3849,6 +4451,45 @@ function debounce(fn, ms=250){
     // Flag for onboarding script: do NOT auto-open tutorial on share links
     window.__VV_SKIP_ONBOARD = true;
 
+    // ------------------------------------------------------------
+    // Relay-first behavior (same-device automation):
+    // If this is a sender "reply link" (#vv=send...), try to forward
+    // it into an already-open sender tab and then close this tab.
+    // ------------------------------------------------------------
+    if (parsed.mode === "send"){
+      const forwarded = await vvTryForwardAnswerToExistingTab(parsed);
+      if (forwarded){
+        clearHashNoReload();
+
+        // Best-effort close (browser may block if not script-opened)
+        try { window.close(); } catch {}
+
+        // If the tab stays open, show a minimal instruction screen
+        try{
+          document.body.innerHTML = `
+            <div style="height:100vh;display:flex;align-items:center;justify-content:center;padding:18px;
+                        font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+                        background:#050711;color:#eef2ff;">
+              <div style="max-width:720px;border:1px solid rgba(255,255,255,.12);
+                          border-radius:18px;padding:16px 18px;background:rgba(10,12,22,.92);">
+                <div style="font-weight:900;font-size:16px;letter-spacing:.06em;text-transform:uppercase;">
+                  Reply link forwarded
+                </div>
+                <div style="margin-top:10px;color:rgba(154,166,207,.92);line-height:1.45;">
+                  Your reply link was delivered to your existing Vortex Vault tab.
+                  You may safely close this tab.
+                </div>
+              </div>
+            </div>
+          `;
+        } catch {}
+        return;
+      }
+    }
+
+    // ------------------------------------------------------------
+    // Fallback: original behavior (standalone receive/send UI)
+    // ------------------------------------------------------------
     ui.shareStun.value = DEFAULT_STUN_LINES;
 
     // Open share modal regardless of vault state
@@ -3859,7 +4500,7 @@ function debounce(fn, ms=250){
     state.webrtc.myCode = makeShareCode(8);
     if (ui.shareMyCode) ui.shareMyCode.value = state.webrtc.myCode;
 
-    // Auto-fill Partner code from the clicked link (sender/receiver convenience)
+    // Auto-fill Partner code from the clicked link
     if (ui.sharePeerCode){
       ui.sharePeerCode.value = parsed.creatorCode || "";
     }
@@ -3886,7 +4527,6 @@ function debounce(fn, ms=250){
       shareSwitchTab("recv");
       ui.shareOfferIn.value = parsed.sdpB64;
 
-      // Auto-create answer for receiver
       setTimeout(() => {
         try { ui.btnShareCreateAnswer.click(); } catch {}
       }, 50);
@@ -3894,7 +4534,6 @@ function debounce(fn, ms=250){
       shareSwitchTab("send");
       ui.shareAnswerIn.value = parsed.sdpB64;
 
-      // If sender already has a PC open, auto-apply answer
       setTimeout(async () => {
         try{
           if (state.webrtc.pc){
@@ -3910,7 +4549,6 @@ function debounce(fn, ms=250){
       }, 80);
     }
 
-    // IMPORTANT: clear so refresh doesn’t re-trigger
     clearHashNoReload();
   }
 
@@ -3947,16 +4585,29 @@ function debounce(fn, ms=250){
 
   function setupPeerCommon(pc){
     pc.oniceconnectionstatechange = () => {
+      webrtcUpdateConnUI();
+
       const st = pc.iceConnectionState || "unknown";
-      if (st === "connected" || st === "completed"){
-        state.webrtc.connected = true;
-        if (state.webrtc.role === "send") ui.btnShareSendNow.disabled = false;
+
+      // If we already had a clean open or completed a transfer,
+      // do not throw errors on late/noisy state changes.
+      if (st === "failed" && !state.webrtc.__completed && !state.webrtc.__hadOpen){
+        webrtcSetStatus("Connection failed. Check network / NAT and retry.", true);
       }
     };
+
     pc.onconnectionstatechange = () => {
+      webrtcUpdateConnUI();
+
       const st = pc.connectionState || "unknown";
+
       if (st === "connected"){
         webrtcSetStatus("Connected. Encrypted data channel is ready.");
+        shareConnSet("connected");
+      }
+
+      if (st === "failed" && !state.webrtc.__completed && !state.webrtc.__hadOpen){
+        webrtcSetStatus("Connection failed. Please retry.", true);
       }
     };
   }
@@ -3964,22 +4615,47 @@ function debounce(fn, ms=250){
   function setupDataChannel(dc, role){
     state.webrtc.dc = dc;
     dc.binaryType = "arraybuffer";
-
+  
+    // Show that we're attempting a live peer connection
+    shareConnSet("connecting");
+  
     dc.onopen = () => {
       state.webrtc.connected = true;
+
+      // Mark that we had a clean open at least once (prevents fake "failed" toasts later)
+      state.webrtc.__hadOpen = true;
+
+      shareConnSet("connected");
+
       if (role === "send") ui.btnShareSendNow.disabled = false;
-      webrtcSetStatus("Data channel open. Ready.");
-    };
 
+      webrtcSetStatus("Connected. Secure channel ready.");
+    };
+  
     dc.onclose = () => {
-      webrtcSetStatus("Data channel closed.");
-      ui.btnShareSendNow.disabled = true;
-    };
+    state.webrtc.connected = false;
 
+    // Use latch or __completed
+    if (state.webrtc.__completed || state.webrtc.__closingCompleted){
+        shareConnSet("complete");
+        webrtcSetStatus("Transfer complete.");
+        return;
+    }
+
+    shareConnSet("disconnected");
+    ui.btnShareSendNow.disabled = true;
+    webrtcSetStatus("Disconnected. Link expired or peer closed.");
+    };
+  
     dc.onerror = () => {
-      webrtcSetStatus("Data channel error.", true);
+      // DataChannel 'error' is often non-fatal and noisy in browsers.
+      // Do not toast as an "error" unless you're actively transferring.
+      if (state.webrtc.__completed) return;
+  
+      // Soft warning only (no red error toast)
+      webrtcSetStatus("Connection issue detected. Attempting to continue…", false);
     };
-
+  
     if (role === "recv"){
       dc.onmessage = (ev) => webrtcHandleIncoming(ev.data);
     }
@@ -3992,6 +4668,8 @@ function debounce(fn, ms=250){
       try { msg = JSON.parse(data); } catch { return; }
 
       if (msg.t === "meta"){
+        shareStatsReset();
+
         state.webrtc.recvMeta = msg;
         state.webrtc.recvChunks = [];
         state.webrtc.recvBytes = 0;
@@ -4023,6 +4701,7 @@ function debounce(fn, ms=250){
       const pct = Math.min(100, Math.floor((state.webrtc.recvBytes / state.webrtc.recvExpect) * 100));
       ui.shareRecvInfo.textContent = `Receiving… ${pct}% (${humanSize(state.webrtc.recvBytes)} / ${humanSize(state.webrtc.recvExpect)})`;
       shareProgressSet(pct, "Receiving");
+      shareStatsTick(state.webrtc.recvBytes, state.webrtc.recvExpect);
     } else {
       ui.shareRecvInfo.textContent = `Receiving… ${humanSize(state.webrtc.recvBytes)}`;
     }
@@ -4082,7 +4761,11 @@ function debounce(fn, ms=250){
         const key = await deriveKeyPBKDF2(sessionPw, salt, iter);
 
         try{
+          const t0 = performance.now();
           outBytes = await aesGcmDecrypt(key, iv, assembled);
+          const t1 = performance.now();
+
+          shareStatsSetCrypto("Dec", outBytes.byteLength, (t1 - t0));
         } catch {
           throw new Error("Wrong codes or corrupted transfer.");
         }
@@ -4099,7 +4782,10 @@ function debounce(fn, ms=250){
         downloadBlob(blob, name);
         toast(`Downloaded: ${name}`);
         ui.shareRecvInfo.textContent = `Downloaded: ${name}`;
-        webrtcSetStatus("Done.");
+        state.webrtc.__completed = true;
+        shareProgressSet(100, "Complete");
+        shareStatsTick(state.webrtc.recvExpect, state.webrtc.recvExpect);
+        webrtcSetStatus("Transfer complete.");
       } else {
         // If logged into a vault, import the shared file into your vault
         const f = new File([outBytes], name, { type: mime });
@@ -4107,13 +4793,63 @@ function debounce(fn, ms=250){
 
         toast(`Received: ${name}`);
         ui.shareRecvInfo.textContent = `Imported: ${name}`;
-        webrtcSetStatus("Done.");
+        state.webrtc.__completed = true;
+        shareProgressSet(100, "Complete");
+        shareStatsTick(state.webrtc.recvExpect, state.webrtc.recvExpect);
+        webrtcSetStatus("Transfer complete.");
       }
     } catch (e){
       webrtcSetStatus(e.message || "Finalize failed.", true);
     }
 
     webrtcCloseSession();
+  }
+
+  function shareStatsReset(){
+    state.webrtc.__stats = {
+      startMs: performance.now(),
+      lastMs: performance.now(),
+      lastBytes: 0,
+      emaBps: 0,
+      cryptoText: "—"
+    };
+
+    if (ui.shareStatSpeed) ui.shareStatSpeed.textContent = "—";
+    if (ui.shareStatEta) ui.shareStatEta.textContent = "—";
+    if (ui.shareStatCrypto) ui.shareStatCrypto.textContent = "—";
+  }
+
+  function shareStatsSetCrypto(label, bytes, ms){
+    if (!ui.shareStatCrypto) return;
+    const sec = Math.max(0.001, ms / 1000);
+    const bps = bytes / sec;
+    ui.shareStatCrypto.textContent = `${label} ${fmtRate(bps)}`;
+    if (state.webrtc.__stats) state.webrtc.__stats.cryptoText = ui.shareStatCrypto.textContent;
+  }
+
+  function shareStatsTick(doneBytes, totalBytes){
+    if (!state.webrtc.__stats) shareStatsReset();
+
+    const st = state.webrtc.__stats;
+    const now = performance.now();
+    const dt = Math.max(0.001, (now - st.lastMs) / 1000);
+    const db = Math.max(0, doneBytes - st.lastBytes);
+
+    const inst = db / dt;
+
+    const alpha = 0.22;
+    st.emaBps = st.emaBps ? (st.emaBps * (1 - alpha) + inst * alpha) : inst;
+
+    st.lastMs = now;
+    st.lastBytes = doneBytes;
+
+    if (ui.shareStatSpeed) ui.shareStatSpeed.textContent = fmtRate(st.emaBps);
+
+    if (ui.shareStatEta){
+      const remaining = Math.max(0, (totalBytes || 0) - doneBytes);
+      const eta = st.emaBps > 1 ? (remaining / st.emaBps) : 0;
+      ui.shareStatEta.textContent = fmtEta(eta);
+    }
   }
 
   async function webrtcSendSelectedItem(){
@@ -4143,9 +4879,6 @@ function debounce(fn, ms=250){
     const key = await deriveKeyPBKDF2(sessionPw, salt, iter);
     const iv = crypto.getRandomValues(new Uint8Array(12));
 
-    const cipher = await aesGcmEncrypt(key, iv, plainBytes);
-    sendBytes = cipher;
-
     const encMeta = {
       enc: "aesgcm-pbkdf2",
       salt: bytesToB64(salt),
@@ -4154,6 +4887,21 @@ function debounce(fn, ms=250){
       plainSize: plainBytes.byteLength
     };
 
+    // Start stats first so we don't wipe the crypto measurement after setting it
+    ui.btnShareSendNow.disabled = true;
+    state.webrtc.__completed = false;
+    shareStatsReset();
+
+    shareProgressSet(0, "Encrypting");
+    webrtcSetStatus(`Encrypting ${it.name || "file"}…`);
+
+    const t0 = performance.now();
+    const cipher = await aesGcmEncrypt(key, iv, plainBytes);
+    const t1 = performance.now();
+
+    sendBytes = cipher;
+    shareStatsSetCrypto("Enc", plainBytes.byteLength, (t1 - t0));
+
     const meta = {
       t: "meta",
       name: it.name || "file.bin",
@@ -4161,10 +4909,6 @@ function debounce(fn, ms=250){
       size: sendBytes.byteLength,
       ...encMeta
     };
-
-    ui.btnShareSendNow.disabled = true;
-    shareProgressSet(0, "Sending");
-    webrtcSetStatus(`Sending ${meta.name} (${humanSize(meta.size)})…`);
 
     // flow control
     const dc = state.webrtc.dc;
@@ -4193,11 +4937,13 @@ function debounce(fn, ms=250){
       const pct = Math.min(100, Math.floor(((off + slice.byteLength) / sendBytes.byteLength) * 100));
       shareProgressSet(pct, "Sending");
       webrtcSetStatus(`Sending… ${pct}%`);
+      shareStatsTick(off + slice.byteLength, sendBytes.byteLength);
     }
 
     dc.send(JSON.stringify({ t:"done" }));
     shareProgressSet(100, "Complete");
-    webrtcSetStatus("Sent.");
+    state.webrtc.__completed = true;
+    webrtcSetStatus("Transfer complete.");
     toast("Transfer complete");
     ui.btnShareSendNow.disabled = false;
   }
@@ -4368,15 +5114,47 @@ function debounce(fn, ms=250){
     ui.btnShareCopyAnswerLink.onclick = () => copyTextToClipboard(ui.shareAnswerLink.value);
 
     ui.btnShareAcceptAnswer.onclick = async () => {
-      try{
-        const pc = state.webrtc.pc;
-        if (!pc) throw new Error("Create an offer first.");
+      const pc = state.webrtc.pc;
+      if (!pc){
+        webrtcSetStatus("Create an offer first.", true);
+        return;
+      }
 
+      // If an answer is already applied, do nothing (prevents false errors)
+      try{
+        if (pc.remoteDescription && pc.remoteDescription.type === "answer"){
+          webrtcSetStatus("Reply already applied. Waiting for connection…");
+          shareConnSet("connecting");
+
+          state.webrtc.__autoSent = false;
+          if (state.webrtc.role === "send") vvAutoSendWhenReady();
+          return;
+        }
+      } catch {}
+
+      try{
         const ans = decodeSignal(ui.shareAnswerIn.value);
         await pc.setRemoteDescription(ans);
 
-        webrtcSetStatus("Answer applied. Waiting for connection…");
+        webrtcSetStatus("Answer applied. Connecting…");
+        shareConnSet("connecting");
+
+        // Auto send once the secure channel opens.
+        state.webrtc.__autoSent = false;
+
+        if (state.webrtc.role === "send"){
+          vvAutoSendWhenReady();
+        }
       } catch (e){
+        // If we *actually* already applied an answer, treat this as harmless browser noise.
+        try{
+          if (pc.remoteDescription && pc.remoteDescription.type === "answer"){
+            webrtcSetStatus("Reply already applied. Waiting for connection…");
+            shareConnSet("connecting");
+            return;
+          }
+        } catch {}
+
         webrtcSetStatus(e.message || "Failed to accept answer", true);
       }
     };
@@ -4523,10 +5301,15 @@ function debounce(fn, ms=250){
     width: min(460px, calc(100vw - 28px));
     border-radius: 22px;
     border: 1px solid rgba(255,255,255,.12);
-    background: rgba(10,12,22,.94);
+
+    /* Glass look */
+    background: rgba(10,12,22,.78);
     box-shadow: var(--shadow);
     overflow:hidden;
-    backdrop-filter: blur(12px) saturate(140%);
+
+    backdrop-filter: blur(3.5px) saturate(140%);
+    -webkit-backdrop-filter: blur(3.5px) saturate(140%);
+
     transition: all 0.35s ease;
   }
 
@@ -4655,6 +5438,40 @@ function debounce(fn, ms=250){
   /* Keep the tour usable on very small screens */
   @media (max-width: 560px){
     .onCardHead .h{ font-size: 15px; }
+  }
+
+  /* Direct Share stats row */
+  .shareStatsRow{
+    margin-top:10px;
+    display:flex;
+    gap:10px;
+    align-items:flex-end;
+    justify-content:space-between;
+  }
+
+  .shareStat{
+    flex:1;
+    min-width:0;
+    padding:8px 10px;
+    border-radius: 14px;
+    border:1px solid rgba(255,255,255,.08);
+    background: rgba(7,9,18,.28);
+  }
+
+  .shareStat .k{
+    font-size:11px;
+    letter-spacing:.14em;
+    color: rgba(154,166,207,.88);
+  }
+
+  .shareStat .v{
+    margin-top:3px;
+    font-size:13px;
+    font-weight:850;
+    color: rgba(238,242,255,.95);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
 </style>
 
