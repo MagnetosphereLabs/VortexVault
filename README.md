@@ -15,11 +15,8 @@ Unlock your vault locally, manage files like in a file explorer. Rename or delet
 ### In-vault encrypted notes
 <img src="VortexVaultSecureNote.png" width="720" />
 
-### Direct Share Receive (P2P, end-to-end encrypted)
-<img src="/VortexVaultReceive.png" width="720" />
-
-### Direct Share Send (P2P, end-to-end encrypted)
-<img src="/VortexVaultSend.png" width="720" />
+### Direct Share Send & Receive (Simple share links, P2P, dual end-to-end encryption)
+<img src="/DirectShareV1.1.png" width="720" />
 
 ### Media previews (images / video / PDF / audio)
 <img src="/VortexVaultPDFDocs.png" width="720" />
