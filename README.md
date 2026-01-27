@@ -12,7 +12,7 @@ Unlock your vault locally, manage files like in a file explorer. Rename or delet
 ### File Browser UI
 <img src="/VortexVaultMainUI.png" alt="Vortex Vault" width="720">
 
-### In-vault encrypted notes
+### In-vault encrypted text notes
 <img src="VortexVaultSecureNote.png" width="720" />
 
 ### Direct Share Send & Receive (Simple share links, P2P, dual end-to-end encryption)
