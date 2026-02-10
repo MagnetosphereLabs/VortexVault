@@ -221,8 +221,21 @@
       flex:1;
       min-height:0;
       display:grid;
-      grid-template-columns: 1fr 420px;
+      grid-template-columns: minmax(340px, 1fr) 10px clamp(300px, var(--previewPaneWidth, 420px), 65vw);
       background: rgba(6,8,14,.58);
+    }
+
+    .paneDivider{
+      cursor: col-resize;
+      background: rgba(255,255,255,.05);
+      border-left:1px solid rgba(255,255,255,.10);
+      border-right:1px solid rgba(255,255,255,.10);
+      transition: background .14s ease;
+      touch-action:none;
+    }
+    .paneDivider:hover,
+    .paneDivider.dragging{
+      background: rgba(93,168,255,.26);
     }
 
     .pane{
@@ -767,6 +780,7 @@
         grid-template-columns: 1fr;
         grid-template-rows: 1fr min(42vh, 420px);
       }
+      .paneDivider{ display:none; }
       header{
         align-items:flex-start;
       }
@@ -1079,7 +1093,7 @@
         </div>
       </header>
 
-      <div class="main">
+      <div class="main" id="mainSplit">
         <!-- Explorer Pane -->
         <div class="pane">
           <div class="paneHead">
@@ -1155,6 +1169,15 @@
             </table>
           </div>
         </div>
+
+        <div
+          class="paneDivider"
+          id="paneDivider"
+          role="separator"
+          aria-label="Resize preview pane"
+          aria-orientation="vertical"
+          tabindex="0"
+        ></div>
 
         <!-- Preview Pane -->
         <div class="pane previewPane" id="previewPane">
@@ -1535,6 +1558,9 @@
     table: $("table"),
     tbody: $("tbody"),
     tableWrap: $("tableWrap"),
+
+    mainSplit: $("mainSplit"),
+    paneDivider: $("paneDivider"),
 
     previewPane: $("previewPane"),
     previewSub: $("previewSub"),
@@ -2399,8 +2425,8 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
   function renderHeaderMeta(){
     const on = state.unlocked;
     ui.statusDot.className = "dot" + (on ? " ok" : "");
-    ui.statusLabel.textContent = on ? "Vault file loaded" : "Open a vault file to continue";
-    ui.subtitle.textContent = on ? "Unlocked" : "Locked";
+    ui.statusLabel.textContent = on ? "Vault Loaded" : "Not Loaded";
+    ui.subtitle.textContent = on ? " " : " ";
 
     ui.btnSave.disabled = !on;
     ui.btnUp.disabled = !on || !state.currentFolderId;
@@ -2430,6 +2456,69 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       return;
     }
     ui.pathSub.textContent = "";
+  }
+
+  function initPaneResizer(){
+    if (!ui.mainSplit || !ui.paneDivider) return;
+
+    const MIN_PREVIEW = 300;
+    const MAX_RATIO = 0.65;
+
+    const clampPreview = (px, totalWidth) => {
+      const max = Math.max(MIN_PREVIEW, Math.floor(totalWidth * MAX_RATIO));
+      return Math.max(MIN_PREVIEW, Math.min(max, px));
+    };
+
+    const setPreviewWidth = (px) => {
+      const rect = ui.mainSplit.getBoundingClientRect();
+      const width = clampPreview(px, rect.width);
+      ui.mainSplit.style.setProperty("--previewPaneWidth", `${width}px`);
+    };
+
+    const updateFromClientX = (clientX) => {
+      const rect = ui.mainSplit.getBoundingClientRect();
+      const previewWidth = rect.right - clientX;
+      setPreviewWidth(previewWidth);
+    };
+
+    ui.paneDivider.addEventListener("pointerdown", (e) => {
+      if (window.matchMedia("(max-width: 980px)").matches) return;
+      e.preventDefault();
+      ui.paneDivider.classList.add("dragging");
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+      ui.paneDivider.setPointerCapture(e.pointerId);
+    });
+
+    ui.paneDivider.addEventListener("pointermove", (e) => {
+      if (!ui.paneDivider.classList.contains("dragging")) return;
+      updateFromClientX(e.clientX);
+    });
+
+    ui.paneDivider.addEventListener("pointerup", (e) => {
+      ui.paneDivider.classList.remove("dragging");
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      if (ui.paneDivider.hasPointerCapture(e.pointerId)){
+        ui.paneDivider.releasePointerCapture(e.pointerId);
+      }
+    });
+
+    ui.paneDivider.addEventListener("keydown", (e) => {
+      if (window.matchMedia("(max-width: 980px)").matches) return;
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      e.preventDefault();
+      const current = parseInt(getComputedStyle(ui.mainSplit).getPropertyValue("--previewPaneWidth"), 10) || 420;
+      const delta = e.key === "ArrowLeft" ? 24 : -24;
+      setPreviewWidth(current + delta);
+    });
+
+    window.addEventListener("resize", () => {
+      const current = parseInt(getComputedStyle(ui.mainSplit).getPropertyValue("--previewPaneWidth"), 10) || 420;
+      setPreviewWidth(current);
+    });
+
+    setPreviewWidth(420);
   }
 
   function renderTable(){
@@ -3478,7 +3567,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     state.prompt.targetId = null;
 
     ui.promptTitle.textContent = "New folder";
-    ui.promptSub.textContent = "Folders help you organize the vault.";
+    ui.promptSub.textContent = "Folders help you organize your vault.";
     ui.promptLabel.textContent = "Folder name";
     ui.promptValue.value = uniqueNameInFolder("Folder");
     openOverlay("ovPrompt", ui.promptValue);
@@ -3562,7 +3651,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
 
     const ok = confirm(it.kind === "folder"
       ? "Delete this folder? Items inside will be moved to Root."
-      : "Delete this item from the vault?");
+      : "Delete this item from your vault?");
     if (!ok) return;
 
     if (state.mode === "v2"){
@@ -5278,7 +5367,7 @@ function debounce(fn, ms=250){
     }
   });
 
-  enableDnD();
+  initPaneResizer();
 
   if (!window.crypto || !crypto.subtle){
     toast("WebCrypto unavailable in this browser. Use a modern browser.", true);
@@ -5517,7 +5606,7 @@ function debounce(fn, ms=250){
       {
         title: "Welcome to Vortex Vault",
         body: `
-          For users requiring the highest level of protection against advanced threats, Vortex Vault is recommended for use on an air-gapped system or within a secured intranet environment. All data is continuously protected using AES-256-GCM encryption via the WebCrypto API while at rest. Decryption occurs only when you explicitly unlock your vault, at which point decrypted files are loaded temporarily into memory solely for active use. Decrypted data is never written to disk unless you intentionally export a file to your device’s downloads directory. This architecture ensures that Vortex Vault maintains an exceptionally high security posture.
+          All data is continuously protected using AES-256-GCM encryption via WebCrypto while at rest. Decryption occurs only when you explicitly unlock your vault, at which point decrypted files are loaded temporarily into memory solely for active use. Decrypted data is never written to disk unless you intentionally export a file to your device’s downloads directory.
 
           When you click <b>Save &amp; log out</b>, an encrypted vortex.vault file is downloaded, and the active session is fully cleared.
 
