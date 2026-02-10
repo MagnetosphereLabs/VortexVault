@@ -9,8 +9,8 @@ Everything encrypts/decrypts locally in your browser using modern **WebCrypto (A
 Unlock your vault locally, manage files like in a file explorer. Rename or delete folders or files in your vault quickly and easily. View notes, images, videos, documents, and even audio all inside Vortex Vault. Vortex supports all common file types (from `.zip` to `.wav`). Pressing **Save & log out** downloads your encrypted vault and clears the active browser session.
 
 
-### File Browser UI
-<img src="/VortexVaultMainUI.png" alt="Vortex Vault" width="720">
+### File Browser v1.2
+<img src="/V1.2.gif" alt="Vortex Vault" width="720">
 
 ### In-vault encrypted text notes
 <img src="VortexVaultSecureNote.png" width="720" />
