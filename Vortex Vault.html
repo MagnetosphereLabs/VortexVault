@@ -2151,16 +2151,40 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
   /* ---------- video best-effort hash change ---------- */
   async function maybePadVideoBytes(file, u8){
     const mime = String(file.type || "").toLowerCase();
-    const ext = extOf(file.name);
+    const ext  = extOf(file.name);
 
-    const okByMime = SAFE_TRAILING_PAD_VIDEO_MIME.has(mime);
-    const okByExt = SAFE_TRAILING_PAD_VIDEO_EXT.has(ext);
-
-    // Only pad when we have a high confidence the container ignores trailing bytes.
-    if (okByMime || okByExt){
-      return appendRandomPadding(u8, VIDEO_PAD_MIN, VIDEO_PAD_MAX);
+    // Only mutate MP4/MOV using a legal ISO-BMFF padding atom.
+    if (mime === "video/mp4" || mime === "video/quicktime" || ext === "mp4" || ext === "m4v" || ext === "mov"){
+      return appendIsoBmffFreeBox(u8, VIDEO_PAD_MIN, VIDEO_PAD_MAX);
     }
+
+    // Do NOT touch WebM/OGG (EBML Void is non-trivial and trailing junk breaks some demuxers)
     return u8;
+  }
+
+  function appendIsoBmffFreeBox(u8, minLen=24, maxLen=80){
+    // ISO-BMFF box = [uint32 size][4-char type][payload]
+    // type "free" is explicitly allowed padding.
+
+    const span = Math.max(0, maxLen - minLen);
+    const payloadLen = minLen + Math.floor(Math.random() * (span + 1));
+
+    // total box size = 8-byte header + payload
+    const boxSize = 8 + payloadLen;
+
+    const out = new Uint8Array(u8.byteLength + boxSize);
+    out.set(u8, 0);
+
+    const dv = new DataView(out.buffer);
+    dv.setUint32(u8.byteLength + 0, boxSize, false); // big-endian
+    out[u8.byteLength + 4] = 0x66; // 'f'
+    out[u8.byteLength + 5] = 0x72; // 'r'
+    out[u8.byteLength + 6] = 0x65; // 'e'
+    out[u8.byteLength + 7] = 0x65; // 'e'
+
+    crypto.getRandomValues(out.subarray(u8.byteLength + 8));
+
+    return out;
   }
 
   /* ---------- data model helpers ---------- */
@@ -3233,7 +3257,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
             const buf = await f.arrayBuffer();
             let u8 = new Uint8Array(buf);
 
-            // Optionally append random trailing bytes for common video containers to reduce fingerprint stability.
+            // Append random trailing bytes for common video containers to reduce fingerprint stability.
             // Only done for formats likely to ignore trailing bytes.
             if (kind === "video"){
               u8 = await maybePadVideoBytes(f, u8);
@@ -4937,7 +4961,9 @@ function debounce(fn, ms=250){
       const pct = Math.min(100, Math.floor(((off + slice.byteLength) / sendBytes.byteLength) * 100));
       shareProgressSet(pct, "Sending");
       webrtcSetStatus(`Sending… ${pct}%`);
-      shareStatsTick(off + slice.byteLength, sendBytes.byteLength);
+      const queued = off + slice.byteLength;              // bytes we've handed to dc.send so far
+      const flushed = Math.max(0, queued - dc.bufferedAmount); // approx bytes that actually left JS buffer
+      shareStatsTick(flushed, sendBytes.byteLength);
     }
 
     dc.send(JSON.stringify({ t:"done" }));
