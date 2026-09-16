@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -8845,6 +8845,863 @@ function debounce(fn, ms=250){
     .sharePickSize{display:none}
     .sharePickIcon{width:30px;height:30px}
   }
+
+  /* ---------- Responsive hardening: phones, tablets, resize/orientation ---------- */
+  /*
+     This layer intentionally changes presentation only. Vault formats, crypto,
+     storage, Direct Share behavior, and data-model code remain untouched.
+  */
+
+  /* Dynamic mobile viewport support without breaking older 100% fallbacks. */
+  @supports (height: 100dvh){
+    html,body,.app{height:100dvh}
+    .shell{height:100dvh;max-height:100dvh}
+  }
+
+  /* Never let intrinsic SVG sizing blow up a compact status/control. */
+  .protectionBadge{
+    max-width:100%;
+    min-width:0;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+  .protectionBadge svg{
+    width:16px;
+    height:16px;
+    min-width:16px;
+    flex:0 0 16px;
+    display:block;
+  }
+  .sharePrivacy svg{
+    width:16px;
+    height:16px;
+    min-width:16px;
+    flex:0 0 16px;
+    display:block;
+  }
+
+  /* Dialogs must always remain reachable, even with the mobile keyboard or
+     a very short landscape viewport. */
+  .overlay{
+    box-sizing:border-box;
+    padding:
+      max(10px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      max(10px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+    overflow:auto;
+    overscroll-behavior:contain;
+  }
+  .overlay .modal{
+    max-height:calc(100dvh - 20px);
+    max-width:100%;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    margin:auto;
+  }
+  .modalHead,.modalFoot{flex:0 0 auto}
+  .modalHead>div:first-child{min-width:0}
+  .modalHead .h,.modalHead .s{overflow-wrap:anywhere}
+  .modalBody{
+    min-height:0;
+    overflow:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  .modalFoot{
+    padding-bottom:max(12px, env(safe-area-inset-bottom));
+  }
+  .menu{
+    max-width:calc(100vw - 20px);
+    max-height:min(60dvh,320px);
+    overflow:auto;
+    overscroll-behavior:contain;
+  }
+
+  /* Media viewer is a true three-row viewport: controls, bounded media stage,
+     counter. Tall portrait photos can never extend below the screen. */
+  .mediaLightbox.on{
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-columns:minmax(0,1fr);
+    width:100%;
+    height:100%;
+    height:100dvh;
+    max-height:100dvh;
+    overflow:hidden;
+    padding:
+      max(10px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      max(10px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+    box-sizing:border-box;
+  }
+  .mediaLbTop{
+    position:relative;
+    inset:auto;
+    grid-row:1;
+    width:100%;
+    min-width:0;
+    padding:4px 4px 10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .mediaLbTitle{
+    min-width:0;
+    flex:1 1 auto;
+  }
+  .mediaLbTitle .h{
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .mediaLbTitle .s{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .mediaLbActions{
+    flex:0 1 auto;
+    min-width:0;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    gap:6px;
+  }
+  .mediaStage{
+    position:relative;
+    grid-row:2;
+    width:100%;
+    min-width:0;
+    min-height:0;
+    overflow:hidden;
+    padding:8px 58px;
+    display:grid;
+    place-items:center;
+  }
+  .mediaStage img,.mediaStage video{
+    display:block;
+    width:auto;
+    height:auto;
+    max-width:100%;
+    max-height:100%;
+    min-width:0;
+    min-height:0;
+    object-fit:contain;
+  }
+  .mediaLbCounter{
+    position:relative;
+    inset:auto;
+    grid-row:3;
+    justify-self:center;
+    transform:none;
+    margin-top:8px;
+    margin-bottom:2px;
+    white-space:nowrap;
+  }
+  .mediaNav{
+    top:50%;
+    margin-top:0;
+  }
+
+  /* Ordinary file previews should fit their pane instead of forcing giant
+     portrait media / embedded PDFs beyond the visible area. */
+  .previewMedia img,.previewMedia video{
+    max-width:100%;
+    max-height:min(58dvh,720px);
+    object-fit:contain;
+    margin-inline:auto;
+  }
+  .previewMedia iframe{
+    max-width:100%;
+    height:min(520px,58dvh)!important;
+  }
+  .previewMedia[style*="height"]{
+    height:min(520px,58dvh)!important;
+  }
+  .previewTools>*{max-width:100%}
+  .previewTools select{min-width:0}
+
+  /* Onboarding is also a dialog. Keep the card inside any aspect ratio and let
+     its body scroll rather than calculating an impossible off-screen position. */
+  .onCard{
+    max-height:calc(100dvh - 28px);
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+  }
+  .onCardHead,.onCardFoot{flex:0 0 auto}
+  .onCardBody{
+    min-height:0;
+    overflow:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* Common shrink/overflow guards. */
+  .featureHub,.featureInner,.featureHead,.featureHeadMain,
+  .settingsGrid,.settingsCard,.shareWorkspaceGrid,.sharePicker,.shareSummary,
+  .secureHub,.secureRail,.secureDetail,.secretPage,.secretCard,
+  .libraryTopRow,.albumStrip,.mediaGrid{
+    min-width:0;
+  }
+  .featureSub,.settingsCard p,.warningPanel,.sharePrivacy,
+  .secureEmptyCard p,.secretNotesText{
+    overflow-wrap:anywhere;
+  }
+  .segmented{
+    max-width:100%;
+    overflow-x:auto;
+    overscroll-behavior-inline:contain;
+    scrollbar-width:none;
+  }
+  .segmented::-webkit-scrollbar{display:none}
+  .segBtn{flex:0 0 auto}
+
+  /* Pane chrome must never be flex-shrunk into clipped controls. */
+  .paneHead,.metaStrip{flex:0 0 auto}
+
+  /* Tablets and compact windows. Restore the original stacked explorer intent;
+     the later premium .main rule otherwise keeps three desktop columns alive
+     between 761px and 980px. */
+  @media (max-width:1000px){
+    .main{
+      grid-template-columns:minmax(0,1fr);
+      grid-template-rows:minmax(0,1fr) minmax(180px,min(42dvh,420px));
+    }
+    .paneDivider{display:none}
+    .sharePickerList{
+      min-height:0;
+      max-height:min(46dvh,520px);
+    }
+    .settingsGrid,.shareWorkspaceGrid{min-width:0}
+  }
+
+  @media (max-width:900px){
+    .controls .pill{display:none}
+  }
+
+  /* Phone / narrow tablet presentation. */
+  @media (max-width:760px){
+    header{
+      min-height:0;
+      padding:
+        max(8px, env(safe-area-inset-top))
+        max(10px, env(safe-area-inset-right))
+        8px
+        max(10px, env(safe-area-inset-left));
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+    }
+    .brand{
+      flex:1 1 auto;
+      min-width:0;
+    }
+    .brandText{min-width:0}
+    .brandText .h{
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* Header actions are real text buttons in the markup, so don't force them
+       into 36px icon boxes. */
+    .controls{
+      width:100%;
+      min-width:0;
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:6px;
+    }
+    .controls .pill{display:none}
+    .controls .btn{
+      width:100%;
+      min-width:0;
+      min-height:34px;
+      padding:7px 6px;
+      justify-content:center;
+      font-size:10.5px;
+      line-height:1.15;
+      white-space:normal;
+      text-align:center;
+      overflow-wrap:anywhere;
+    }
+
+    /* Six workspaces remain visible at once and don't overflow oddly. */
+    .workspaceBar{
+      height:44px;
+      min-height:44px;
+      overflow:hidden;
+      padding:
+        5px max(6px, env(safe-area-inset-right))
+        5px max(6px, env(safe-area-inset-left));
+    }
+    .workspaceTabs{
+      width:100%;
+      min-width:0;
+      display:grid;
+      grid-template-columns:repeat(6,minmax(0,1fr));
+      gap:3px;
+    }
+    .workspaceTab{
+      width:100%;
+      min-width:0;
+      height:34px;
+      padding:0;
+      justify-content:center;
+      flex:none;
+    }
+    .workspaceTabIcon{
+      width:17px;
+      height:17px;
+      flex:0 0 17px;
+    }
+    .workspaceTabIcon svg{width:17px;height:17px}
+    .workspaceCount{display:none}
+
+    /* Explorer header becomes deliberate rows instead of colliding flex items. */
+    .main{
+      min-width:0;
+      grid-template-columns:minmax(0,1fr);
+      grid-template-rows:minmax(0,1fr) minmax(150px,36dvh);
+    }
+    .main>.pane:first-child{
+      overflow:visible;
+      position:relative;
+      z-index:2;
+    }
+    .previewPane{position:relative;z-index:1}
+    .paneHead{
+      min-width:0;
+      flex-wrap:wrap;
+      align-items:stretch;
+      padding:8px 10px;
+      gap:7px;
+    }
+    .paneTitle,
+    .paneTitle[style]{
+      min-width:0!important;
+      width:100%;
+      flex:1 1 100%;
+    }
+    .paneTitle .h,.paneTitle .s{
+      max-width:100%;
+    }
+    .crumbs{
+      max-width:100%;
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      overscroll-behavior-inline:contain;
+      scrollbar-width:none;
+      padding-bottom:1px;
+    }
+    .crumbs::-webkit-scrollbar{display:none}
+    .crumb{flex:0 0 auto;max-width:min(58vw,260px)}
+    .headTools{
+      width:100%;
+      min-width:0;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+      gap:6px;
+    }
+    .headTools .search{
+      grid-column:1/-1;
+      width:100%;
+      max-width:none;
+      min-width:0;
+      flex:none;
+    }
+    .headTools>.btn,
+    .headTools>.menuWrap{
+      width:100%;
+      min-width:0;
+    }
+    .headTools>.btn,
+    .headTools>.menuWrap>.btn{
+      width:100%;
+      min-width:0;
+      justify-content:center;
+      padding-inline:8px;
+      white-space:normal;
+      text-align:center;
+    }
+    .menuWrap{justify-self:stretch}
+    .menu{right:0}
+
+    /* Metadata stays readable instead of becoming one oversized wrapping row. */
+    .metaStrip{
+      min-width:0;
+      flex-direction:column;
+      align-items:stretch;
+      gap:8px;
+      padding:8px 10px;
+    }
+    .metaLeft .title,.metaLeft .sub{max-width:100%}
+    .metaStats{
+      width:100%;
+      min-width:0;
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:6px;
+    }
+    .stat{
+      min-width:0;
+      text-align:left;
+      padding:6px 7px;
+      border-radius:9px;
+      background:rgba(255,255,255,.018);
+      border:1px solid rgba(255,255,255,.045);
+    }
+    .stat .k{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      font-size:8.5px;
+    }
+    .stat .v{
+      min-width:0;
+      margin-left:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      font-size:10px;
+    }
+
+    /* Preserve all file columns via intentional horizontal scrolling. */
+    .tableWrap{
+      min-width:0;
+      overscroll-behavior:contain;
+      -webkit-overflow-scrolling:touch;
+    }
+    .tableWrap table{min-width:570px}
+
+    .paneBody{padding:9px}
+    .previewCard{padding:10px}
+    .previewTools{
+      justify-content:stretch;
+      align-items:stretch;
+    }
+    .previewTools .btn{
+      flex:1 1 120px;
+      justify-content:center;
+      min-width:0;
+      white-space:normal;
+      text-align:center;
+    }
+    .previewTools select{
+      width:100%;
+      flex:1 1 100%;
+    }
+    .editor{min-height:120px;max-height:38dvh}
+
+    /* Secure workspaces stay independently scrollable. */
+    .secureHub{
+      min-width:0;
+      grid-template-columns:minmax(0,1fr);
+      grid-template-rows:minmax(135px,31dvh) minmax(0,1fr);
+    }
+    .secureRail,.secureDetail{min-width:0;min-height:0}
+    .secureList{-webkit-overflow-scrolling:touch}
+    .secureDetail{
+      padding:12px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .secretPageHead{gap:12px;margin-bottom:12px}
+    .secretActions{width:100%}
+    .secretActions .btn{
+      flex:1 1 110px;
+      justify-content:center;
+    }
+    .secretRow{
+      min-width:0;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:8px;
+      padding:11px 12px;
+    }
+    .secretLabel{grid-column:1/-1}
+    .secretValue{
+      min-width:0;
+      white-space:normal;
+      overflow-wrap:anywhere;
+    }
+    .secretRowActions{min-width:0}
+    .totpHero{padding:16px}
+    .totpHeroTop{gap:10px;flex-wrap:wrap}
+    .totpCode{
+      max-width:100%;
+      font-size:clamp(27px,8.5vw,34px);
+      gap:7px;
+      letter-spacing:.055em;
+    }
+
+    /* Feature screens. */
+    .featureInner{
+      width:100%;
+      padding:12px 10px max(20px,env(safe-area-inset-bottom));
+    }
+    .featureHead{
+      margin-bottom:15px;
+      gap:12px;
+    }
+    .featureTitle{font-size:clamp(23px,8vw,32px)}
+    .featureSub{font-size:12px}
+    .featureActions{
+      width:100%;
+      min-width:0;
+    }
+    .featureActions>.btn{
+      flex:1 1 120px;
+      justify-content:center;
+    }
+    .libraryTopRow{
+      align-items:stretch;
+      gap:8px;
+    }
+    .libraryTopRow>.segmented{width:100%}
+    .libraryTopRow>.segmented .segBtn{flex:1 0 auto}
+    .albumActiveBar{
+      min-width:0;
+      flex-wrap:wrap;
+    }
+    .albumActiveBar .spacer{display:none}
+    .albumActiveBar .name{flex:1 1 140px}
+    .albumActiveBar .btn{margin-left:auto}
+    .mediaGrid{
+      grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+    .albumStrip{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    /* Settings & Cascade. */
+    .settingsCard{min-width:0;padding:14px}
+    .cascadeHero{padding:13px}
+    .cascadeReadout{
+      min-width:0;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    .cascadeNumber{
+      font-size:32px;
+      max-width:100%;
+    }
+    .cascadeNumber small{
+      display:inline-block;
+      margin-left:5px;
+    }
+    .cascadeDots{gap:4px}
+    .cascadeDot{min-width:0;width:auto;flex:1 1 0}
+    .securityLine{
+      grid-template-columns:32px minmax(0,1fr);
+      padding:9px;
+    }
+    .securityLineIco{width:32px;height:32px}
+    .cascadeComposer{
+      max-height:none;
+      overflow:visible;
+      padding-right:0;
+    }
+
+    /* Share picker & summary. */
+    .sharePickerHead{
+      flex-wrap:wrap;
+      align-items:flex-start;
+      padding:11px 12px;
+    }
+    .sharePickerList{
+      min-height:0;
+      max-height:min(43dvh,430px);
+    }
+    .shareSummary{padding:14px}
+    .shareSummaryStats{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .shareSummaryStat{min-width:0}
+    .shareSummaryStat .v{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    /* Viewer controls can wrap, but the stage automatically receives whatever
+       height remains. */
+    .mediaLbTop{
+      align-items:flex-start;
+      flex-wrap:wrap;
+      padding:2px 2px 7px;
+    }
+    .mediaLbTitle{
+      flex:1 1 150px;
+      padding:3px 2px;
+    }
+    .mediaLbActions{
+      flex:1 1 100%;
+      width:100%;
+      justify-content:stretch;
+    }
+    .mediaLbActions .btn{
+      flex:1 1 90px;
+      justify-content:center;
+      min-width:0;
+      padding:7px 6px;
+      font-size:10.5px;
+      white-space:normal;
+      text-align:center;
+    }
+    .mediaLbActions .iconBtn{flex:0 0 36px}
+    .mediaStage{padding:5px 46px}
+    .mediaNav{
+      top:calc(50% + 20px);
+      bottom:auto;
+      transform:translateY(-50%);
+      width:38px;
+      height:46px;
+    }
+    .mediaNav:hover{transform:translateY(-50%) scale(1.04)}
+    .mediaNav.prev{left:max(7px,env(safe-area-inset-left))}
+    .mediaNav.next{right:max(7px,env(safe-area-inset-right))}
+    .mediaLbCounter{
+      bottom:auto;
+      margin-top:6px;
+      margin-bottom:0;
+    }
+
+    /* Toasts don't cover the entire width or fall under phone home indicators. */
+    .toasts{
+      left:max(8px,env(safe-area-inset-left));
+      right:max(8px,env(safe-area-inset-right));
+      bottom:max(8px,env(safe-area-inset-bottom));
+      align-items:flex-end;
+    }
+    .toast{
+      width:auto;
+      max-width:min(100%,420px);
+      border-radius:12px;
+    }
+
+    .qrStage{
+      max-height:52dvh;
+      min-height:0;
+    }
+  }
+
+  /* Very narrow phones: favor usability over dense one-line layouts. */
+  @media (max-width:520px){
+    .controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .controls .btn{font-size:11px;min-height:36px}
+    .brandText .h{font-size:11px}
+    .mark.vvLogoMark{width:36px;height:36px}
+    .workspaceBar{height:42px;min-height:42px}
+    .workspaceTab{height:32px}
+    .workspaceTabIcon,.workspaceTabIcon svg{width:16px;height:16px}
+
+    .metaStats{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .mediaGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+    .albumStrip{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+    .albumCard{min-height:104px;padding:12px}
+    .albumIcon{margin-bottom:11px}
+
+    .main{grid-template-rows:minmax(0,1fr) minmax(100px,24dvh)}
+    .secureHub{grid-template-rows:minmax(128px,29dvh) minmax(0,1fr)}
+    .secureRailHead{padding:11px 10px 8px}
+    .hubSearch{margin:0 8px 7px}
+    .secureList{padding-inline:5px}
+    .secureEmptyCard{
+      padding:22px 14px;
+      border-radius:17px;
+    }
+    .secureEmptyIcon{
+      width:48px;
+      height:48px;
+      border-radius:15px;
+    }
+    .secureEmptyIcon svg{width:23px;height:23px}
+    .secretPageTitle{font-size:22px}
+    .totpCode{font-size:clamp(25px,8vw,31px)}
+
+    .sharePickRow{
+      grid-template-columns:22px 30px minmax(0,1fr);
+      gap:7px;
+      padding:7px;
+    }
+    .sharePickSize{display:none}
+    .shareSummaryStats{grid-template-columns:1fr 1fr}
+
+    .mediaLbActions .btn{flex-basis:calc(50% - 22px)}
+    .mediaStage{padding-inline:38px}
+    .mediaNav{width:34px;height:42px}
+  }
+
+  /* Extremely narrow / embedded panes. */
+  @media (max-width:360px){
+    .featureInner{padding-inline:7px}
+    .workspaceBar{padding-inline:3px}
+    .workspaceTabs{gap:1px}
+    .workspaceTab{border-radius:8px}
+    .metaStrip,.paneHead{padding-inline:7px}
+    .albumStrip{grid-template-columns:1fr 1fr}
+    .mediaLbActions{gap:4px}
+    .mediaLbActions .btn{font-size:10px;padding-inline:4px}
+    .mediaStage{padding-inline:34px}
+    .onCard{width:calc(100vw - 16px)}
+  }
+
+  /* Short landscape and square-ish windows need a different density strategy.
+     Keep every control available while preventing headers from consuming the
+     entire viewport. */
+  @media (max-height:600px) and (max-width:980px){
+    header{
+      min-height:0;
+      padding-top:max(5px,env(safe-area-inset-top));
+      padding-bottom:5px;
+    }
+    .workspaceBar{height:39px;min-height:39px;padding-block:3px}
+    .workspaceTab{height:31px}
+    .main{
+      grid-template-rows:minmax(0,1fr) minmax(80px,22dvh);
+    }
+    .paneHead{padding-block:6px}
+    .metaStrip{padding-block:5px}
+    .paneBody{padding:7px}
+    .previewCard{padding:8px}
+    .secureHub{
+      grid-template-rows:minmax(105px,35%) minmax(0,1fr);
+    }
+    .secureRailHead{padding-top:9px;padding-bottom:7px}
+    .secureDetail{padding:9px}
+    .featureInner{padding-top:9px}
+    .featureHead{margin-bottom:10px}
+    .featureSub{line-height:1.35}
+    .sharePickerList{max-height:36dvh}
+    .mediaLightbox.on{
+      padding-top:max(5px,env(safe-area-inset-top));
+      padding-bottom:max(5px,env(safe-area-inset-bottom));
+    }
+    .mediaLbTop{
+      flex-wrap:nowrap;
+      align-items:center;
+      gap:6px;
+    }
+    .mediaLbTitle{flex:1 1 auto;min-width:90px}
+    .mediaLbActions{
+      flex:0 1 auto;
+      width:auto;
+      flex-wrap:nowrap;
+      justify-content:flex-end;
+    }
+    .mediaLbActions .btn{
+      flex:0 1 auto;
+      min-height:30px;
+      padding:5px 7px;
+      font-size:9.5px;
+      white-space:nowrap;
+    }
+    .mediaLbActions .iconBtn{
+      width:32px;height:32px;flex-basis:32px;
+    }
+    .mediaStage{padding-top:2px;padding-bottom:2px}
+    .mediaLbCounter{margin-top:3px;padding-block:4px}
+    .overlay .modal{max-height:calc(100dvh - 20px)}
+    .editor{min-height:90px;max-height:30dvh}
+    .qrStage{max-height:43dvh}
+  }
+
+  /* Small landscape phones: keep header actions on one row where width allows,
+     saving precious vertical space. */
+  @media (orientation:landscape) and (max-height:560px) and (max-width:900px){
+    header{
+      flex-wrap:nowrap;
+      gap:7px;
+    }
+    .brand{
+      flex:0 1 170px;
+      min-width:105px;
+    }
+    .mark.vvLogoMark{width:34px;height:34px}
+    .brandText .h{font-size:10px}
+    .controls{
+      width:auto;
+      min-width:0;
+      flex:1 1 auto;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:4px;
+    }
+    .controls .btn{
+      min-height:31px;
+      padding:5px 4px;
+      font-size:9.5px;
+      white-space:nowrap;
+    }
+
+    .paneHead{
+      flex-wrap:nowrap;
+      align-items:center;
+    }
+    .paneTitle,
+    .paneTitle[style]{
+      width:auto;
+      flex:0 1 34%;
+      min-width:90px!important;
+    }
+    .headTools{
+      width:auto;
+      flex:1 1 auto;
+      grid-template-columns:minmax(100px,1fr) auto auto;
+      align-items:center;
+      gap:4px;
+    }
+    .headTools .search{
+      grid-column:auto;
+      min-width:100px;
+    }
+    .headTools>.btn,
+    .headTools>.menuWrap,
+    .headTools>.menuWrap>.btn{
+      width:auto;
+    }
+    .headTools>.btn,
+    .headTools>.menuWrap>.btn{
+      min-height:31px;
+      padding:5px 7px;
+      font-size:10px;
+      white-space:nowrap;
+    }
+
+    .metaStrip{
+      flex-direction:row;
+      align-items:center;
+      gap:8px;
+    }
+    .metaLeft{flex:1 1 auto;min-width:80px}
+    .metaStats{
+      width:auto;
+      flex:0 1 auto;
+      grid-template-columns:repeat(4,minmax(48px,1fr));
+      gap:4px;
+    }
+    .stat{padding:4px 5px}
+
+    .featureHead{
+      flex-direction:row;
+      align-items:flex-start;
+    }
+    .featureActions{
+      width:auto;
+      flex:0 1 auto;
+      justify-content:flex-end;
+    }
+  }
+
+  /* Square/near-square compact displays: avoid landscape assumptions while
+     keeping media and panes comfortably bounded. */
+  @media (min-aspect-ratio:4/5) and (max-aspect-ratio:5/4) and (max-width:900px){
+    .main{grid-template-rows:minmax(0,1fr) minmax(130px,31dvh)}
+    .mediaStage{padding-inline:44px}
+    .sharePickerList{max-height:39dvh}
+  }
+
 </style>
 
 <!-- Ultra: new-vault protection -->
