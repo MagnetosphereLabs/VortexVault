@@ -22,6 +22,8 @@ No account is required.
 No storage backend is required.
 Your encrypted vault can live on your computer, an external drive, removable media, or any storage provider you choose.
 
+Try it on almost any device: https://vortex.mglabs.dev (client loads there, vault decrypts locally)
+
 <br>
 
 [What is Vortex?](#what-is-vortex-vault) ·
