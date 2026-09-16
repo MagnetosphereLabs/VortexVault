@@ -1,387 +1,1003 @@
-<img src="/VortexVaultLogo.png" alt="Vortex Vault" width="200">
+<div align="center">
 
-**Vortex Vault** is an offline, client-side encrypted vault that stores an entire file system inside a single `vortex.vault` container — like a portable encrypted drive, but as one file.
+# ◈ VORTEX VAULT
 
-Everything encrypts/decrypts locally in your browser using modern **WebCrypto (AES-256-GCM)**. No accounts. No storage server. Just a vault you control.
+### A portable, local-first encrypted workspace.
 
-**Try it on almost any device:** https://vortex.mglabs.dev (client loads there, vault decrypts locally)
+**Files · Photos · Passwords · Authenticator · Direct Share**
 
-Unlock your vault locally, manage files like in a file explorer. Rename or delete folders or files in your vault quickly and easily. View notes, images, videos, documents, and even audio all inside Vortex Vault. Vortex supports all common file types (from `.zip` to `.wav`). Pressing **Save & log out** downloads your encrypted vault and clears the active browser session.
+<br>
 
+<img src="https://img.shields.io/badge/LOCAL--FIRST-5D8CFF?style=for-the-badge&labelColor=090D18" alt="Local First">
+<img src="https://img.shields.io/badge/OFFLINE-CAPABLE-34D8A3?style=for-the-badge&labelColor=090D18" alt="Offline Capable">
+<img src="https://img.shields.io/badge/AES--256--GCM-806DF7?style=for-the-badge&labelColor=090D18" alt="AES-256-GCM">
+<img src="https://img.shields.io/badge/CASCADE_LOCK-1%E2%80%937_PASSPHRASES-70B5FF?style=for-the-badge&labelColor=090D18" alt="Cascade Lock">
+<img src="https://img.shields.io/badge/SINGLE_HTML-PORTABLE-9B73FF?style=for-the-badge&labelColor=090D18" alt="Single HTML">
 
-### File Browser v1.2
-<img src="/V1.2.gif" alt="Vortex Vault" width="720">
+<br><br>
 
-### In-vault encrypted text notes
-<img src="VortexVaultSecureNote.png" width="720" />
+**Vortex Vault turns one portable `.vault` file into a private encrypted workspace you control.**
 
-### Direct Share Send & Receive (Simple share links, P2P, dual end-to-end encryption)
-<img src="/DirectShareV1.1.png" width="720" />
+No account is required.
+No storage backend is required.
+Your encrypted vault can live on your computer, an external drive, removable media, or any storage provider you choose.
 
-### Media previews (images / video / PDF / audio)
-<img src="/VortexVaultPDFDocs.png" width="720" />
+<br>
 
----
+[What is Vortex?](#what-is-vortex-vault) ·
+[How it works](#how-it-works) ·
+[Features](#features) ·
+[Security](#security-architecture) ·
+[Cascade Lock](#cascade-lock) ·
+[Direct Share](#direct-share) ·
+[Threat model](#threat-model)
 
-## Why Vortex Vault exists
-
-A lot of encryption tools are strong, but the workflow often breaks down when you want all of these at the same time:
-
-- strong encryption
-- **encrypted metadata** (not just file contents)
-- **authenticated encryption detects modification**
-- portable storage that works anywhere without installing an app
-- the ability to keep backups wherever you want
-- a clean, file-explorer style interface that doesn’t fight you
-- a way to really securely and easily share files around the world **without uploading them to a server** - requires an internet connection
-- we record absolutely zero logs or analytics about you or how you use Vortex Vault
-- the vault works fully offline and disconnected from the rest of the world
-- as long as your device has a modern web browser and ok hardware, the vault can be loaded from the html file.
-
-Vortex Vault is built to hit that sweet spot: simple enough for daily use, but serious enough for journalists, researchers, engineers, and teams who want strong security without needing a complicated stack.
+</div>
 
 ---
 
-## Start Guide
+## What is Vortex Vault?
 
-This is the safest and simplest way to use Vortex Vault.
+Vortex Vault is a **self-contained browser-based encrypted workspace** built around a simple idea:
 
-1. Download the `VortexVault.html` file from this repo, or load it from the official public link: https://vortex.mglabs.dev, or load it from your self-hosted source.
-2. Open the app:
-   - open the html file in a modern browser
-   - or visit the official public link to load it on almost any device anywhere
-3. Click **New vault** to make a new `vortex.vault` file or **Open Vault** to load an existing one.
-4. Use a strong password  
-   - minimum **12 characters**
-   - must include **uppercase, lowercase, numbers, and symbols**
-   - if the password is lost, the vault cannot be recovered.
-5. Add content:
-   - **Add Content** → Import files / Paste files or text / Make new folders / make new text notes 
-   - or drag-and-drop into the file list
-6. When done, click **Save & log out**
-   - your encrypted `vortex.vault` file downloads
-   - the active session is cleared
+> Your private data should be stored in a file that **you own, you move, and you control**.
 
-To reopen later: **Open vault** → select your `vortex.vault` file → enter password.
+Instead of placing your data into an online account or application database, Vortex stores protected content inside a portable encrypted `.vault` container.
 
----
+The application itself is delivered as a single HTML file and performs its cryptographic operations locally using the browser's native **Web Crypto API**.
 
-## What makes it different
+A vault can contain much more than ordinary files.
 
-### A vault is a file system inside a file
-A `vortex.vault` file isn’t just “encrypted files in a bundle.” It’s a structured container that holds:
+| Workspace         | Purpose                                                                    |
+| ----------------- | -------------------------------------------------------------------------- |
+| **Files**         | Folders, documents, notes, images, video, audio, PDFs, and arbitrary files |
+| **Library**       | Photo and video browsing with encrypted albums                             |
+| **Passwords**     | Encrypted login credentials and password generation                        |
+| **Authenticator** | Offline TOTP authentication codes                                          |
+| **Direct Share**  | Peer-to-peer encrypted file and folder transfers                           |
+| **Settings**      | Vault protection and Cascade Lock configuration                            |
 
-- folders
-- files (any binary format)
-- encrypted text notes editable inside the vault
-- previews for various media types
-- an encrypted index that describes the whole vault
-
-It behaves like a portable encrypted drive you carry as **one file**.
-
-### The metadata is encrypted too
-Some tools encrypt file contents but still leak file names, structure, and hints of what’s inside.
-
-In Vortex Vault:
-
-- the **vault index** (names, folder layout, types, timestamps, sizes) is encrypted
-- records are encrypted individually
-- tampering is detected automatically (AES-GCM integrity)
-
-If someone steals your `.vault`, they don’t get filenames, folder structure, or clues about what’s inside.
-
-### Offline-first, but still globally portable
-Vortex Vault is designed to be safest offline, but it stays flexible:
-
-- run locally from an HTML file on an offline machine
-- run on an air-gapped device
-- host it on a private intranet
-- or use the official public endpoint at **vortex.mglabs.dev** to access the interface from anywhere
-
-A `.vault` file is simply a file, so you can store it anywhere. On your local disk, USB drive, encrypted cloud storage, multiple publicly hosted backups, whatever you prefer. 
-
-### Plausible real-world uses
-
-- Investigative journalist crossing borders  
-  A reporter keeps source identities, meeting notes, and draft stories inside a `.vault` file that’s mirrored across a couple of commodity VPS hosts. They travel with a “clean” device and pull the vault down from whatever computer they can access, then decrypt it in a browser using either the hosted client or a saved local HTML copy. If a laptop is searched or a server is scraped, the attacker gets a single opaque file: no filenames, no folder structure, no hints about which sources exist. For extra safety, the reporter keeps a harmless outer vault and a deeper vault with a separate passphrase for the most sensitive material.
-
-- Safely documenting abuse or harassment  
-  Someone quietly collecting evidence (photos, screenshots, audio notes, incident timelines) stores it in a `.vault` file that sits in ordinary cloud storage and a second copy on a removable drive. The key detail is metadata secrecy: even if the file is discovered, there’s nothing to preview, nothing to sort through, and nothing that reveals what’s inside or how it’s organized. They can later recover it from any device that has a modern browser, without depending on a specific app installation.
-
-- Public-interest whistleblowing with staged disclosure  
-  A whistleblower preserves emails, PDFs, and logs in a `.vault` file and shares only the encrypted blob (for example via a neutral file host), while distributing the passphrase through a separate channel. They use nested vaults to control blast radius: an outer vault contains non-identifying context suitable for initial legal review, while inner vaults contain originals and identifying details behind different passwords and stronger key-derivation settings. If any single key is compromised or coerced, deeper layers can still remain protected.
-
-### Direct Share (Easy link based sharing system, peer-to-peer, encrypted, no file servers)
-Vortex Vault includes **Direct Share**: a practical way to transfer a file directly between devices without uploading it to a storage service.
-
-- **Peer-to-peer transfer over WebRTC DataChannels**
-- **No file hosting, no upload server, no storage backend**
-- Application-layer encryption **in addition to** WebRTC transport encryption
-- Receiver can either:
-  - **download the file to their device** (if they open the share link without a vault loaded), or
-  - **import directly into their vault** (if they already have a vault open)
-
-Direct Share is built to be as simple and usable as possible without any storage servers in between. To share a file you simply click on what you want to share and then press "Direct Share". From there it automatically generates a link. You simply send it to someone you know and trust through a secure platform, then they click your link, send you the link generated by their Vortex Vault, and you simply click that link they send back and the file transfer starts automatically, directly between your browsers securely across the internet. With absolutely no servers holding, or even getting a glimpse at, your transferred file.
+Everything belongs to the same encrypted portable workspace.
 
 ---
 
-## Key features
+## The design philosophy
 
-### Secure vault container
-- **AES-256-GCM** encryption (WebCrypto)
-- **PBKDF2-SHA256** key derivation with a 1,000,000 iteration count
-- Encrypted index + encrypted records
-- Every record uses a fresh random **12-byte IV**
-- The index is encrypted separately with its own IV
-- Integrity is built-in via AES-GCM authentication
+Vortex is built around four principles.
 
-### Real file-explorer workflow
-- Folders + nested organization
-- Breadcrumb navigation
-- Search for any of your files easily inside any folder
-- Drag-and-drop import
-- Rename / delete
-- Export any file back out
+### ◇ Local-first
 
-### In-vault notes (editable)
-- Create encrypted text notes
-- Edit in place
-- Save updates without leaving the app
+Vault processing happens in the browser on the device where Vortex is running.
 
-### Previews & media support
-- Image viewer
-- Video player
-- PDF viewer
-- Audio player
+The application does not require a remote database to hold the contents of your vault.
 
-### Privacy-aware imports (anti-fingerprinting)
-Vortex Vault isn’t only “encrypt the bytes.” When you import content, it can apply privacy-focused transformations that reduce tracking/correlation across systems.
+### ◇ Portable
 
-Current strongest privacy handling is implemented for visual media:
+The encrypted `.vault` file is the data store.
 
-- **Images** are decoded and re-encoded as PNG:
-  - strips metadata by design
-  - max dimension size of 4,000px by 4,000px to reduce extreme inputs
-  - output is normalized (`.png`)
-- **Videos** may receive small randomized trailing padding (only when safe) to change file hashes without breaking playback
+Move it.
 
-This is version **1.1**. Over time, privacy transforms may expand to additional file types where it’s practical and safe (without corrupting the file), while keeping the core offline workflow intact.
+Copy it.
+
+Back it up.
+
+Put it on removable storage.
+
+Store an encrypted copy with the storage provider of your choice.
+
+The vault is not tied to one installation of Vortex.
+
+### ◇ Offline-capable
+
+Core vault functionality does not depend on an internet connection.
+
+Opening, browsing, encrypting, decrypting, editing, managing passwords, and generating TOTP codes can operate locally.
+
+Network connectivity is only needed for features that inherently communicate with another device, such as Direct Share.
+
+### ◇ Encryption before storage
+
+Sensitive vault content is encrypted before it becomes part of the saved vault container.
+
+The portable file is designed to remain unintelligible without the required vault passphrase or passphrase sequence.
 
 ---
 
-## Access it from anywhere (advanced, still user-friendly)
+# How it works
 
-If you want maximum portability across devices, you can use Vortex Vault like this:
+At a high level, Vortex separates the application from the encrypted data.
 
-- keep your `vortex.vault` file stored somewhere reachable (local drive, encrypted cloud storage, private server, etc.)
-- on any device, open the official client at **vortex.mglabs.dev**
-- download your vault file or select your `.vault` file
-- unlock it locally (decryption happens on your device, not on a server)
+```mermaid
+flowchart LR
+    A["Vortex Vault<br>HTML application"]
+    B["Browser<br>Web Crypto API"]
+    C["Encrypted<br>.vault file"]
+    D["Local disk"]
+    E["USB / removable storage"]
+    F["Cloud storage"]
+    G["Backup media"]
 
-This is a real advantage of the “vault is a file” model: it can be as portable as cloud apps while still staying client-side encrypted.
+    A --> B
+    B <--> C
+    C --> D
+    C --> E
+    C --> F
+    C --> G
+```
 
-If you’re operating in high-risk situations, offline/local usage remains the recommended approach. If you want convenience and global access, the hosted client model is viable — just treat the client code as a security-critical dependency and verify you’re loading the official domain (`vortex.mglabs.dev`).
+The `.vault` file is portable.
 
----
-
-## Direct Share (peer-to-peer encrypted file transfer)
-
-Direct Share is designed to be **fast, link-based, and serverless for file data**.
-
-### What it is
-Direct Share uses **WebRTC** to establish a direct encrypted channel between two browsers. You share a link (the offer), the receiver opens it and generates a reply link (the answer), and the sender applies it to start the transfer.
-
-### What “double encrypted” means here
-Direct Share benefits from two layers of encryption:
-
-1. **Transport encryption (WebRTC)**  
-   WebRTC DataChannels are encrypted in transit by the protocol itself.
-
-2. **Application-layer payload encryption (Vortex Vault)**  
-   Vortex Vault additionally encrypts the transferred file bytes using:
-   - **AES-256-GCM**
-   - **PBKDF2-SHA256** key derivation
-   - a one-time random salt + IV per transfer
-   - a mutual secret derived from both users’ one-time security codes
-
-This means even if a transfer were somehow recorded at the transport level, the file payload is still encrypted as ciphertext.
-
-### How to send a file
-1. Unlock your vault
-2. Select a file
-3. Click **Direct Share**
-4. Send the generated link to the receiver
-5. The receiver opens the link and sends you back a reply link
-6. Click the reply link, it will automatically open your browser and forward the information to your Vortex vault tab. With good network conditions, the file should then send automatically.
-
-### How to receive a file
-1. Open the sender’s link
-2. Vortex Vault generates a reply link automatically
-3. Send the reply link back to the sender
-4. When the transfer completes:
-   - if your vault is already loaded and unlocked, and you opened the Direct Share menu, you can paste a link sent to you, and the file imports into your vault when transfered.
-   - if your vault is not already loaded and unlocked, the file downloads to your device like any other file.
-
-### Important operational notes
-- Direct Share uses STUN to help peers connect (NAT traversal).  
-  This does **not** store your file on servers, but it can expose network metadata (like IP addresses) to the peer you’re connecting with, which is normal for P2P.
-- Direct Share intentionally does **not** rely on TURN relays.  
-  This keeps the “no relay servers” posture, but very restrictive networks may fail to connect.
+The application knows how to unlock it, authenticate it, decrypt individual records when needed, modify the workspace, and produce a newly encrypted vault when saved.
 
 ---
 
-## How Vortex Vault works (high-level)
+## Opening a vault
 
-Vortex Vault is a pure client-side application:
+When you open a modern Vortex vault:
 
-- All cryptography happens locally using the browser’s WebCrypto API.
-- Your vault file stays encrypted on disk.
-- Decryption happens only when you unlock the vault.
-- Decrypted bytes exist in memory only for active use (preview/export/share).
-- When you add or remove files to your vault, click **Save & log out** to download a newly encrypted `vortex.vault` file and clear the session.
+1. Vortex reads the small container header.
+2. Untrusted header parameters are validated before expensive cryptographic work is performed.
+3. Your passphrase — or ordered Cascade Lock passphrases — is processed through the configured key derivation.
+4. A 256-bit AES key is created using the browser's Web Crypto implementation.
+5. The encrypted vault index is authenticated and decrypted.
+6. Individual encrypted records are decrypted only when their contents are needed.
 
-No server is required to use Vortex Vault, it is possible to store and access the html file locally.
+If authenticated decryption fails, the vault is not accepted.
 
----
-
-## Vault format (`.vault`)
-
-Vaults use a compact container format:
-
-- Header with:
-  - magic bytes (`AVLT`)
-  - version
-  - PBKDF2 iteration count
-  - KDF salt
-  - encrypted index length
-  - index IV
-- Encrypted index:
-  - JSON describing meta + items (names, timestamps, folder structure, record offsets)
-- Encrypted records:
-  - each record is stored as `[IV(12) || AES-GCM(ciphertext+tag)]`
-
-### Record model
-Each item in the index describes either:
-- a **folder** (no record bytes), or
-- a **record-backed item** (file/image/video/text)
-
-Text notes are stored as encrypted records as well, but the editor can hold pending plaintext in memory until you save.
-
-### Legacy v1 support
-Older vaults (v1) from the prototype phase of Vortex Vault are supported for opening.
-When you **Save & log out**, v1 vaults are upgraded and re-saved as a v2 container automatically.
+For Cascade Lock vaults, there is intentionally **no successful intermediate passphrase check**. Authentication only succeeds after the entire ordered sequence has produced the final key.
 
 ---
 
-## Passwords & key derivation
+## Saving a vault
 
-Vortex Vault uses PBKDF2 (SHA-256) to derive the encryption key from your password.
+Vortex rebuilds the portable encrypted container when you choose **Save & log out**.
 
-- Default vault KDF iteration count is 1,000,000 (designed to slow brute-force attempts).
-- Password rules are enforced when creating a new vault:
-  - minimum length: **12**
-  - must include: uppercase, lowercase, number, symbol
+Records that have not changed can remain encrypted and be copied directly from the existing container, while modified or newly added records are encrypted before being written into the new vault.
 
-Recommendation: use a long passphrase you can type reliably. PBKDF2 helps, but password strength still matters.
+After saving, Vortex clears the active vault session.
 
----
-
-## Supported file types (practical view)
-
-Vortex Vault can store **any file type** as encrypted bytes.
-
-### Preview / playback inside the app
-- Images
-- Videos
-- PDFs
-- Audio files
-- Text notes (editable)
-
-### Import-time transformations
-- Images: re-encoded to PNG, metadata stripped, size normalized
-- Videos: attempts adding trailing padding when safe to alter hashes without breaking playback
-- Other files: stored as-is (encrypted), no transformation applied to not risk corrupting your files. In future releases, we are considering hash changes or normalization for more file types.
+> [!TIP]
+> The `.vault` file is the important data. Treat it like any other important encrypted archive: maintain backups and periodically verify that those backups can be opened.
 
 ---
 
-## Security model (what it protects well)
+# Features
 
-Vortex Vault is built to protect against:
+## 📁 Files
 
-- unauthorized access to your vault file at rest
-- exposure of file names, folder structure, timestamps, sizes
-- tampering or silent modification of vault contents
-- server-side compromise risks (because there is no server that holds your vault data)
+The Files workspace behaves like a lightweight encrypted file manager.
 
-In other words: if someone obtains your `vortex.vault` file, the design is intended to keep its contents and structure private unless the password is known.
+**Included functionality:**
 
----
+* Nested folders
+* Breadcrumb navigation
+* Search
+* Sorting
+* Drag-and-drop organization
+* Rename and delete
+* File import
+* Clipboard paste
+* Text note creation and editing
+* File export
+* Resizable preview pane
+* Images
+* Video
+* Audio
+* PDF preview
+* Arbitrary binary files
 
-## Practical threat notes (what to keep in mind)
-
-- If an attacker can run malicious code on your device while your vault is unlocked, they can potentially access decrypted content.
-- If you load the client from the public internet, your security depends on the integrity of what you loaded (use the official domain, or run it locally/offline).
-- Direct Share is peer-to-peer: the peer you connect to can see your connection metadata (typical for P2P). We recommend using it to send files between people you know and trust.
-- This project has not yet undergone an independent security audit.
-
----
-
-## Limits & performance notes
-
-Vortex Vault is optimized for being practical inside a browser tab, but browsers have finite memory.
-
-Notable internal guardrails:
-- Pending unsaved data is capped to prevent memory blowups on typical devices.
-- Direct Share receiving has a hard memory cap (to prevent “RAM nukes”).
-
-If you intend to handle large files (over 2GB), consider splitting them or testing on the target hardware/browser.
+Files are stored as encrypted records inside the vault rather than as ordinary loose files alongside the application.
 
 ---
 
-## Keyboard shortcuts
+## 🖼️ Library
 
-- **Ctrl/Cmd + F** — Search
-- **Ctrl/Cmd + I** — Import files
-- **Ctrl/Cmd + N** — New text note
-- **Ctrl/Cmd + S** — Save & log out (downloads vault + clears session)
-- **Esc** — Close modals
+Library provides a media-oriented view of the images and videos already stored in the vault.
 
----
+It does **not** duplicate or relocate those files.
 
-## Browser requirements
+The Library is another view over the same encrypted records.
 
-You need a modern browser with:
-- WebCrypto (`crypto.subtle`)
-- Blob / File APIs
-- WebRTC (for Direct Share)
+### Media features
 
-Recent Chrome / Edge / Firefox / Safari should work. If WebCrypto is unavailable, the app will warn you.
+* Browse all media
+* Filter photos
+* Filter videos
+* Full-screen media viewer
+* Previous / next navigation
+* Keyboard navigation
+* Export media
+* Delete media
+* Create albums
+* Add media to albums
+* Remove albums without deleting their files
 
----
+Album membership is stored as protected vault metadata referencing the original media records.
 
-## License
-
-This project is open source under GNU AGPL v3.0. See **LICENSE** for details.
-
----
-
-## Contributing
-
-Contributions are welcome — especially in areas like:
-
-- expanding safe privacy transformations for additional file types
-- improving large-file (2GB+) handling
-- UX improvements that preserve the “offline-first” posture
-- security review and hardening
-
-### Guidelines
-Please keep feedback constructive and focused on real user impact.
-
-- If you’re proposing a change, include the reason (security, performance, correctness, UX).
-- Avoid style-only refactors or subjective rewrites unless they clearly improve the software.
-- For larger changes, open an issue first so we can collaborate before a PR.
+That means one photograph does not need to be copied several times simply because it appears in multiple organizational views.
 
 ---
 
+## 🔑 Passwords
 
-If you want a vault that’s easy to carry, easy to back up, and hard to analyze or tamper with, Vortex Vault is built for that exact job.
+Vortex includes a password manager directly inside the encrypted workspace.
+
+A credential can contain:
+
+* Name
+* Username or email
+* Password
+* Website
+* Notes
+
+Passwords can be:
+
+* Hidden or revealed
+* Copied when needed
+* Searched
+* Edited
+* Deleted
+* Generated using cryptographically secure randomness
+
+Password entries are stored as encrypted vault records and are separated from the ordinary Files view.
+
+---
+
+## ⏱️ Authenticator
+
+Vortex can also generate **TOTP — Time-based One-Time Password — codes** completely locally.
+
+Supported input includes:
+
+* Base32 setup secrets
+* `otpauth://totp/...` URIs
+* QR scanning through the browser's native QR capabilities when available
+
+Supported configurations include:
+
+| Setting            | Support        |
+| ------------------ | -------------- |
+| SHA-1              | ✓              |
+| SHA-256            | ✓              |
+| SHA-512            | ✓              |
+| 6 digit codes      | ✓              |
+| 8 digit codes      | ✓              |
+| Custom period      | 15–120 seconds |
+| Offline generation | ✓              |
+
+QR scanning is performed locally. Vortex does not need to upload the QR image to decode an authenticator setup.
+
+> [!IMPORTANT]
+> Storing a site's password and its TOTP seed in the same vault is convenient, but it does not provide the same factor separation as keeping the second factor on an independent hardware authenticator or separate trusted device.
+
+---
+
+# Security architecture
+
+Vortex uses established browser cryptographic primitives rather than implementing encryption algorithms from scratch in JavaScript.
+
+| Component                | Design                                    |
+| ------------------------ | ----------------------------------------- |
+| Authenticated encryption | **AES-256-GCM**                           |
+| Key derivation           | **PBKDF2-HMAC-SHA-256**                   |
+| Default work factor      | **1,000,000 iterations per passphrase**   |
+| Cascade Lock             | **1–7 ordered passphrases**               |
+| Cascade composition      | **HMAC-SHA-256**                          |
+| Randomness               | Browser cryptographic RNG                 |
+| Modern record IV         | Random 96-bit AES-GCM IV                  |
+| Cascade salt             | Unique random 128-bit salt per passphrase |
+| Active AES key           | Non-extractable Web Crypto `CryptoKey`    |
+| Index                    | Encrypted and authenticated               |
+| Modern records           | Independently encrypted and authenticated |
+| Record identity binding  | AES-GCM Additional Authenticated Data     |
+
+---
+
+## Security flow
+
+```mermaid
+flowchart TD
+    A["1–7 passphrases"]
+    B["PBKDF2-HMAC-SHA-256<br>1,000,000 rounds each"]
+    C["Unique random salt<br>for every passphrase"]
+    D["Ordered HMAC-SHA-256<br>Cascade Lock chain"]
+    E["256-bit AES-GCM key"]
+    F["Authenticated<br>encrypted vault index"]
+    G["Authenticated<br>encrypted records"]
+    H["Portable .vault file"]
+
+    A --> B
+    C --> B
+    B --> D
+    D --> E
+    E --> F
+    E --> G
+    F --> H
+    G --> H
+```
+
+---
+
+# Cascade Lock
+
+Cascade Lock allows a modern Vortex vault to require between **one and seven ordered passphrases**.
+
+This is not implemented as a series of separately unlockable encrypted layers.
+
+That distinction is important.
+
+If each password independently unlocked one encryption layer, an attacker could potentially test and crack each layer separately.
+
+Vortex instead derives a single final vault key from the **entire ordered sequence**.
+
+---
+
+## How Cascade Lock derives a key
+
+For every passphrase:
+
+1. A unique random 16-byte salt is generated.
+2. The passphrase is processed with **PBKDF2-HMAC-SHA-256**.
+3. PBKDF2 performs **1,000,000 iterations**.
+4. The resulting 256-bit value is incorporated into an ordered HMAC-SHA-256 chain.
+5. Each stage includes domain separation, its position in the sequence, and the vault's random identifier.
+6. After the final passphrase, another domain-separated HMAC operation produces the raw AES key material.
+7. The result is imported into Web Crypto as a **non-extractable AES-256-GCM key**.
+
+The order matters cryptographically.
+
+For example:
+
+```text
+Passphrase A → Passphrase B → Passphrase C
+```
+
+does not derive the same key as:
+
+```text
+Passphrase C → Passphrase B → Passphrase A
+```
+
+---
+
+## No intermediate password oracle
+
+Cascade Lock deliberately avoids storing a verifier for each individual passphrase.
+
+Vortex therefore cannot tell an attacker:
+
+```text
+Passphrase 1 was correct.
+Passphrase 2 was wrong.
+```
+
+The complete chain must be derived first.
+
+Only the final authenticated vault index determines whether the entire sequence was correct.
+
+If authentication fails, the sequence is rejected as a whole.
+
+---
+
+## Cascade unlock memory behavior
+
+During Cascade Lock unlock, Vortex processes passphrases sequentially.
+
+After each stage:
+
+* The password field is cleared.
+* The PBKDF2-derived intermediate material is no longer needed.
+* Temporary byte buffers are overwritten where practical.
+* Only the cryptographic chain state needs to continue to the next stage.
+
+The final AES key is imported as a Web Crypto key marked **non-extractable**.
+
+> [!NOTE]
+> JavaScript strings and browser memory cannot be guaranteed to be physically erased. Vortex performs best-effort cleanup, but the browser and operating system ultimately control memory allocation, copying, swapping, and process inspection.
+
+---
+
+# Authenticated encryption
+
+Encryption alone is not enough.
+
+Vortex uses **AES-GCM**, which provides both:
+
+* Confidentiality
+* Authentication
+
+This means encrypted data is not only hidden — modifications to authenticated ciphertext are detected.
+
+If encrypted data is altered without the correct key, authenticated decryption fails.
+
+---
+
+## Encrypted index
+
+The vault's index contains the structure needed to understand the workspace.
+
+That includes information such as:
+
+* Item records
+* Folder relationships
+* Media organization
+* Vault metadata
+* Record offsets and lengths
+* Password and authenticator record references
+
+The index is encrypted with AES-256-GCM.
+
+The plaintext container header contains only the structural and cryptographic information necessary to determine how the vault should be opened.
+
+---
+
+## Per-record encryption
+
+Files and secure records are not stored as one enormous plaintext structure.
+
+They are represented as independently encrypted records.
+
+Modern Vortex records use:
+
+* AES-256-GCM
+* A fresh random IV
+* Authentication tags
+* Record identity binding
+
+For the modern internal container, each record's immutable item ID is supplied to AES-GCM as **Additional Authenticated Data**.
+
+Conceptually:
+
+```text
+Ciphertext + Authentication Tag + Expected Record ID
+                         │
+                         ▼
+                  AES-GCM verification
+```
+
+This makes a ciphertext record cryptographically associated with the identity it belongs to.
+
+A valid encrypted record cannot simply be moved and presented as another record without authentication failing.
+
+---
+
+# Cryptographic parameter validation
+
+The vault header must be readable before the vault can be unlocked, which means it is attacker-controlled input.
+
+Vortex therefore validates cryptographic and allocation parameters before performing expensive work.
+
+Modern vault validation includes checks such as:
+
+* Supported format version
+* Supported KDF suite
+* Supported cipher suite
+* Valid Cascade Lock count
+* Expected header size
+* Expected fixed KDF work factor
+* Valid salt sizes
+* Valid vault identifier
+* Reasonable encrypted index size
+* Verification that the declared index actually fits within the file
+
+This prevents a modified plaintext header from simply requesting absurd resource consumption or impossible allocations before authentication occurs.
+
+---
+
+# Rekeying
+
+Vault protection can be changed from the Settings workspace.
+
+A vault can be migrated to a new Cascade Lock configuration using between one and seven new passphrases.
+
+The migration is performed as an application-level atomic operation:
+
+1. New key material is derived.
+2. Existing records are decrypted one at a time.
+3. Each record is re-encrypted with the new key.
+4. A new encrypted record set is built separately.
+5. The active vault state changes only after all records have been processed successfully.
+
+If migration fails before completion, the existing unlocked vault state remains available rather than being partially replaced by a half-rekeyed container.
+
+---
+
+# Password handling
+
+Vortex applies several defensive practices around vault passwords.
+
+### New passphrase requirements
+
+New vault passphrases must contain:
+
+* At least 12 characters
+* Uppercase character
+* Lowercase character
+* Number
+* Symbol
+
+When multiple Cascade Lock passphrases are used, each passphrase must be different.
+
+### After derivation
+
+For modern vaults, the original master passphrase string is not required after the cryptographic key has been derived.
+
+Vortex retains the derived non-extractable Web Crypto key for the unlocked session rather than intentionally keeping the user's master password in application state.
+
+### Intermediate material
+
+Sensitive temporary byte arrays are overwritten where practical after use.
+
+This includes several intermediate PBKDF2, HMAC, and plaintext buffers.
+
+---
+
+# Privacy-oriented file handling
+
+Vortex applies additional privacy-oriented processing to some imported media.
+
+## Images
+
+Raster images are decoded and re-encoded as PNG before storage.
+
+This has useful privacy properties:
+
+* Embedded image metadata is discarded during re-encoding.
+* EXIF metadata is not copied into the new PNG.
+* Images are constrained to a maximum dimension to reduce pathological resource usage.
+* A smaller thumbnail can be created for the Library.
+
+The thumbnail is stored inside protected vault metadata rather than as an exposed sidecar file.
+
+## Video
+
+For compatible MP4/MOV-style containers, Vortex can append a valid randomized `free` padding box.
+
+This changes the resulting file hash without corrupting the media container and can reduce stable byte-for-byte fingerprinting of an imported copy.
+
+Formats where trailing or container padding could create compatibility problems are left untouched.
+
+---
+
+# Direct Share
+
+Direct Share allows files to move between devices without first uploading the file contents to a Vortex storage server.
+
+It uses a browser **WebRTC DataChannel**.
+
+```mermaid
+sequenceDiagram
+    participant A as Sender
+    participant B as Receiver
+
+    A->>B: Share link / connection offer
+    B->>A: Reply link / connection answer
+    A-->>B: WebRTC DataChannel established
+    A->>A: Decrypt selected vault record
+    A->>A: Encrypt transfer payload
+    A-->>B: Encrypted chunks
+    B->>B: Authenticate + decrypt
+    B->>B: Import into destination vault
+```
+
+STUN services may assist the browsers in discovering how to establish a peer connection, but the shared file payload itself is sent through the WebRTC peer connection rather than being stored in a Vortex file server.
+
+---
+
+## Multi-file and folder sharing
+
+Direct Share supports more than one file.
+
+You can select:
+
+* Individual files
+* Multiple files
+* Folders
+* Multiple folders
+* Mixed file/folder selections
+
+Selecting a folder recursively includes its descendants.
+
+Vortex creates a temporary transfer manifest that describes the bundle hierarchy without transmitting the original internal vault record IDs.
+
+The receiving Vortex workspace can reconstruct the folder hierarchy inside the destination vault.
+
+---
+
+## Transfer encryption
+
+A Direct Share session derives a separate transfer key.
+
+Each transferred file is encrypted using AES-GCM with:
+
+* A per-file random IV
+* Authenticated encrypted contents
+* Authenticated metadata describing that transfer entry
+
+The receiving side verifies authentication before accepting the plaintext.
+
+If the receiver already has a vault unlocked, received data can immediately be encrypted under the receiver's own vault key before becoming part of that vault.
+
+---
+
+> [!IMPORTANT]
+> Direct Share link exchange is part of the trust model.
+>
+> Exchange the sender and receiver links through a channel you trust and verify that you are communicating with the intended person.
+>
+> WebRTC peer connections may also expose network information such as peer IP addresses to the other participant.
+
+---
+
+# Security best practices used by Vortex
+
+Vortex intentionally follows several defensive design patterns.
+
+### ✓ Native browser cryptography
+
+Encryption, hashing, PBKDF2, and HMAC use the browser's Web Crypto implementation.
+
+Vortex does not implement AES itself in handwritten JavaScript.
+
+### ✓ Authenticated encryption
+
+AES-GCM detects unauthorized ciphertext modification.
+
+### ✓ Cryptographically secure randomness
+
+Salts, vault identifiers, IVs, IDs, and cryptographic random material use the browser cryptographic random-number generator where appropriate.
+
+### ✓ Unique salts
+
+Every Cascade Lock passphrase receives its own random salt.
+
+### ✓ Fresh encryption IVs
+
+AES-GCM encryption operations use fresh random initialization vectors.
+
+### ✓ Domain-separated Cascade Lock
+
+Different stages of Cascade Lock use explicit domain strings so the cryptographic operations have distinct purposes.
+
+### ✓ No partial Cascade verifier
+
+Individual passphrases do not receive independent success/failure verifiers.
+
+### ✓ Non-extractable active vault key
+
+The final modern AES key is imported into Web Crypto as non-extractable.
+
+### ✓ Record identity authentication
+
+Modern encrypted records are bound to their immutable item identity using AES-GCM Additional Authenticated Data.
+
+### ✓ Encrypted workspace metadata
+
+The useful vault index is authenticated and encrypted.
+
+### ✓ Bounds checking before KDF work
+
+Attacker-controlled header parameters are validated before expensive operations.
+
+### ✓ Best-effort memory cleanup
+
+Sensitive temporary byte buffers are overwritten after use where practical.
+
+### ✓ Local media sanitization
+
+Raster image imports are re-encoded rather than preserving embedded metadata.
+
+### ✓ Atomic rekeying
+
+A failed migration does not intentionally replace the active vault with a partially migrated state.
+
+---
+
+# Why PBKDF2?
+
+Vortex currently uses **PBKDF2-HMAC-SHA-256** because PBKDF2 is available directly through the browser's native Web Crypto API.
+
+Modern Vortex uses:
+
+```text
+1,000,000 PBKDF2 iterations
+per Cascade Lock passphrase
+```
+
+Using seven passphrases therefore requires seven independent million-round PBKDF2 derivations before the final Cascade Lock key can be produced.
+
+There is an important technical distinction, however:
+
+> [!NOTE]
+> PBKDF2 is computationally expensive, but it is **not memory-hard**.
+>
+> Algorithms such as Argon2id can provide stronger resistance to highly parallel specialized password-cracking hardware by requiring substantial memory as well as computation.
+
+Vortex currently favors native Web Crypto and a self-contained implementation instead of introducing a large security-critical third-party cryptographic/WASM dependency.
+
+Strong, unpredictable passphrases remain extremely important.
+
+Seven weak passwords are not automatically equivalent to one enormous uniformly random secret.
+
+---
+
+# Threat model
+
+Vortex is primarily designed to protect the **vault file at rest**.
+
+Examples include:
+
+* A stolen USB drive
+* A copied `.vault` file
+* A lost backup
+* A cloud-storage copy
+* Someone obtaining the encrypted file without the passphrase
+* Unauthorized modification of encrypted records
+
+With a strong passphrase or Cascade Lock sequence, the goal is for possession of the `.vault` file alone to be insufficient to recover its protected contents.
+
+---
+
+## What Vortex can protect
+
+| Scenario                                                     | Protection                                                |
+| ------------------------------------------------------------ | --------------------------------------------------------- |
+| Someone obtains only the encrypted `.vault` file             | **Designed to protect**                                   |
+| Someone modifies authenticated ciphertext                    | **Detected by AES-GCM**                                   |
+| Someone swaps modern encrypted record ciphertext between IDs | **Detected by record authentication**                     |
+| Cloud provider can see stored `.vault` bytes                 | **Contents remain encrypted**                             |
+| USB drive containing vault is lost                           | **Contents remain encrypted**                             |
+| Attacker guesses passwords offline                           | **KDF increases cost; password entropy remains critical** |
+
+---
+
+## What encryption cannot solve
+
+Vortex cannot make a compromised machine trustworthy.
+
+If an attacker controls the environment in which the vault is unlocked, they may be able to observe secrets after legitimate decryption.
+
+Examples include:
+
+* Malware
+* Browser compromise
+* Operating-system compromise
+* Keyloggers
+* Screen capture
+* Malicious browser extensions
+* A modified or malicious copy of the Vortex HTML
+* Arbitrary code executing in the same page while the vault is unlocked
+
+A non-extractable key prevents normal JavaScript from exporting the raw key bytes, but malicious code executing inside the same trusted browser context could still attempt to **use** that active key.
+
+---
+
+# Trusted application delivery matters
+
+The Vortex HTML application is part of the trusted computing base.
+
+If someone modifies the application before you enter your passphrase, the modified application could potentially capture the passphrase or plaintext after decryption.
+
+For serious use:
+
+1. Keep a trusted local copy of the Vortex HTML.
+2. Verify its hash after obtaining or updating it.
+3. Use an up-to-date browser.
+4. Keep the operating system clean and updated.
+5. Avoid unknown browser extensions in the environment used to unlock sensitive vaults.
+
+> [!WARNING]
+> Encryption cannot protect secrets from an application that has already been maliciously modified before the secrets are entered.
+
+---
+
+# Backup strategy
+
+Vortex deliberately gives you control of the encrypted file.
+
+That also means backup responsibility remains with you.
+
+A reasonable strategy is:
+
+```text
+Primary vault
+     │
+     ├── Local backup
+     │
+     ├── Offline / removable backup
+     │
+     └── Encrypted cloud copy
+```
+
+Because the file is already encrypted, it can be copied to ordinary storage while remaining protected by the vault cryptography.
+
+For important data, maintain more than one backup and periodically test that a backup can actually be opened.
+
+---
+
+# Security considerations
+
+<details>
+<summary><strong>Browser memory</strong></summary>
+
+<br>
+
+Vortex clears sensitive fields and overwrites temporary byte arrays where practical.
+
+However, browser JavaScript does not provide a reliable primitive for proving that every historical copy of a string or buffer has been physically erased from RAM, swap, crash dumps, or browser internals.
+
+Memory cleanup should therefore be understood as a defense-in-depth measure rather than guaranteed physical zeroization.
+
+</details>
+
+<details>
+<summary><strong>Password entropy</strong></summary>
+
+<br>
+
+KDF cost slows password guessing. It does not create entropy that was not present in the passphrase.
+
+Long, unique, unpredictable passphrases provide substantially stronger protection than common phrases with cosmetic substitutions.
+
+Cascade Lock allows multiple independent secrets to participate in key derivation, but every component should still be chosen carefully.
+
+</details>
+
+<details>
+<summary><strong>Direct Share authentication</strong></summary>
+
+<br>
+
+Direct Share encrypts the transferred payload and uses peer-to-peer WebRTC transport.
+
+The connection-link exchange is still security-sensitive.
+
+For sensitive transfers, verify the sender and receiver links over a trusted independent communication channel.
+
+</details>
+
+---
+
+# Internal vault formats
+
+> [!IMPORTANT]
+> **Vortex Vault V2** refers to the **application release**.
+>
+> That is separate from the version number of the internal `.vault` container format.
+
+The application maintains compatibility with multiple generations of Vortex vaults.
+
+| Internal format | Purpose                                                                        |
+| --------------- | ------------------------------------------------------------------------------ |
+| Legacy **v1**   | Original encrypted JSON envelope                                               |
+| Internal **v2** | Binary container with encrypted index and encrypted records                    |
+| Internal **v3** | Cascade Lock, stronger record identity binding, and expanded modern protection |
+
+A Vortex Vault **V2 application** can therefore work with multiple internal vault-format generations.
+
+These two version numbers should not be treated as the same thing.
+
+---
+
+# Technical details
+
+<details>
+<summary><strong>Modern Cascade Lock header</strong></summary>
+
+<br>
+
+The modern container begins with a fixed-size header containing the information required to derive the key and locate the encrypted index.
+
+This includes:
+
+* Vortex container magic
+* Internal format version
+* Cascade count
+* Cryptographic suite identifiers
+* PBKDF2 work factor
+* Encrypted index length
+* Random vault identifier
+* Cascade salts
+* Index AES-GCM IV
+* Header-size identifier
+* Reserved space for future format evolution
+
+The header is not intended to contain the user's file names, folder names, passwords, notes, TOTP secrets, or file contents.
+
+Those belong to authenticated encrypted structures.
+
+</details>
+
+<details>
+<summary><strong>Cascade domain separation</strong></summary>
+
+<br>
+
+Cascade Lock uses distinct domain strings for separate cryptographic purposes.
+
+Conceptually:
+
+```text
+VortexVault/v3/cascade-root
+VortexVault/v3/cascade-step
+VortexVault/v3/final-aes-gcm-key
+```
+
+Domain separation reduces the risk of accidentally treating the same cryptographic operation as interchangeable across different protocol roles.
+
+</details>
+
+<details>
+<summary><strong>Modern record authentication</strong></summary>
+
+<br>
+
+Each modern encrypted record derives its AES-GCM Additional Authenticated Data from:
+
+```text
+VortexVault/v3/record-id
++
+immutable record ID
+```
+
+The ID itself does not need to be secret.
+
+Its purpose here is authentication: the ciphertext is valid only in the record identity for which it was encrypted.
+
+</details>
+
+<details>
+<summary><strong>Rekey migration</strong></summary>
+
+<br>
+
+Rekeying decrypts and re-encrypts records one at a time.
+
+For very large individual files, that individual plaintext necessarily exists temporarily in browser memory while the record is processed.
+
+Vortex avoids intentionally constructing one giant plaintext representation of the entire vault during this operation.
+
+</details>
+
+---
+
+# Recommended usage
+
+For stronger practical security:
+
+* Use a long, unique vault passphrase.
+* Consider multiple independently strong Cascade Lock passphrases for higher-security vaults.
+* Do not reuse account passwords as vault passphrases.
+* Keep trusted backups of the `.vault` file.
+* Keep a verified local copy of the Vortex application.
+* Keep your browser and operating system updated.
+* Avoid unlocking sensitive vaults on untrusted computers.
+* Verify Direct Share links through a trusted channel.
+* Use hardware-backed authentication for your most valuable accounts when strong factor separation is required.
+* Lock or close the vault when you are finished using it.
+
+---
+
+# Security status
+
+Vortex is security-sensitive software.
+
+Its design uses established cryptographic primitives and defensive implementation practices, but **it should not be represented as independently audited unless and until an independent security audit has actually been completed**.
+
+Security review, cryptographic review, adversarial testing, fuzzing, and independent source inspection are welcome and valuable.
+
+---
+
+<div align="center">
+
+## ◈ Your vault. Your file. Your storage.
+
+**Portable · Local-first · Offline-capable · Encrypted**
+
+<br>
+
+Vortex Vault is built around a simple premise:
+
+### Your private data should remain under your control.
+
+</div>
