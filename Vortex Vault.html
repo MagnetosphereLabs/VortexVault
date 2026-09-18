@@ -9,6 +9,7 @@
   <meta name="referrer" content="no-referrer" />
   <meta name="color-scheme" content="dark" />
   <title>Vortex Vault</title>
+  <!-- Vortex Vault application release 2.2 -->
 
   <style>
     :root{
@@ -1795,6 +1796,93 @@
     }
   </style>
 
+
+
+  <style id="vv22Styles">
+    .vvPasswordGenerator{
+      border:1px solid rgba(112,181,255,.14);
+      border-radius:14px;
+      padding:12px;
+      background:linear-gradient(145deg,rgba(112,181,255,.055),rgba(110,120,255,.025));
+      gap:10px;
+    }
+    .vvPasswordGenerator[hidden]{display:none!important}
+    .vvGeneratorTop,.vvGeneratorActions{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    }
+    .vvGeneratorTop>span{font-size:12px;font-weight:780;color:#dce7ff}
+    .vvGeneratorLength{display:flex;align-items:center;gap:7px;color:#8794b5;font-size:11px}
+    .vvGeneratorLength input{
+      width:76px;padding:6px 8px;border-radius:9px;border:1px solid rgba(255,255,255,.09);
+      background:rgba(2,5,10,.6);color:#eef3ff;outline:none;
+    }
+    .vvGeneratorRange{width:100%;accent-color:#70b5ff}
+    .vvGeneratorOptions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+    .vvGeneratorOptions label{
+      min-width:0;display:flex;align-items:center;gap:6px;padding:8px 9px;border-radius:10px;
+      border:1px solid rgba(255,255,255,.065);background:rgba(255,255,255,.022);
+      color:#aeb9d4;font-size:11px;cursor:pointer;
+    }
+    .vvGeneratorOptions input{accent-color:#70b5ff}
+    .vvGeneratorActions .vvFieldHint{flex:1 1 250px}
+    @media(max-width:650px){
+      .vvGeneratorOptions{grid-template-columns:1fr 1fr}
+      .vvGeneratorActions .btn{width:100%;justify-content:center}
+    }
+
+    .vvPrivacyCurtain{
+      position:fixed;inset:0;z-index:20000;background:#000;display:none;
+      align-items:center;justify-content:center;padding:20px;color:#f3f6ff;
+    }
+    .vvPrivacyCurtain.on{display:flex}
+    .vvPrivacyCurtain.prompt{background:rgba(0,0,0,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+    .vvPrivacyCurtain.grace .vvPrivacyCard{display:none}
+    .vvPrivacyCard{
+      width:min(440px,100%);padding:24px;border-radius:20px;text-align:center;
+      border:1px solid rgba(255,255,255,.10);background:linear-gradient(155deg,#0d111d,#05070c);
+      box-shadow:0 30px 100px rgba(0,0,0,.75);
+    }
+    .vvPrivacyMark{
+      width:54px;height:54px;border-radius:17px;margin:0 auto 14px;display:grid;place-items:center;
+      border:1px solid rgba(112,181,255,.18);background:rgba(112,181,255,.08);color:#9dcaff;
+    }
+    .vvPrivacyMark svg{width:28px;height:28px}
+    .vvPrivacyCard h2{margin:0;font-size:21px}
+    .vvPrivacyCard p{margin:9px 0 16px;color:#8f9bbd;font-size:12.5px;line-height:1.5}
+    .vvPrivacyCard .fieldInput{text-align:center}
+    .vvPrivacyActions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+    .vvPrivacyError{min-height:18px;margin-top:8px;color:#ff8fa2;font-size:11px}
+
+    .vv22SettingSection{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)}
+    .vv22SettingRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0}
+    .vv22SettingRow+.vv22SettingRow{border-top:1px solid rgba(255,255,255,.045)}
+    .vv22SettingRow .h{font-size:12.5px;font-weight:760;color:#e9efff}
+    .vv22SettingRow .s{font-size:10.5px;color:#7f8bad;margin-top:3px;line-height:1.4}
+    .vv22Select{
+      min-width:130px;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.08);
+      background:rgba(2,5,10,.62);color:#edf3ff;outline:none;
+    }
+    .vvHealthBadge{display:inline-flex;align-items:center;gap:7px;padding:7px 9px;border-radius:10px;
+      border:1px solid rgba(52,216,163,.16);background:rgba(52,216,163,.055);color:#a9e8d3;font-size:11px}
+    .vvHealthBadge.warn{border-color:rgba(255,204,102,.18);background:rgba(255,204,102,.06);color:#ffe0a0}
+
+    .vvVersionsModal{width:min(760px,100%)}
+    .vvVersionList{display:flex;flex-direction:column;gap:8px;max-height:min(58dvh,620px);overflow:auto}
+    .vvVersionRow{
+      border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:11px;
+      background:rgba(255,255,255,.022);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;
+    }
+    .vvVersionRow .h{font-size:12.5px;font-weight:760;color:#eaf0ff}
+    .vvVersionRow .s{margin-top:3px;font-size:10.5px;color:#7f8cab;line-height:1.35}
+    .vvVersionActs{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    @media(max-width:620px){
+      .vv22SettingRow,.vvVersionRow{grid-template-columns:1fr}
+      .vv22Select{width:100%}
+      .vvVersionActs{justify-content:stretch}
+      .vvVersionActs .btn{flex:1;justify-content:center}
+    }
+  </style>
+
 </head>
 
 <body>
@@ -1828,7 +1916,8 @@
           </div>
           <button class="btn ghost" id="btnOpen">Open vault</button>
           <button class="btn ghost" id="btnNewVault">New vault</button>
-          <button class="btn primary" id="btnSave" disabled>Save & log out</button>
+          <button class="btn primary" id="btnSave" disabled>Save</button>
+          <button class="btn ghost" id="btnSaveLogout" disabled>Save &amp; log out</button>
         </div>
       </header>
 
@@ -2347,6 +2436,26 @@
             <button class="btn ghost compact" id="credGenerateBtn" type="button">Generate</button>
           </div>
         </label>
+        <div class="vvField full vvPasswordGenerator" id="credGeneratorPanel" hidden>
+          <div class="vvGeneratorTop">
+            <span>Password generator</span>
+            <div class="vvGeneratorLength">
+              <label for="credGenLength">Length</label>
+              <input id="credGenLength" type="number" min="8" max="128" step="1" value="24" inputmode="numeric" />
+            </div>
+          </div>
+          <input id="credGenLengthRange" class="vvGeneratorRange" type="range" min="8" max="128" step="1" value="24" />
+          <div class="vvGeneratorOptions" role="group" aria-label="Password character types">
+            <label><input id="credGenUpper" type="checkbox" checked /> Uppercase</label>
+            <label><input id="credGenLower" type="checkbox" checked /> Lowercase</label>
+            <label><input id="credGenNumbers" type="checkbox" checked /> Numbers</label>
+            <label><input id="credGenSymbols" type="checkbox" checked /> Symbols</label>
+          </div>
+          <div class="vvGeneratorActions">
+            <span class="vvFieldHint">8–128 characters. At least one character type must stay enabled.</span>
+            <button class="btn primary compact" id="credGenerateNowBtn" type="button">Generate password</button>
+          </div>
+        </div>
         <label class="vvField full">
           <span>Notes</span>
           <textarea class="fieldInput vvNotes" id="credNotes" autocomplete="off" spellcheck="false" placeholder="Optional notes"></textarea>
@@ -2465,6 +2574,20 @@
   const V3_MAX_CASCADE = 7;
   const V3_KDF_ITER_DEFAULT = 1000000;
 
+  // Vortex Vault 2.2 session/privacy/share hardening.
+  const PRIVACY_SHIELD_KDF_ITER = 350000;
+  const PRIVACY_SHIELD_GRACE_MS = 60 * 1000;
+  const PRIVACY_SHIELD_MIN_LEN = 8;
+  const SHARE_KDF_ITER = 250000;
+  const SHARE_MAX_CONTROL_BYTES = 4 * 1024 * 1024;
+  const SHARE_MAX_MANIFEST_ENTRIES = 10000;
+  const SHARE_MAX_NAME_CHARS = 180;
+  const SHARE_MAX_MIME_CHARS = 200;
+  const RESILIENCE_TRAILER_MAGIC = "VVRS2201";
+  const RESILIENCE_TRAILER_VERSION = 1;
+  const RESILIENCE_FOOTER_SIZE = 64;
+  const RESILIENCE_TRAILER_COPIES = 3;
+
   // Sanitization caps / behavior
   const MAX_IMAGE_DIM = 4000; // max resolution in any direction
   const SAFE_TRAILING_PAD_VIDEO_MIME = new Set([
@@ -2487,6 +2610,7 @@
     btnOpen: $("btnOpen"),
     btnNewVault: $("btnNewVault"),
     btnSave: $("btnSave"),
+    btnSaveLogout: $("btnSaveLogout"),
 
     // meta strip
     metaStrip: $("metaStrip"),
@@ -2626,6 +2750,33 @@
     sortDir: "asc",            // "asc" | "desc"
 
     dirty: false,
+
+    // 2.2 Privacy Shield keeps no passphrase string. A derived key exists only
+    // while the unlocked session is active; after a 60s background lock it is
+    // discarded and must be re-derived from the separate Privacy Shield phrase.
+    privacyShield: {
+      active: false,
+      locked: false,
+      guardKey: null,
+      config: null,
+      hiddenAt: 0,
+      timer: null,
+      snapshot: null,
+      busy: false,
+      lastWorkspace: "files"
+    },
+
+    // Optional in-file redundancy archive. The standard V2/V3 payload remains
+    // the first copy, so older Vortex Vault builds can still open the primary.
+    resilience: {
+      sourceFile: null,
+      manifest: null,
+      activeCurrentIndex: 0,
+      recoveredFromCopy: null,
+      recoveredRecords: new Set(),
+      activeBaseBlob: null,
+      openedFromPrevious: null
+    },
 
     pendingOpenFile: null,
     pendingV3Header: null,
@@ -3242,6 +3393,53 @@
     }
   }
 
+  async function v2EncryptPendingPlainForItem(it, plainU8){
+    if (!it || state.mode !== "v2" || !state.v2.key) throw new Error("Vault encryption key is unavailable");
+    const bytes = plainU8 instanceof Uint8Array ? plainU8 : new Uint8Array(plainU8 || 0);
+    const rec = Number(state.v2.formatVersion || V2_VERSION) === V3_VERSION
+      ? await v3EncryptRecordForItem(state.v2.key, it, bytes)
+      : await v2EncryptRecord(state.v2.key, bytes);
+    it.recLen = rec.byteLength;
+    state.v2.pendingRecords.set(it.id, rec);
+    state.v2.pendingText.delete(it.id);
+    return rec;
+  }
+
+  async function v2StoreEncryptedText(it, text){
+    const plain = new TextEncoder().encode(String(text ?? ""));
+    try{
+      // Replacing an already-encrypted pending edit must not count both the old
+      // and new copy against the RAM guard. AES-GCM records add 12-byte IV +
+      // 16-byte authentication tag.
+      const oldRec = state.v2.pendingRecords.get(it.id);
+      const oldText = state.v2.pendingText.get(it.id);
+      const oldBytes = (oldRec ? oldRec.byteLength : 0) +
+        (oldText != null ? new TextEncoder().encode(String(oldText)).byteLength : 0);
+      const current = Math.max(0, v2PendingBytesTotal() - oldBytes);
+      const projected = plain.byteLength + 28;
+      if (current + projected > MAX_PENDING_BYTES){
+        throw new Error(
+          `Too much unsaved data for this device. ` +
+          `Pending ~${humanSize(current)}, incoming ~${humanSize(projected)}, limit ~${humanSize(MAX_PENDING_BYTES)}.`
+        );
+      }
+      await v2EncryptPendingPlainForItem(it, plain);
+      it.size = plain.byteLength;
+    } finally {
+      try { plain.fill(0); } catch {}
+    }
+  }
+
+  async function encryptPendingTextRecordsNow(){
+    if (state.mode !== "v2" || !state.v2.key || !state.v2.pendingText.size) return;
+    const queued = [...state.v2.pendingText.entries()];
+    for (const [id, value] of queued){
+      const it = getItemById(id);
+      if (!it){ state.v2.pendingText.delete(id); continue; }
+      await v2StoreEncryptedText(it, value);
+    }
+  }
+
 const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
 
   function v2PendingBytesTotal(){
@@ -3652,6 +3850,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     ui.subtitle.textContent = on ? "Encrypted workspace unlocked" : "Portable encrypted workspace";
 
     ui.btnSave.disabled = !on;
+    if (ui.btnSaveLogout) ui.btnSaveLogout.disabled = !on;
     ui.btnUp.disabled = !on || !state.currentFolderId;
 
     ui.btnAdd.disabled = !on;
@@ -3920,6 +4119,12 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     tools.unshift(moveSel);
 
     if (it.kind !== "folder"){
+      const bVersions = document.createElement("button");
+      bVersions.className = "btn ghost";
+      bVersions.textContent = "Versions";
+      bVersions.onclick = () => openItemVersions(it.id);
+      tools.unshift(bVersions);
+
       const bExport = document.createElement("button");
       bExport.className = "btn";
       bExport.textContent = "Export & Download";
@@ -4067,22 +4272,23 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
 
     const name = document.createElement("input");
     name.className = "editorName";
+    name.id = "vvActiveTextName";
+    name.dataset.itemId = it.id;
     name.value = it.name || "note.txt";
     name.placeholder = "note.txt";
 
     const editor = document.createElement("textarea");
     editor.className = "editor";
+    editor.id = "vvActiveTextEditor";
+    editor.dataset.itemId = it.id;
     editor.placeholder = "Write…";
 
     try{
       let text = "";
       if (state.mode === "v2"){
-        if (state.v2.pendingText.has(it.id)){
-          text = state.v2.pendingText.get(it.id) || "";
-        } else {
-          const bytes = await v2GetPlainBytes(it);
-          text = new TextDecoder().decode(bytes);
-        }
+        const bytes = await v2GetPlainBytes(it);
+        text = new TextDecoder().decode(bytes);
+        try { bytes.fill(0); } catch {}
       } else {
         text = it.text || "";
       }
@@ -4101,10 +4307,10 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     const saveBtn = document.createElement("button");
     saveBtn.className = "btn primary";
     saveBtn.textContent = "Save note";
-    saveBtn.onclick = () => {
+    saveBtn.onclick = async () => {
       const nextName = sanitizeName((name.value || "note.txt").trim(), "note.txt");
       const nextText = editor.value || "";
-      saveTextInline(it.id, nextName, nextText);
+      await saveTextInline(it.id, nextName, nextText);
     };
 
     row.appendChild(saveBtn);
@@ -4232,10 +4438,19 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     }
     if (it.kind === "folder") return new Uint8Array();
     const record = await v2GetRecordBytes(it);
-    if (Number(state.v2.formatVersion || V2_VERSION) === V3_VERSION){
-      return v3DecryptRecordForItem(state.v2.key, it, record);
+    try{
+      if (Number(state.v2.formatVersion || V2_VERSION) === V3_VERSION){
+        return await v3DecryptRecordForItem(state.v2.key, it, record);
+      }
+      return await v2DecryptRecordBytes(state.v2.key, record);
+    }catch(primaryError){
+      const recovered=await resilienceTryRecordCopies(it);
+      if(recovered){
+        toast(`Recovered “${it.name||"item"}” from a redundant copy. Save the vault to heal all current copies.`);
+        return recovered;
+      }
+      throw primaryError;
     }
-    return v2DecryptRecordBytes(state.v2.key, record);
   }
 
   async function v2OrV1PlainBytes(it){
@@ -4264,6 +4479,1229 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     }, 120);
   }
 
+  /* ---------- Privacy Shield (2.2) ---------- */
+  function ensurePrivacyShieldUi(){
+    let curtain = document.getElementById("vvPrivacyCurtain");
+    if (curtain) return curtain;
+
+    curtain = document.createElement("div");
+    curtain.id = "vvPrivacyCurtain";
+    curtain.className = "vvPrivacyCurtain";
+    curtain.setAttribute("role","dialog");
+    curtain.setAttribute("aria-modal","true");
+
+    const card = document.createElement("div");
+    card.className = "vvPrivacyCard";
+
+    const mark = document.createElement("div");
+    mark.className = "vvPrivacyMark";
+    mark.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3.5 19 6v5.2c0 4.5-2.7 7.9-7 9.8-4.3-1.9-7-5.3-7-9.8V6l7-2.5Z" stroke="currentColor" stroke-width="1.8"/><path d="M9.2 11.2V9.8a2.8 2.8 0 0 1 5.6 0v1.4M8.2 11.2h7.6v5.5H8.2v-5.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+
+    const title = document.createElement("h2"); title.id = "vvPrivacyTitle";
+    const sub = document.createElement("p"); sub.id = "vvPrivacySub";
+    const pw = document.createElement("input");
+    pw.id = "vvPrivacyPw"; pw.className = "fieldInput"; pw.type = "password";
+    pw.autocomplete = "off"; pw.autocapitalize = "off"; pw.spellcheck = false;
+    pw.placeholder = "Privacy Shield passphrase";
+
+    const pw2 = document.createElement("input");
+    pw2.id = "vvPrivacyPw2"; pw2.className = "fieldInput"; pw2.type = "password";
+    pw2.autocomplete = "off"; pw2.autocapitalize = "off"; pw2.spellcheck = false;
+    pw2.placeholder = "Confirm Privacy Shield passphrase";
+    pw2.style.marginTop = "8px";
+
+    const err = document.createElement("div"); err.id = "vvPrivacyError"; err.className = "vvPrivacyError";
+    const actions = document.createElement("div"); actions.className = "vvPrivacyActions";
+    const later = document.createElement("button"); later.id = "vvPrivacyLater"; later.className = "btn ghost"; later.type = "button";
+    const go = document.createElement("button"); go.id = "vvPrivacyGo"; go.className = "btn primary"; go.type = "button";
+    actions.append(later,go);
+    card.append(mark,title,sub,pw,pw2,err,actions);
+    curtain.appendChild(card);
+    document.body.appendChild(curtain);
+
+    go.addEventListener("click",()=>privacyShieldSubmit());
+    later.addEventListener("click",()=>privacyShieldDismissPrompt());
+    for(const input of [pw,pw2]){
+      input.addEventListener("keydown",(e)=>{ if(e.key==="Enter") privacyShieldSubmit(); });
+    }
+    return curtain;
+  }
+
+  function privacyShieldConfig(){
+    const meta = getMeta();
+    const cfg = meta && meta.privacyShield && typeof meta.privacyShield === "object"
+      ? meta.privacyShield : null;
+    return cfg;
+  }
+
+  function privacyShieldShow(mode){
+    const curtain = ensurePrivacyShieldUi();
+    curtain.dataset.mode = mode;
+    curtain.className = "vvPrivacyCurtain on" + (mode==="grace" ? " grace" : (mode==="setup"||mode==="activate"||mode==="configure" ? " prompt" : ""));
+    const title = document.getElementById("vvPrivacyTitle");
+    const sub = document.getElementById("vvPrivacySub");
+    const pw = document.getElementById("vvPrivacyPw");
+    const pw2 = document.getElementById("vvPrivacyPw2");
+    const later = document.getElementById("vvPrivacyLater");
+    const go = document.getElementById("vvPrivacyGo");
+    const err = document.getElementById("vvPrivacyError");
+    err.textContent = "";
+    pw.value = ""; pw2.value = "";
+
+    if(mode==="grace") return;
+    if(mode==="locked"){
+      title.textContent = "Privacy Shield";
+      sub.textContent = "This vault was encrypted in memory after being left in the background. Enter your separate Privacy Shield passphrase to continue.";
+      pw.placeholder = "Quick unlock passphrase";
+      pw2.style.display = "none";
+      later.style.display = "none";
+      go.textContent = "Unlock session";
+    }else if(mode==="activate"){
+      const cfg=privacyShieldConfig();
+      const legacyConfig=cfg?.enabled===true && cfg?.v===1 && state.mode==="v2";
+      title.textContent = legacyConfig ? "Upgrade Privacy Shield" : "Activate Privacy Shield";
+      sub.textContent = legacyConfig
+        ? "Enter your existing Privacy Shield passphrase once. Vortex will upgrade its encrypted vault metadata so Privacy Shield automatically arms after every future full vault unlock."
+        : "Automatic Privacy Shield activation could not be recovered from this vault. Enter the Privacy Shield passphrase to restore and repair its persistent encrypted key.";
+      pw.placeholder = "Privacy Shield passphrase";
+      pw2.style.display = "none";
+      later.style.display = "";
+      later.textContent = legacyConfig ? "Not now" : "Not this session";
+      go.textContent = legacyConfig ? "Upgrade & activate" : "Activate & repair";
+    }else{
+      title.textContent = mode==="configure" ? "Configure Privacy Shield" : "Set up Privacy Shield";
+      sub.textContent = "Optional: use a separate, easier-to-remember passphrase for quick unlock. The screen blacks out immediately when Vortex Vault is backgrounded; after 60 seconds, decrypted session state is AES-GCM encrypted in RAM.";
+      pw.placeholder = "New Privacy Shield passphrase";
+      pw2.style.display = "";
+      later.style.display = "";
+      later.textContent = mode==="configure" ? "Cancel" : "Use legacy behavior";
+      go.textContent = "Enable Privacy Shield";
+    }
+    setTimeout(()=>pw.focus(),30);
+  }
+
+  function privacyShieldHide(){
+    const curtain = document.getElementById("vvPrivacyCurtain");
+    if(curtain) curtain.className = "vvPrivacyCurtain";
+    for(const id of ["vvPrivacyPw","vvPrivacyPw2"]){
+      const n=document.getElementById(id); if(n)n.value="";
+    }
+  }
+
+  function privacyShieldAad(label){
+    return new TextEncoder().encode(`VortexVault/PrivacyShield/v2/${label}\0`);
+  }
+
+  async function privacyShieldImportGuardKey(raw){
+    const bytes=raw instanceof Uint8Array?raw:new Uint8Array(raw||0);
+    if(bytes.byteLength!==32) throw new Error("Privacy Shield key material is invalid");
+    return crypto.subtle.importKey(
+      "raw",
+      bytes,
+      {name:"AES-GCM",length:256},
+      false,
+      ["encrypt","decrypt"]
+    );
+  }
+
+  async function privacyShieldEncryptWrappedRaw(wrapperKey,raw,label){
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const cipher=new Uint8Array(await crypto.subtle.encrypt(
+      {name:"AES-GCM",iv,additionalData:privacyShieldAad(label)},
+      wrapperKey,
+      raw
+    ));
+    return {iv,cipher};
+  }
+
+  async function privacyShieldDecryptWrappedRaw(wrapperKey,iv,cipher,label){
+    try{
+      const plain=new Uint8Array(await crypto.subtle.decrypt(
+        {name:"AES-GCM",iv,additionalData:privacyShieldAad(label)},
+        wrapperKey,
+        cipher
+      ));
+      if(plain.byteLength!==32){
+        try{plain.fill(0)}catch{}
+        throw new Error("Privacy Shield key material is invalid");
+      }
+      return plain;
+    }catch(e){
+      if(e && e.message==="Privacy Shield key material is invalid") throw e;
+      throw new Error("Privacy Shield wrapped key could not be authenticated");
+    }
+  }
+
+  function privacyShieldDecodeV2Wrap(cfg,prefix){
+    const ivName=`${prefix}Iv`, cipherName=`${prefix}Cipher`;
+    let iv,cipher;
+    try{
+      if(String(cfg?.[ivName]||"").length>64 || String(cfg?.[cipherName]||"").length>256) throw new Error();
+      iv=b64ToBytes(cfg?.[ivName]||"");
+      cipher=b64ToBytes(cfg?.[cipherName]||"");
+    }catch{
+      throw new Error("Privacy Shield configuration is corrupted");
+    }
+    if(iv.byteLength!==12 || cipher.byteLength!==48){
+      throw new Error("Privacy Shield configuration is corrupted");
+    }
+    return {iv,cipher};
+  }
+
+  async function privacyShieldMakeConfig(passphrase){
+    const salt=crypto.getRandomValues(new Uint8Array(16));
+
+    // Legacy v1 vaults do not retain an AES vault CryptoKey. Preserve the
+    // existing setup behavior until the vault is saved/upgraded to V2/V3.
+    if(state.mode!=="v2" || !state.v2.key){
+      const key=await deriveKeyPBKDF2(passphrase,salt,PRIVACY_SHIELD_KDF_ITER);
+      const iv=crypto.getRandomValues(new Uint8Array(12));
+      const checkPlain=new TextEncoder().encode("VortexVault/PrivacyShield/v1");
+      let cipher;
+      try{cipher=await aesGcmEncrypt(key,iv,checkPlain)}
+      finally{try{checkPlain.fill(0)}catch{}}
+      return {
+        cfg:{
+          v:1,enabled:true,offered:true,
+          iter:PRIVACY_SHIELD_KDF_ITER,
+          salt:bytesToB64(salt),
+          checkIv:bytesToB64(iv),
+          checkCipher:bytesToB64(cipher)
+        },
+        key
+      };
+    }
+
+    const passKey=await deriveKeyPBKDF2(passphrase,salt,PRIVACY_SHIELD_KDF_ITER);
+    const raw=crypto.getRandomValues(new Uint8Array(32));
+    try{
+      const passWrap=await privacyShieldEncryptWrappedRaw(passKey,raw,"passphrase-wrap");
+      const vaultWrap=await privacyShieldEncryptWrappedRaw(state.v2.key,raw,"vault-wrap");
+      const guardKey=await privacyShieldImportGuardKey(raw);
+      return {
+        cfg:{
+          v:2,enabled:true,offered:true,
+          iter:PRIVACY_SHIELD_KDF_ITER,
+          salt:bytesToB64(salt),
+          passIv:bytesToB64(passWrap.iv),
+          passCipher:bytesToB64(passWrap.cipher),
+          vaultIv:bytesToB64(vaultWrap.iv),
+          vaultCipher:bytesToB64(vaultWrap.cipher)
+        },
+        key:guardKey
+      };
+    }finally{
+      try{raw.fill(0)}catch{}
+    }
+  }
+
+  async function privacyShieldRawFromPassphrase(passphrase,cfg){
+    if(!cfg || cfg.v!==2 || cfg.enabled!==true) throw new Error("Privacy Shield is not configured");
+    if(Number(cfg.iter)!==PRIVACY_SHIELD_KDF_ITER) throw new Error("Privacy Shield parameters are invalid");
+    let salt;
+    try{
+      if(String(cfg.salt||"").length>64) throw new Error();
+      salt=b64ToBytes(cfg.salt||"");
+    }catch{
+      throw new Error("Privacy Shield configuration is corrupted");
+    }
+    if(salt.byteLength!==16) throw new Error("Privacy Shield configuration is corrupted");
+    const passWrap=privacyShieldDecodeV2Wrap(cfg,"pass");
+    const passKey=await deriveKeyPBKDF2(passphrase,salt,PRIVACY_SHIELD_KDF_ITER);
+    try{
+      return await privacyShieldDecryptWrappedRaw(passKey,passWrap.iv,passWrap.cipher,"passphrase-wrap");
+    }catch(e){
+      if(e && /configuration|parameters/.test(String(e.message||""))) throw e;
+      throw new Error("Incorrect Privacy Shield passphrase");
+    }
+  }
+
+  async function privacyShieldRecoverFromVault(cfg,vaultKey=state.v2.key){
+    if(!cfg || cfg.v!==2 || cfg.enabled!==true) throw new Error("Privacy Shield persistent key is unavailable");
+    if(!vaultKey) throw new Error("Vault key is unavailable");
+    const vaultWrap=privacyShieldDecodeV2Wrap(cfg,"vault");
+    let raw;
+    try{
+      raw=await privacyShieldDecryptWrappedRaw(vaultKey,vaultWrap.iv,vaultWrap.cipher,"vault-wrap");
+      return await privacyShieldImportGuardKey(raw);
+    }finally{
+      try{if(raw)raw.fill(0)}catch{}
+    }
+  }
+
+  async function privacyShieldRewrapConfigForVaultKey(cfg,oldVaultKey,newVaultKey){
+    if(!cfg || cfg.enabled!==true || cfg.v!==2) return cfg;
+    if(!oldVaultKey || !newVaultKey) throw new Error("Privacy Shield cannot migrate without both vault keys");
+    const vaultWrap=privacyShieldDecodeV2Wrap(cfg,"vault");
+    let raw;
+    try{
+      raw=await privacyShieldDecryptWrappedRaw(oldVaultKey,vaultWrap.iv,vaultWrap.cipher,"vault-wrap");
+      const next=await privacyShieldEncryptWrappedRaw(newVaultKey,raw,"vault-wrap");
+      return {
+        ...cfg,
+        vaultIv:bytesToB64(next.iv),
+        vaultCipher:bytesToB64(next.cipher)
+      };
+    }finally{
+      try{if(raw)raw.fill(0)}catch{}
+    }
+  }
+
+  async function privacyShieldDeriveAndVerify(passphrase,cfg){
+    if(!cfg || cfg.enabled!==true) throw new Error("Privacy Shield is not configured");
+
+    if(cfg.v===2){
+      let raw;
+      try{
+        raw=await privacyShieldRawFromPassphrase(passphrase,cfg);
+        return await privacyShieldImportGuardKey(raw);
+      }finally{
+        try{if(raw)raw.fill(0)}catch{}
+      }
+    }
+
+    // Compatibility with Privacy Shield configs created by the first 2.2 build.
+    if(cfg.v!==1) throw new Error("Privacy Shield configuration is unsupported");
+    if(Number(cfg.iter)!==PRIVACY_SHIELD_KDF_ITER) throw new Error("Privacy Shield parameters are invalid");
+    let salt,iv,cipher;
+    try{
+      if(String(cfg.salt||"").length>64 || String(cfg.checkIv||"").length>64 || String(cfg.checkCipher||"").length>256) throw new Error();
+      salt=b64ToBytes(cfg.salt||""); iv=b64ToBytes(cfg.checkIv||""); cipher=b64ToBytes(cfg.checkCipher||"");
+    }catch{throw new Error("Privacy Shield configuration is corrupted")}
+    if(salt.byteLength!==16 || iv.byteLength!==12 || cipher.byteLength<17 || cipher.byteLength>128){
+      throw new Error("Privacy Shield configuration is corrupted");
+    }
+    const key=await deriveKeyPBKDF2(passphrase,salt,PRIVACY_SHIELD_KDF_ITER);
+    try{
+      const plain=await aesGcmDecrypt(key,iv,cipher);
+      const ok=new TextDecoder().decode(plain)==="VortexVault/PrivacyShield/v1";
+      try{plain.fill(0)}catch{}
+      if(!ok) throw new Error("Incorrect Privacy Shield passphrase");
+      return key;
+    }catch(e){
+      if(e && e.message==="Incorrect Privacy Shield passphrase") throw e;
+      throw new Error("Incorrect Privacy Shield passphrase");
+    }
+  }
+
+  async function privacyShieldSubmit(){
+    if(state.privacyShield.busy) return;
+    const curtain=ensurePrivacyShieldUi();
+    const mode=curtain.dataset.mode;
+    const pw=document.getElementById("vvPrivacyPw").value||"";
+    const pw2=document.getElementById("vvPrivacyPw2").value||"";
+    const err=document.getElementById("vvPrivacyError");
+    if(!pw){err.textContent="Passphrase required.";return}
+    state.privacyShield.busy=true;
+    document.getElementById("vvPrivacyGo").disabled=true;
+    try{
+      if(mode==="setup" || mode==="configure"){
+        if(pw.length<PRIVACY_SHIELD_MIN_LEN) throw new Error(`Use at least ${PRIVACY_SHIELD_MIN_LEN} characters`);
+        if(pw!==pw2) throw new Error("Passphrases do not match");
+        const made=await privacyShieldMakeConfig(pw);
+        getMeta().privacyShield=made.cfg;
+        state.privacyShield.config={...made.cfg};
+        state.privacyShield.guardKey=made.key;
+        state.privacyShield.active=true;
+        state.privacyShield.locked=false;
+        markDirty();
+        privacyShieldHide();
+        if(window.VortexVaultUltra?.refreshActiveFeature) window.VortexVaultUltra.refreshActiveFeature();
+        toast("Privacy Shield enabled");
+      }else if(mode==="activate"){
+        const cfg=privacyShieldConfig();
+
+        // First-generation 2.2 configs did not contain a copy of the Shield key
+        // wrapped by the vault key. Verify the existing phrase once, then migrate
+        // to the persistent v2 config. Future full vault unlocks auto-arm it.
+        if(cfg?.v===1 && state.mode==="v2" && state.v2.key){
+          await privacyShieldDeriveAndVerify(pw,cfg);
+          const made=await privacyShieldMakeConfig(pw);
+          getMeta().privacyShield=made.cfg;
+          state.privacyShield.config={...made.cfg};
+          state.privacyShield.guardKey=made.key;
+          state.privacyShield.active=true;
+          state.privacyShield.locked=false;
+          markDirty();
+          privacyShieldHide();
+          if(window.VortexVaultUltra?.refreshActiveFeature) window.VortexVaultUltra.refreshActiveFeature();
+          toast("Privacy Shield upgraded · future vault unlocks will arm it automatically");
+        }else if(cfg?.v===2 && state.mode==="v2" && state.v2.key){
+          let raw;
+          try{
+            raw=await privacyShieldRawFromPassphrase(pw,cfg);
+            const key=await privacyShieldImportGuardKey(raw);
+            const wrap=await privacyShieldEncryptWrappedRaw(state.v2.key,raw,"vault-wrap");
+            const repaired={
+              ...cfg,
+              vaultIv:bytesToB64(wrap.iv),
+              vaultCipher:bytesToB64(wrap.cipher)
+            };
+            getMeta().privacyShield=repaired;
+            state.privacyShield.config={...repaired};
+            state.privacyShield.guardKey=key;
+            state.privacyShield.active=true;
+            state.privacyShield.locked=false;
+            markDirty();
+          }finally{
+            try{if(raw)raw.fill(0)}catch{}
+          }
+          privacyShieldHide();
+          if(window.VortexVaultUltra?.refreshActiveFeature) window.VortexVaultUltra.refreshActiveFeature();
+          toast("Privacy Shield repaired · automatic activation restored");
+        }else{
+          const key=await privacyShieldDeriveAndVerify(pw,cfg);
+          state.privacyShield.config={...cfg};
+          state.privacyShield.guardKey=key;
+          state.privacyShield.active=true;
+          state.privacyShield.locked=false;
+          privacyShieldHide();
+          toast("Privacy Shield active");
+        }
+      }else if(mode==="locked"){
+        await privacyShieldUnlockLockedSession(pw);
+      }
+    }catch(e){
+      err.textContent=e.message||"Privacy Shield could not continue.";
+      document.getElementById("vvPrivacyPw").value="";
+      document.getElementById("vvPrivacyPw2").value="";
+      document.getElementById("vvPrivacyPw").focus();
+    }finally{
+      state.privacyShield.busy=false;
+      const b=document.getElementById("vvPrivacyGo"); if(b)b.disabled=false;
+    }
+  }
+
+  function privacyShieldDismissPrompt(){
+    const curtain=ensurePrivacyShieldUi();
+    const mode=curtain.dataset.mode;
+    if(mode==="setup"){
+      getMeta().privacyShield={v:1,enabled:false,offered:true};
+      markDirty();
+    }
+    state.privacyShield.active=false;
+    state.privacyShield.guardKey=null;
+    state.privacyShield.config=privacyShieldConfig();
+    privacyShieldHide();
+    if(window.VortexVaultUltra?.refreshActiveFeature) window.VortexVaultUltra.refreshActiveFeature();
+  }
+
+  function privacyShieldCaptureTransientUi(){
+    const textName=document.getElementById("vvActiveTextName");
+    const textEditor=document.getElementById("vvActiveTextEditor");
+    return {
+      workspace:window.VortexVaultSecureWorkspace?.currentWorkspace?.() || "files",
+      secure:window.VortexVaultSecureWorkspace?.captureSensitiveUi?.() || null,
+      text:(textName&&textEditor)?{
+        itemId:textEditor.dataset.itemId||null,
+        name:textName.value||"",
+        text:textEditor.value||""
+      }:null,
+      search:ui.search?.value||"",
+      prompt:ui.ovPrompt?.classList.contains("on")?{
+        kind:state.prompt.kind,targetId:state.prompt.targetId,
+        title:ui.promptTitle.textContent,sub:ui.promptSub.textContent,
+        label:ui.promptLabel.textContent,value:ui.promptValue.value||""
+      }:null
+    };
+  }
+
+  function privacyShieldScrubDom(){
+    revokeAllObjectUrls();
+    try{webrtcCloseSession(true,true)}catch{}
+    try{window.VortexVaultUltra?.closeMediaViewer?.()}catch{}
+    try{window.VortexVaultSecureWorkspace?.scrubSensitiveUi?.()}catch{}
+    for(const id of ["pw","pw2","promptValue","pasteCatcher","shareAnswerIn","shareOfferIn","shareOfferOut","shareAnswerOut","shareOfferLink","shareAnswerLink","shareMyCode","sharePeerCode"]){
+      const n=document.getElementById(id); if(n && "value" in n)n.value="";
+    }
+    // The protected snapshot was already created before this runs. Close every
+    // transient surface that could otherwise reveal stale plaintext after the
+    // curtain is removed.
+    for(const id of ["ovPrompt","ovPaste","ovShare","ovCredential","ovTotp","ovQrScan","ovVersions"]){
+      try{const ov=document.getElementById(id);if(ov)ov.classList.remove("on")}catch{}
+    }
+    if(ui.search)ui.search.value="";
+    for(const el of [ui.tbody,ui.pathLabel,ui.pvBody,ui.pvTools,ui.pvTitle,ui.pvMeta,ui.previewSub,ui.vaultName,ui.vaultFileLabel]){
+      if(el)el.textContent="";
+    }
+    for(const id of ["libraryHub","shareHub","settingsHub","secureList","secureDetail","vvVersionsPreview"]){
+      const el=document.getElementById(id);if(el)el.textContent="";
+    }
+  }
+
+  async function privacyShieldLockNow(){
+    if(!state.unlocked || !state.privacyShield.active || state.privacyShield.locked || state.privacyShield.busy) return;
+    const key=state.privacyShield.guardKey;
+    if(!key) return;
+    state.privacyShield.busy=true;
+    try{
+      await encryptPendingTextRecordsNow();
+      const snapshotObj={
+        v:1,
+        mode:state.mode,
+        index:state.mode==="v2"?state.v2.index:null,
+        v1Vault:state.mode==="v1"?state.v1Vault:null,
+        legacyPassword:state.mode==="v1"?state.password:null,
+        fileName:state.fileName,
+        currentFolderId:state.currentFolderId,
+        selectedId:state.selectedId,
+        dirty:!!state.dirty,
+        transient:privacyShieldCaptureTransientUi()
+      };
+      const plain=new TextEncoder().encode(JSON.stringify(snapshotObj));
+      const iv=crypto.getRandomValues(new Uint8Array(12));
+      let cipher;
+      try{cipher=await aesGcmEncrypt(key,iv,plain)}
+      finally{try{plain.fill(0)}catch{}}
+
+      state.privacyShield.snapshot={iv,cipher};
+      state.privacyShield.guardKey=null;
+      state.privacyShield.locked=true;
+      if(state.mode==="v2") state.v2.index=null;
+      if(state.mode==="v1"){state.v1Vault=null;state.password=null}
+      state.currentFolderId=null;
+      state.selectedId=null;
+      state.fileName=null;
+      privacyShieldScrubDom();
+    }catch(e){
+      console.error(e);
+      // If an in-memory lock cannot be completed, never pretend it was. Keep the
+      // blackout curtain up and retain the live key/state rather than destroy data.
+      state.privacyShield.locked=false;
+    }finally{
+      state.privacyShield.busy=false;
+    }
+  }
+
+  async function privacyShieldUnlockLockedSession(passphrase){
+    const cfg=state.privacyShield.config;
+    const snap=state.privacyShield.snapshot;
+    if(!snap) throw new Error("Protected session state is unavailable");
+    const key=await privacyShieldDeriveAndVerify(passphrase,cfg);
+    let plain;
+    try{
+      plain=await aesGcmDecrypt(key,snap.iv,snap.cipher);
+    }catch{
+      throw new Error("Privacy Shield state could not be decrypted");
+    }
+    let saved;
+    try{
+      saved=JSON.parse(new TextDecoder().decode(plain));
+    }finally{try{plain.fill(0)}catch{}}
+    if(!saved || saved.v!==1 || saved.mode!==state.mode) throw new Error("Protected session state is invalid");
+
+    if(state.mode==="v2") state.v2.index=normalizeV2Index(saved.index);
+    if(state.mode==="v1"){
+      state.v1Vault=normalizeV1(saved.v1Vault);
+      state.password=saved.legacyPassword||null;
+    }
+    state.fileName=saved.fileName||state.fileName;
+    state.currentFolderId=saved.currentFolderId||null;
+    state.selectedId=saved.selectedId||null;
+    state.dirty=!!saved.dirty;
+    state.privacyShield.guardKey=key;
+    state.privacyShield.snapshot=null;
+    state.privacyShield.locked=false;
+    state.privacyShield.hiddenAt=0;
+    privacyShieldHide();
+    render();
+
+    const transient=saved.transient||{};
+    if(transient.workspace && window.VortexVaultSecureWorkspace?.setWorkspace){
+      window.VortexVaultSecureWorkspace.setWorkspace(transient.workspace);
+    }
+    if(ui.search && typeof transient.search==="string") ui.search.value=transient.search;
+    if(transient.secure && window.VortexVaultSecureWorkspace?.restoreSensitiveUi){
+      await window.VortexVaultSecureWorkspace.restoreSensitiveUi(transient.secure);
+    }
+    if(transient.text && transient.workspace==="files"){
+      setTimeout(()=>{
+        const n=document.getElementById("vvActiveTextName"), e=document.getElementById("vvActiveTextEditor");
+        if(n&&e&&e.dataset.itemId===transient.text.itemId){
+          n.value=transient.text.name||n.value;
+          e.value=transient.text.text||"";
+        }
+      },80);
+    }
+    if(transient.prompt){
+      state.prompt.kind=transient.prompt.kind||null;
+      state.prompt.targetId=transient.prompt.targetId||null;
+      ui.promptTitle.textContent=transient.prompt.title||"Prompt";
+      ui.promptSub.textContent=transient.prompt.sub||"";
+      ui.promptLabel.textContent=transient.prompt.label||"Value";
+      ui.promptValue.value=transient.prompt.value||"";
+      openOverlay("ovPrompt",ui.promptValue);
+    }
+    toast("Privacy Shield unlocked");
+  }
+
+  function privacyShieldBeginBackground(){
+    if(!state.unlocked || !state.privacyShield.active || state.privacyShield.locked) return;
+    if(state.privacyShield.hiddenAt) return;
+    state.privacyShield.hiddenAt=Date.now();
+    privacyShieldShow("grace");
+    if(state.privacyShield.timer)clearTimeout(state.privacyShield.timer);
+    state.privacyShield.timer=setTimeout(async()=>{
+      state.privacyShield.timer=null;
+      if(!state.unlocked || !state.privacyShield.active || state.privacyShield.locked) return;
+      if((Date.now()-state.privacyShield.hiddenAt)>=PRIVACY_SHIELD_GRACE_MS){
+        await privacyShieldLockNow();
+      }
+    },PRIVACY_SHIELD_GRACE_MS+50);
+  }
+
+  async function privacyShieldReturnForeground(){
+    if(!state.unlocked || !state.privacyShield.active) return;
+    if(state.privacyShield.locked){
+      privacyShieldShow("locked");
+      return;
+    }
+    const elapsed=state.privacyShield.hiddenAt?Date.now()-state.privacyShield.hiddenAt:0;
+    if(state.privacyShield.timer){clearTimeout(state.privacyShield.timer);state.privacyShield.timer=null}
+    if(elapsed>=PRIVACY_SHIELD_GRACE_MS){
+      await privacyShieldLockNow();
+      privacyShieldShow("locked");
+      return;
+    }
+    state.privacyShield.hiddenAt=0;
+    privacyShieldHide();
+  }
+
+  function privacyShieldAfterVaultUnlocked(){
+    if(!state.unlocked) return;
+    if(state.resilience.recoveredFromCopy){
+      const src=state.resilience.recoveredFromCopy;
+      const label=typeof src==="number"?`redundant current copy ${src}`:String(src);
+      setTimeout(()=>toast(`Vault opened from ${label}. Save to heal the current vault set.`),40);
+    }
+    const cfg=privacyShieldConfig();
+    state.privacyShield.config=cfg?{...cfg}:null;
+    state.privacyShield.locked=false;
+    state.privacyShield.snapshot=null;
+    state.privacyShield.hiddenAt=0;
+    state.privacyShield.guardKey=null;
+    state.privacyShield.active=false;
+
+    if(cfg && cfg.enabled===true && cfg.v===2 && state.mode==="v2" && state.v2.key){
+      // Persistent v2 Privacy Shield configs contain the same random Shield key
+      // wrapped twice: once by the quick-unlock phrase and once by the already-
+      // authenticated vault key. Recover the latter immediately so there is no
+      // per-session activation prompt and no post-unlock window where Shield is off.
+      privacyShieldRecoverFromVault(cfg,state.v2.key).then((key)=>{
+        if(!state.unlocked) return;
+        const latest=privacyShieldConfig();
+        if(!latest || latest.enabled!==true || latest.v!==2 || latest.vaultCipher!==cfg.vaultCipher) return;
+        state.privacyShield.config={...latest};
+        state.privacyShield.guardKey=key;
+        state.privacyShield.active=true;
+        state.privacyShield.locked=false;
+        privacyShieldHide();
+        if(window.VortexVaultUltra?.refreshActiveFeature) window.VortexVaultUltra.refreshActiveFeature();
+        if(document.visibilityState==="hidden") privacyShieldBeginBackground();
+      }).catch((e)=>{
+        if(!state.unlocked) return;
+        console.error("Privacy Shield automatic activation failed",e);
+        setTimeout(()=>{if(state.unlocked)privacyShieldShow("activate")},80);
+      });
+      return;
+    }
+
+    setTimeout(()=>{
+      if(!state.unlocked) return;
+      const latest=privacyShieldConfig();
+      state.privacyShield.config=latest?{...latest}:null;
+      if(latest && latest.enabled===true){
+        // Configs made by the first 2.2 build need the existing Shield phrase
+        // exactly once so they can be upgraded to the persistent dual-wrap form.
+        privacyShieldShow("activate");
+      }else if(!latest || latest.offered!==true){
+        privacyShieldShow("setup");
+      }
+    },160);
+  }
+
+  function privacyShieldDisable(){
+    if(!state.unlocked) return;
+    if(!confirm("Disable Privacy Shield for this vault? The vault itself remains encrypted; only automatic background session locking will be disabled.")) return;
+    getMeta().privacyShield={v:1,enabled:false,offered:true};
+    state.privacyShield.active=false;
+    state.privacyShield.locked=false;
+    state.privacyShield.guardKey=null;
+    state.privacyShield.snapshot=null;
+    state.privacyShield.config={...getMeta().privacyShield};
+    if(state.privacyShield.timer){clearTimeout(state.privacyShield.timer);state.privacyShield.timer=null}
+    privacyShieldHide();
+    markDirty();
+    if(window.VortexVaultUltra?.refreshActiveFeature)window.VortexVaultUltra.refreshActiveFeature();
+    toast("Privacy Shield disabled");
+  }
+
+  window.VortexVaultPrivacyShield={
+    afterUnlock:privacyShieldAfterVaultUnlocked,
+    configure:()=>privacyShieldShow("configure"),
+    activate:()=>privacyShieldShow("activate"),
+    disable:privacyShieldDisable,
+    status:()=>({
+      configured:!!privacyShieldConfig()?.enabled,
+      active:!!state.privacyShield.active,
+      locked:!!state.privacyShield.locked
+    })
+  };
+
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="hidden") privacyShieldBeginBackground();
+    else privacyShieldReturnForeground();
+  });
+  window.addEventListener("blur",()=>privacyShieldBeginBackground());
+  window.addEventListener("focus",()=>{if(document.visibilityState==="visible")privacyShieldReturnForeground()});
+  window.addEventListener("pagehide",()=>privacyShieldBeginBackground());
+  window.addEventListener("pageshow",()=>{if(document.visibilityState==="visible")privacyShieldReturnForeground()});
+
+  document.addEventListener("keydown",(e)=>{
+    if(!state.privacyShield?.locked)return;
+    const curtain=document.getElementById("vvPrivacyCurtain");
+    if(curtain&&curtain.contains(e.target))return;
+    e.preventDefault();e.stopImmediatePropagation();
+  },true);
+
+  /* ---------- Resilience archive (2.2) ---------- */
+  function resilienceClampSettings(raw){
+    const r=raw&&typeof raw==="object"?raw:{};
+    return {
+      currentCopies:Math.max(1,Math.min(3,Math.round(Number(r.currentCopies||2)))),
+      previousVersions:Math.max(0,Math.min(3,Math.round(Number(r.previousVersions ?? 1))))
+    };
+  }
+
+  function resilienceSettings(writeDefault=false){
+    const meta=getMeta();
+    const existing=meta&&meta.resilience&&typeof meta.resilience==="object"?meta.resilience:null;
+    const out=resilienceClampSettings(existing);
+    if(writeDefault && state.unlocked && meta && (!existing || existing.currentCopies!==out.currentCopies || existing.previousVersions!==out.previousVersions)){
+      meta.resilience={v:1,...out};
+      state.dirty=true;
+    }
+    return out;
+  }
+
+  function sameBytes(a,b){
+    const x=a instanceof Uint8Array?a:new Uint8Array(a||0);
+    const y=b instanceof Uint8Array?b:new Uint8Array(b||0);
+    if(x.byteLength!==y.byteLength)return false;
+    let diff=0;
+    for(let i=0;i<x.byteLength;i++)diff|=x[i]^y[i];
+    return diff===0;
+  }
+
+  async function resilienceBuildFooter(manifestBytes){
+    const hash=await sha256Bytes(manifestBytes);
+    const out=new Uint8Array(RESILIENCE_FOOTER_SIZE);
+    const dv=new DataView(out.buffer);
+    for(let i=0;i<8;i++)out[i]=RESILIENCE_TRAILER_MAGIC.charCodeAt(i);
+    dv.setUint32(8,RESILIENCE_TRAILER_VERSION,true);
+    dv.setUint32(12,manifestBytes.byteLength,true);
+    out.set(hash.slice(0,32),16);
+    dv.setUint32(48,RESILIENCE_FOOTER_SIZE,true);
+    const end="ENDVVRS!";
+    for(let i=0;i<8;i++)out[56+i]=end.charCodeAt(i);
+    return out;
+  }
+
+  async function resilienceTryFooter(file,footerOffset){
+    if(!Number.isSafeInteger(footerOffset)||footerOffset<0||footerOffset+RESILIENCE_FOOTER_SIZE>file.size)return null;
+    const f=await readSlice(file,footerOffset,RESILIENCE_FOOTER_SIZE);
+    const magic=String.fromCharCode(...f.slice(0,8));
+    if(magic!==RESILIENCE_TRAILER_MAGIC)return null;
+    const dv=new DataView(f.buffer,f.byteOffset,f.byteLength);
+    if(dv.getUint32(8,true)!==RESILIENCE_TRAILER_VERSION || dv.getUint32(48,true)!==RESILIENCE_FOOTER_SIZE)return null;
+    if(String.fromCharCode(...f.slice(56,64))!=="ENDVVRS!")return null;
+    const len=dv.getUint32(12,true);
+    if(!Number.isInteger(len)||len<20||len>256*1024||footerOffset-len<0)return null;
+    const bytes=await readSlice(file,footerOffset-len,len);
+    const hash=await sha256Bytes(bytes);
+    if(!sameBytes(hash.slice(0,32),f.slice(16,48)))return null;
+    let m;
+    try{m=JSON.parse(new TextDecoder().decode(bytes))}catch{return null}
+    if(!m||m.v!==1||!Array.isArray(m.entries)||m.entries.length<1||m.entries.length>6)return null;
+    const settings=resilienceClampSettings(m.settings);
+    const entries=[];
+    for(const e of m.entries){
+      const kind=e&&e.kind;
+      const offset=Number(e?.offset),length=Number(e?.length);
+      if(!["current","previous"].includes(kind))return null;
+      if(!Number.isSafeInteger(offset)||!Number.isSafeInteger(length)||offset<0||length<1||offset+length>(footerOffset-len))return null;
+      const headerLen=Number(e?.headerLen||0);
+      const headerHash=typeof e?.headerHash==="string"&&e.headerHash.length<=128?e.headerHash:"";
+      if(kind==="current" && headerHash && (!Number.isInteger(headerLen)||![V2_HEADER_SIZE,V3_HEADER_SIZE].includes(headerLen)))return null;
+      entries.push({
+        kind,offset,length,
+        copy:Number.isInteger(Number(e.copy))?Number(e.copy):0,
+        savedAtHour:Number.isFinite(Number(e.savedAtHour))?Number(e.savedAtHour):0,
+        headerLen,headerHash
+      });
+    }
+    const currents=entries.filter(e=>e.kind==="current");
+    const previous=entries.filter(e=>e.kind==="previous");
+    if(currents.length<1||currents.length>3||previous.length>3)return null;
+    return {v:1,settings,entries,savedAtHour:Number(m.savedAtHour||0),footerOffset};
+  }
+
+  async function resilienceParseManifest(file){
+    if(!file||!Number.isFinite(file.size)||file.size<RESILIENCE_FOOTER_SIZE)return null;
+    const direct=await resilienceTryFooter(file,file.size-RESILIENCE_FOOTER_SIZE);
+    if(direct)return direct;
+
+    // The manifest/footer pair is written three times. Scan only the small tail
+    // region so a damaged last copy cannot make the recovery map a single point
+    // of failure.
+    const scanLen=Math.min(file.size,1024*1024);
+    const start=file.size-scanLen;
+    const tail=await readSlice(file,start,scanLen);
+    const magic=[...RESILIENCE_TRAILER_MAGIC].map(c=>c.charCodeAt(0));
+    for(let i=tail.length-RESILIENCE_FOOTER_SIZE;i>=0;i--){
+      let ok=true;
+      for(let j=0;j<magic.length;j++){if(tail[i+j]!==magic[j]){ok=false;break}}
+      if(!ok)continue;
+      const parsed=await resilienceTryFooter(file,start+i);
+      if(parsed)return parsed;
+    }
+    return null;
+  }
+
+  async function resilienceHeaderLooksValid(blob){
+    try{
+      if(blob.size<5)return false;
+      const probe=await readSlice(blob,0,5);
+      const sig=String.fromCharCode(probe[0],probe[1],probe[2],probe[3]);
+      if(sig!==V2_MAGIC)return false;
+      if(probe[4]===V2_VERSION){
+        const h=v2ParseHeader(await readSlice(blob,0,V2_HEADER_SIZE));
+        return Number.isInteger(h.indexLen)&&h.indexLen>=16&&(V2_HEADER_SIZE+h.indexLen)<=blob.size;
+      }
+      if(probe[4]===V3_VERSION){
+        const h=v3ParseHeader(await readSlice(blob,0,V3_HEADER_SIZE));
+        validateV3HeaderOrThrow(h,blob.size);
+        return true;
+      }
+    }catch{}
+    return false;
+  }
+
+  async function resiliencePrepareOpen(file){
+    const manifest=await resilienceParseManifest(file);
+    state.resilience.sourceFile=file;
+    state.resilience.manifest=manifest;
+    state.resilience.activeCurrentIndex=0;
+    state.resilience.recoveredFromCopy=null;
+    state.resilience.recoveredRecords=new Set();
+    state.resilience.activeBaseBlob=file;
+    state.resilience.openedFromPrevious=null;
+
+    if(!manifest)return file;
+    const current=manifest.entries.filter(e=>e.kind==="current").sort((a,b)=>(a.copy||0)-(b.copy||0));
+    for(let i=0;i<current.length;i++){
+      const e=current[i],blob=file.slice(e.offset,e.offset+e.length);
+      if(e.headerHash&&e.headerLen){
+        try{
+          const hb=await readSlice(blob,0,e.headerLen);
+          const hh=bytesToB64(await sha256Bytes(hb));
+          if(hh!==e.headerHash)continue;
+        }catch{continue}
+      }
+      if(await resilienceHeaderLooksValid(blob)){
+        state.resilience.activeCurrentIndex=i;
+        state.resilience.activeBaseBlob=blob;
+        if(i>0)state.resilience.recoveredFromCopy=i+1;
+        return blob;
+      }
+    }
+
+    const previous=manifest.entries.filter(e=>e.kind==="previous").sort((a,b)=>(a.copy||0)-(b.copy||0));
+    for(let i=0;i<previous.length;i++){
+      const e=previous[i],blob=file.slice(e.offset,e.offset+e.length);
+      if(await resilienceHeaderLooksValid(blob)){
+        state.resilience.activeCurrentIndex=-1;
+        state.resilience.activeBaseBlob=blob;
+        state.resilience.openedFromPrevious=i+1;
+        state.resilience.recoveredFromCopy=`previous version ${i+1}`;
+        return blob;
+      }
+    }
+    throw new Error("All current vault copies are damaged and no readable previous version is available");
+  }
+
+  function resilienceCurrentEntries(){
+    const m=state.resilience.manifest;
+    return m&&Array.isArray(m.entries)?m.entries.filter(e=>e.kind==="current").sort((a,b)=>(a.copy||0)-(b.copy||0)):[];
+  }
+
+  function resiliencePreviousEntries(){
+    const m=state.resilience.manifest;
+    return m&&Array.isArray(m.entries)?m.entries.filter(e=>e.kind==="previous"):[];
+  }
+
+  function resilienceEntryBlob(entry){
+    const src=state.resilience.sourceFile;
+    if(!src||!entry)return null;
+    return src.slice(entry.offset,entry.offset+entry.length);
+  }
+
+  function resiliencePriorBaseForHistory(){
+    if(state.resilience.activeBaseBlob)return state.resilience.activeBaseBlob;
+    if(state.mode==="v2"&&state.v2.fileRef)return state.v2.fileRef;
+    if(state.mode==="v1"&&state.pendingOpenFile)return state.pendingOpenFile;
+    return null;
+  }
+
+  function resilienceExistingPreviousBlobs(){
+    return resiliencePreviousEntries().map(resilienceEntryBlob).filter(Boolean);
+  }
+
+  async function resilienceBuildArchive(baseBlob,settings,priorBase,olderPrevious,criticalHeader=null){
+    const cfg=resilienceClampSettings(settings);
+    if(cfg.currentCopies===1 && cfg.previousVersions===0){
+      return {blob:baseBlob,manifest:null};
+    }
+
+    const savedAtHour=Math.floor(Date.now()/3600000)*3600000;
+    const parts=[];
+    const entries=[];
+    let offset=0;
+    for(let i=0;i<cfg.currentCopies;i++){
+      parts.push(baseBlob);
+      entries.push({
+        kind:"current",copy:i+1,offset,length:baseBlob.size,savedAtHour,
+        headerLen:Number(criticalHeader?.headerLen||0),
+        headerHash:String(criticalHeader?.headerHash||"")
+      });
+      offset+=baseBlob.size;
+    }
+
+    const prev=[];
+    if(priorBase&&priorBase.size)prev.push(priorBase);
+    for(const b of olderPrevious||[]){
+      if(prev.length>=cfg.previousVersions)break;
+      if(b&&b.size)prev.push(b);
+    }
+    for(let i=0;i<Math.min(cfg.previousVersions,prev.length);i++){
+      const b=prev[i];
+      parts.push(b);
+      const priorHour = Number(state.resilience.manifest?.savedAtHour || (state.resilience.sourceFile?.lastModified ? Math.floor(state.resilience.sourceFile.lastModified/3600000)*3600000 : 0));
+      entries.push({kind:"previous",copy:i+1,offset,length:b.size,savedAtHour:i===0?priorHour:Number(resiliencePreviousEntries()[i-1]?.savedAtHour||0)});
+      offset+=b.size;
+    }
+
+    const manifest={v:1,savedAtHour,settings:cfg,entries};
+    const bytes=new TextEncoder().encode(JSON.stringify(manifest));
+    const footer=await resilienceBuildFooter(bytes);
+    for(let i=0;i<RESILIENCE_TRAILER_COPIES;i++)parts.push(bytes,footer);
+    return {blob:new Blob(parts,{type:"application/octet-stream"}),manifest};
+  }
+
+  async function resilienceTryIndexCopy(key,version){
+    const src=state.resilience.sourceFile, entries=resilienceCurrentEntries();
+    if(!src||!entries.length)return null;
+    for(let i=0;i<entries.length;i++){
+      if(i===state.resilience.activeCurrentIndex)continue;
+      const e=entries[i],blob=src.slice(e.offset,e.offset+e.length);
+      try{
+        if(version===V3_VERSION){
+          const hdr=v3ParseHeader(await readSlice(blob,0,V3_HEADER_SIZE));
+          validateV3HeaderOrThrow(hdr,blob.size);
+          const cipher=await readSlice(blob,V3_HEADER_SIZE,hdr.indexLen);
+          const index=await v2DecryptIndex(key,hdr.indexIv,cipher);
+          state.resilience.activeCurrentIndex=i;
+          state.resilience.activeBaseBlob=blob;
+          state.resilience.recoveredFromCopy=i+1;
+          return {file:blob,hdr,index,dataStart:V3_HEADER_SIZE+hdr.indexLen};
+        }else{
+          const hdr=v2ParseHeader(await readSlice(blob,0,V2_HEADER_SIZE));
+          if(!Number.isInteger(hdr.indexLen)||hdr.indexLen<16||V2_HEADER_SIZE+hdr.indexLen>blob.size)continue;
+          const cipher=await readSlice(blob,V2_HEADER_SIZE,hdr.indexLen);
+          const index=await v2DecryptIndex(key,hdr.indexIv,cipher);
+          state.resilience.activeCurrentIndex=i;
+          state.resilience.activeBaseBlob=blob;
+          state.resilience.recoveredFromCopy=i+1;
+          return {file:blob,hdr,index,dataStart:V2_HEADER_SIZE+hdr.indexLen};
+        }
+      }catch{}
+    }
+    const previous=resiliencePreviousEntries();
+    for(let i=0;i<previous.length;i++){
+      const e=previous[i],blob=src.slice(e.offset,e.offset+e.length);
+      try{
+        if(version===V3_VERSION){
+          const hdr=v3ParseHeader(await readSlice(blob,0,V3_HEADER_SIZE));
+          validateV3HeaderOrThrow(hdr,blob.size);
+          const cipher=await readSlice(blob,V3_HEADER_SIZE,hdr.indexLen);
+          const index=await v2DecryptIndex(key,hdr.indexIv,cipher);
+          state.resilience.activeCurrentIndex=-1;
+          state.resilience.activeBaseBlob=blob;
+          state.resilience.openedFromPrevious=i+1;
+          state.resilience.recoveredFromCopy=`previous version ${i+1}`;
+          return {file:blob,hdr,index,dataStart:V3_HEADER_SIZE+hdr.indexLen};
+        }else{
+          const hdr=v2ParseHeader(await readSlice(blob,0,V2_HEADER_SIZE));
+          if(!Number.isInteger(hdr.indexLen)||hdr.indexLen<16||V2_HEADER_SIZE+hdr.indexLen>blob.size)continue;
+          const cipher=await readSlice(blob,V2_HEADER_SIZE,hdr.indexLen);
+          const index=await v2DecryptIndex(key,hdr.indexIv,cipher);
+          state.resilience.activeCurrentIndex=-1;
+          state.resilience.activeBaseBlob=blob;
+          state.resilience.openedFromPrevious=i+1;
+          state.resilience.recoveredFromCopy=`previous version ${i+1}`;
+          return {file:blob,hdr,index,dataStart:V2_HEADER_SIZE+hdr.indexLen};
+        }
+      }catch{}
+    }
+    return null;
+  }
+
+  async function resilienceTryRecordCopies(it){
+    const src=state.resilience.sourceFile,entries=resilienceCurrentEntries();
+    if(state.resilience.openedFromPrevious)return null;
+    if(!src||entries.length<2||!state.v2.key)return null;
+    for(let i=0;i<entries.length;i++){
+      if(i===state.resilience.activeCurrentIndex)continue;
+      const e=entries[i];
+      try{
+        const abs=e.offset+state.v2.dataStart+Number(it.recRelOff||0);
+        if(abs<e.offset||abs+Number(it.recLen||0)>e.offset+e.length)continue;
+        const record=await readSlice(src,abs,Number(it.recLen||0));
+        const plain=Number(state.v2.formatVersion||V2_VERSION)===V3_VERSION
+          ? await v3DecryptRecordForItem(state.v2.key,it,record)
+          : await v2DecryptRecordBytes(state.v2.key,record);
+        state.v2.pendingRecords.set(it.id,record);
+        state.resilience.recoveredRecords.add(it.id);
+        state.dirty=true;
+        return plain;
+      }catch{}
+    }
+    return null;
+  }
+
+  function timestampedVaultName(name){
+    let base=sanitizeName(name||"vortex.vault","vortex.vault").replace(/\.vault$/i,"");
+    base=base.replace(/-\d{4}-\d{2}-\d{2}-\d{2}$/,"");
+    const d=new Date(),pad=n=>String(n).padStart(2,"0");
+    return `${base}-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}-${pad(d.getHours())}.vault`;
+  }
+
+  async function resilienceLoadVersionEntry(entry){
+    if(!entry||!state.v2.key)throw new Error("Version cannot be opened in the current session");
+    const blob=resilienceEntryBlob(entry);
+    if(!blob)throw new Error("Version data is unavailable");
+    const probe=await readSlice(blob,0,5);
+    const sig=probe.length>=4?String.fromCharCode(probe[0],probe[1],probe[2],probe[3]):"";
+    if(sig!==V2_MAGIC)throw new Error("This archived version uses an older legacy container; download it to open separately.");
+    if(probe[4]===V3_VERSION){
+      const hdr=v3ParseHeader(await readSlice(blob,0,V3_HEADER_SIZE));
+      validateV3HeaderOrThrow(hdr,blob.size);
+      const cipher=await readSlice(blob,V3_HEADER_SIZE,hdr.indexLen);
+      const index=await v2DecryptIndex(state.v2.key,hdr.indexIv,cipher);
+      return {blob,index,formatVersion:V3_VERSION,dataStart:V3_HEADER_SIZE+hdr.indexLen};
+    }
+    if(probe[4]===V2_VERSION){
+      const hdr=v2ParseHeader(await readSlice(blob,0,V2_HEADER_SIZE));
+      if(!Number.isInteger(hdr.indexLen)||hdr.indexLen<16||V2_HEADER_SIZE+hdr.indexLen>blob.size)throw new Error("Archived version header is damaged");
+      const cipher=await readSlice(blob,V2_HEADER_SIZE,hdr.indexLen);
+      const index=await v2DecryptIndex(state.v2.key,hdr.indexIv,cipher);
+      return {blob,index,formatVersion:V2_VERSION,dataStart:V2_HEADER_SIZE+hdr.indexLen};
+    }
+    throw new Error("Archived version format is unsupported");
+  }
+
+  async function resiliencePlainFromLoadedVersion(loaded,it){
+    if(!loaded||!it)throw new Error("File version is unavailable");
+    if(it.kind==="folder")return new Uint8Array();
+    const off=loaded.dataStart+Number(it.recRelOff||0),len=Number(it.recLen||0);
+    if(!Number.isSafeInteger(off)||!Number.isSafeInteger(len)||len<28||off<loaded.dataStart||off+len>loaded.blob.size)throw new Error("Archived record bounds are invalid");
+    const rec=await readSlice(loaded.blob,off,len);
+    return loaded.formatVersion===V3_VERSION
+      ? v3DecryptRecordForItem(state.v2.key,it,rec)
+      : v2DecryptRecordBytes(state.v2.key,rec);
+  }
+
+  async function resilienceVerifyCurrentEntry(entry,itemId){
+    try{
+      const loaded=await resilienceLoadVersionEntry(entry);
+      const it=loaded.index.items.find(x=>x.id===itemId);
+      if(!it)return {ok:false,message:"File does not exist in this saved copy."};
+      const plain=await resiliencePlainFromLoadedVersion(loaded,it);
+      try{plain.fill(0)}catch{}
+      return {ok:true,message:"Authenticated and healthy."};
+    }catch(e){
+      return {ok:false,message:e.message||"Authentication failed."};
+    }
+  }
+
+  function ensureVersionsOverlay(){
+    let ov=document.getElementById("ovVersions");
+    if(ov)return ov;
+    ov=document.createElement("div");ov.id="ovVersions";ov.className="overlay";
+    const modal=document.createElement("div");modal.className="modal vvVersionsModal";
+    const head=document.createElement("div");head.className="modalHead";
+    const tx=document.createElement("div");
+    const h=document.createElement("div");h.className="h";h.id="vvVersionsTitle";h.textContent="Versions & recovery";
+    const s=document.createElement("div");s.className="s";s.id="vvVersionsSub";
+    tx.append(h,s);
+    const close=document.createElement("button");close.className="btn ghost";close.type="button";close.textContent="Close";close.onclick=()=>closeOverlay("ovVersions");
+    head.append(tx,close);
+    const body=document.createElement("div");body.className="modalBody";
+    const list=document.createElement("div");list.className="vvVersionList";list.id="vvVersionList";
+    const preview=document.createElement("div");preview.id="vvVersionsPreview";
+    body.append(list,preview);
+    modal.append(head,body);ov.appendChild(modal);document.body.appendChild(ov);
+    return ov;
+  }
+
+  function versionRow(title,sub){
+    const row=document.createElement("div");row.className="vvVersionRow";
+    const tx=document.createElement("div");
+    const h=document.createElement("div");h.className="h";h.textContent=title;
+    const s=document.createElement("div");s.className="s";s.textContent=sub||"";
+    tx.append(h,s);
+    const acts=document.createElement("div");acts.className="vvVersionActs";
+    row.append(tx,acts);
+    return {row,sub:s,acts};
+  }
+
+  function formatSavedHour(ms){
+    if(!ms)return "Saved time unavailable";
+    try{
+      const d=new Date(ms);
+      return d.toLocaleString([], {year:"numeric",month:"short",day:"2-digit",hour:"2-digit",minute:undefined});
+    }catch{return "Saved time unavailable"}
+  }
+
+  async function previewArchivedItem(entry,itemId){
+    const stage=document.getElementById("vvVersionsPreview");
+    if(!stage)return;
+    stage.textContent="";
+    try{
+      const loaded=await resilienceLoadVersionEntry(entry);
+      const old=loaded.index.items.find(x=>x.id===itemId);
+      if(!old)throw new Error("This file did not exist in that vault version");
+      const plain=await resiliencePlainFromLoadedVersion(loaded,old);
+      const card=document.createElement("div");card.className="previewCard";card.style.marginTop="10px";
+      const title=document.createElement("div");title.className="metaRow";
+      const t=document.createElement("div");t.className="title";t.textContent=`Previous version · ${old.name||"file"}`;
+      title.appendChild(t);card.appendChild(title);
+      if(old.kind==="text" || String(old.mime||"").startsWith("text/")){
+        const pre=document.createElement("pre");
+        pre.style.cssText="white-space:pre-wrap;overflow-wrap:anywhere;max-height:360px;overflow:auto;margin:0;color:#dce5fa;font:12px/1.5 ui-monospace,monospace";
+        pre.textContent=new TextDecoder().decode(plain);card.appendChild(pre);
+      }else{
+        const mime=old.mime||"application/octet-stream";
+        const url=URL.createObjectURL(new Blob([plain],{type:mime}));state.v2.objectUrls.add(url);
+        const box=document.createElement("div");box.className="previewMedia";
+        let node=null;
+        if(old.kind==="image"){node=document.createElement("img");node.src=url}
+        else if(old.kind==="video"){node=document.createElement("video");node.controls=true;node.src=url}
+        else if(String(mime).startsWith("audio/")){node=document.createElement("audio");node.controls=true;node.src=url;node.style.width="100%"}
+        else if(mime==="application/pdf"||extOf(old.name)==="pdf"){node=document.createElement("iframe");node.src=url;node.style.cssText="width:100%;height:420px;border:0"}
+        if(node)box.appendChild(node);
+        else{
+          const hint=document.createElement("div");hint.className="hintBox";hint.textContent="This file type has no inline preview. Use Download version.";
+          box.appendChild(hint);
+        }
+        card.appendChild(box);
+      }
+      const acts=document.createElement("div");acts.className="previewTools";
+      const dl=document.createElement("button");dl.className="btn";dl.type="button";dl.textContent="Download version";
+      dl.onclick=()=>downloadBlob(new Blob([plain],{type:old.mime||"application/octet-stream"}),old.name||"version.bin");
+      acts.appendChild(dl);card.appendChild(acts);stage.appendChild(card);
+    }catch(e){
+      const hint=document.createElement("div");hint.className="hintBox";hint.textContent=e.message||"Could not preview this version.";stage.appendChild(hint);
+    }
+  }
+
+  async function restoreArchivedItem(entry,itemId){
+    const current=getItemById(itemId);
+    if(!current)return;
+    if(!confirm(`Restore “${current.name}” from this previous vault version? The restored contents will remain an unsaved edit until you Save.`))return;
+    try{
+      const loaded=await resilienceLoadVersionEntry(entry);
+      const old=loaded.index.items.find(x=>x.id===itemId);
+      if(!old)throw new Error("This file did not exist in that vault version");
+      const plain=await resiliencePlainFromLoadedVersion(loaded,old);
+      current.kind=old.kind;
+      current.name=sanitizeName(old.name||current.name,current.name||"file.bin");
+      current.mime=old.mime||current.mime||"application/octet-stream";
+      current.size=plain.byteLength;
+      if(old.kind==="image"){
+        current.thumbMime=old.thumbMime;
+        current.thumbB64=old.thumbB64;
+      }else{
+        delete current.thumbMime;
+        delete current.thumbB64;
+      }
+      current.updated=Date.now();
+      await v2EncryptPendingPlainForItem(current,plain);
+      try{plain.fill(0)}catch{}
+      state.dirty=true;getMeta().updated=Date.now();
+      closeOverlay("ovVersions");render();
+      toast("Previous file version restored · Save to commit and heal redundant copies");
+    }catch(e){toast(e.message||"Could not restore this version",true)}
+  }
+
+  async function openItemVersions(itemId){
+    if(!state.unlocked||state.mode!=="v2"){toast("Versions are available after the vault is saved in the encrypted container format.",true);return}
+    const it=getItemById(itemId);if(!it)return;
+    ensureVersionsOverlay();
+    document.getElementById("vvVersionsTitle").textContent=`Versions · ${it.name||"file"}`;
+    document.getElementById("vvVersionsSub").textContent="Current redundant copies are authenticated independently. Previous saved vault versions can be previewed or restored when they use the current protection key.";
+    const list=document.getElementById("vvVersionList");list.textContent="";
+    document.getElementById("vvVersionsPreview").textContent="";
+    openOverlay("ovVersions");
+
+    const current=resilienceCurrentEntries();
+    if(!current.length){
+      const r=versionRow("Current vault","No in-file redundancy archive exists yet. Save the vault to apply the configured resilience settings.");
+      list.appendChild(r.row);
+    }else{
+      for(let i=0;i<current.length;i++){
+        const e=current[i],r=versionRow(`Current saved copy ${i+1}`,"Verifying this file…");list.appendChild(r.row);
+        const result=await resilienceVerifyCurrentEntry(e,itemId);
+        r.sub.textContent=result.message;
+        if(!result.ok)r.row.style.borderColor="rgba(255,95,120,.28)";
+      }
+    }
+
+    const previous=resiliencePreviousEntries();
+    for(let i=0;i<previous.length;i++){
+      const e=previous[i];
+      const r=versionRow(`Previous vault version ${i+1}`,formatSavedHour(e.savedAtHour));
+      const preview=document.createElement("button");preview.className="btn compact";preview.type="button";preview.textContent="Preview file";
+      preview.onclick=()=>previewArchivedItem(e,itemId);
+      const restore=document.createElement("button");restore.className="btn primary compact";restore.type="button";restore.textContent="Restore file";
+      restore.onclick=()=>restoreArchivedItem(e,itemId);
+      const whole=document.createElement("button");whole.className="btn ghost compact";whole.type="button";whole.textContent="Download vault";
+      whole.onclick=()=>{const b=resilienceEntryBlob(e);if(b)downloadBlob(b,`vortex-previous-${i+1}.vault`)};
+      r.acts.append(preview,restore,whole);list.appendChild(r.row);
+    }
+
+    if(!previous.length){
+      const r=versionRow("Previous versions","No previous vault versions are stored in this file under the current resilience settings.");
+      list.appendChild(r.row);
+    }
+
+    if(state.resilience.recoveredFromCopy||state.resilience.recoveredRecords.size){
+      const r=versionRow("Recovery is active","Vortex has already used redundant encrypted data during this session. Saving now rewrites fresh synchronized current copies.");
+      const heal=document.createElement("button");heal.className="btn primary compact";heal.type="button";heal.textContent="Heal with Save";
+      heal.onclick=async()=>{closeOverlay("ovVersions");await saveVaultWithoutLogout()};
+      r.acts.appendChild(heal);list.appendChild(r.row);
+    }
+  }
+
+  window.openVortexItemVersions=openItemVersions;
+
+  function timestampedVaultName(name){
+    let base=sanitizeName(name||"vortex.vault","vortex.vault").replace(/\.vault$/i,"");
+    base=base.replace(/-\d{4}-\d{2}-\d{2}-\d{2}$/,"");
+    const d=new Date(),pad=n=>String(n).padStart(2,"0");
+    return `${base}-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}-${pad(d.getHours())}.vault`;
+  }
+
   /* ---------- vault lifecycle ---------- */
   async function openVaultFile(file, password){
     const head4 = await readSlice(file, 0, 4);
@@ -4288,27 +5726,36 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       const key = await deriveKeyPBKDF2(password, hdr.kdfSalt, hdr.kdfIter);
 
       const indexCipher = await readSlice(file, V2_HEADER_SIZE, hdr.indexLen);
-      let indexObj;
+      let indexObj, openedFile=file, openedHdr=hdr;
       try{
         indexObj = await v2DecryptIndex(key, hdr.indexIv, indexCipher);
       } catch {
-        throw new Error("Wrong password or corrupted vault");
+        const recovered=await resilienceTryIndexCopy(key,V2_VERSION);
+        if(!recovered) throw new Error("Wrong password or corrupted vault");
+        indexObj=recovered.index;
+        openedFile=recovered.file;
+        openedHdr=recovered.hdr;
+        {
+          const src=state.resilience.recoveredFromCopy;
+          const label=typeof src==="number"?`current copy ${src}`:String(src);
+          toast(`Primary vault copy was damaged. Recovered from ${label}; Save to heal redundancy.`);
+        }
       }
 
       state.mode = "v2";
       state.v1Vault = null;
 
-      state.v2.fileRef = file;
+      state.v2.fileRef = openedFile;
       state.v2.formatVersion = V2_VERSION;
-      state.v2.kdfIter = hdr.kdfIter;
-      state.v2.kdfSalt = hdr.kdfSalt;
+      state.v2.kdfIter = openedHdr.kdfIter;
+      state.v2.kdfSalt = openedHdr.kdfSalt;
       state.v2.cascadeCount = 1;
       state.v2.cascadeSalts = null;
       state.v2.vaultId = null;
       state.v2.key = key;
       state.v2.index = indexObj;
-      state.v2.indexLen = hdr.indexLen;
-      state.v2.dataStart = V2_HEADER_SIZE + hdr.indexLen;
+      state.v2.indexLen = openedHdr.indexLen;
+      state.v2.dataStart = V2_HEADER_SIZE + openedHdr.indexLen;
 
       state.v2.pendingRecords.clear();
       state.v2.pendingText.clear();
@@ -4351,26 +5798,35 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
   async function openV3VaultFileWithKey(file, hdr, key){
     validateV3HeaderOrThrow(hdr, file.size);
     const indexCipher = await readSlice(file, V3_HEADER_SIZE, hdr.indexLen);
-    let indexObj;
+    let indexObj, openedFile=file, openedHdr=hdr;
     try{
       indexObj = await v2DecryptIndex(key, hdr.indexIv, indexCipher);
     } catch {
-      throw new Error("One or more passphrases are incorrect, out of order, or the vault is corrupted");
+      const recovered=await resilienceTryIndexCopy(key,V3_VERSION);
+      if(!recovered) throw new Error("One or more passphrases are incorrect, out of order, or the vault is corrupted");
+      indexObj=recovered.index;
+      openedFile=recovered.file;
+      openedHdr=recovered.hdr;
+      {
+        const src=state.resilience.recoveredFromCopy;
+        const label=typeof src==="number"?`current copy ${src}`:String(src);
+        toast(`Primary vault copy was damaged. Recovered from ${label}; Save to heal redundancy.`);
+      }
     }
 
     state.mode = "v2";
     state.v1Vault = null;
-    state.v2.fileRef = file;
+    state.v2.fileRef = openedFile;
     state.v2.formatVersion = V3_VERSION;
-    state.v2.kdfIter = hdr.kdfIter;
+    state.v2.kdfIter = openedHdr.kdfIter;
     state.v2.kdfSalt = null;
-    state.v2.cascadeCount = hdr.cascadeCount;
-    state.v2.cascadeSalts = hdr.cascadeSalts.map(s=>s.slice());
-    state.v2.vaultId = hdr.vaultId.slice();
+    state.v2.cascadeCount = openedHdr.cascadeCount;
+    state.v2.cascadeSalts = openedHdr.cascadeSalts.map(s=>s.slice());
+    state.v2.vaultId = openedHdr.vaultId.slice();
     state.v2.key = key;
     state.v2.index = indexObj;
-    state.v2.indexLen = hdr.indexLen;
-    state.v2.dataStart = V3_HEADER_SIZE + hdr.indexLen;
+    state.v2.indexLen = openedHdr.indexLen;
+    state.v2.dataStart = V3_HEADER_SIZE + openedHdr.indexLen;
     state.v2.pendingRecords.clear();
     state.v2.pendingText.clear();
     revokeAllObjectUrls();
@@ -4440,6 +5896,13 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       return copy;
     });
     const sourceMeta = {...getMeta()};
+    if(sourceMeta.privacyShield?.enabled===true && sourceMeta.privacyShield?.v===2){
+      sourceMeta.privacyShield=await privacyShieldRewrapConfigForVaultKey(
+        sourceMeta.privacyShield,
+        state.v2.key,
+        newKey
+      );
+    }
     const newIndex = normalizeV2Index({
       meta:{
         ...sourceMeta,
@@ -4489,6 +5952,9 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     state.v2.vaultId = vaultId.slice();
     state.v2.key = newKey;
     state.v2.index = newIndex;
+    if(newIndex.meta?.privacyShield){
+      state.privacyShield.config={...newIndex.meta.privacyShield};
+    }
     state.v2.indexLen = 0;
     state.v2.dataStart = 0;
     state.v2.pendingRecords = newRecords;
@@ -4549,6 +6015,13 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       return copy;
     });
     const sourceMeta = {...getMeta()};
+    if(sourceMeta.privacyShield?.enabled===true && sourceMeta.privacyShield?.v===2){
+      sourceMeta.privacyShield=await privacyShieldRewrapConfigForVaultKey(
+        sourceMeta.privacyShield,
+        state.v2.key,
+        newKey
+      );
+    }
     const newIndex = normalizeV2Index({
       meta:{
         ...sourceMeta,
@@ -4597,6 +6070,9 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     state.v2.vaultId = vaultId.slice();
     state.v2.key = newKey;
     state.v2.index = newIndex;
+    if(newIndex.meta?.privacyShield){
+      state.privacyShield.config={...newIndex.meta.privacyShield};
+    }
     state.v2.indexLen = 0;
     state.v2.dataStart = 0;
     state.v2.pendingRecords = newRecords;
@@ -4654,6 +6130,18 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     state.pendingOpenFile = null;
     state.pendingV3Header = null;
 
+    if (state.privacyShield.timer) try{ clearTimeout(state.privacyShield.timer); }catch{}
+    state.privacyShield = {
+      active:false, locked:false, guardKey:null, config:null,
+      hiddenAt:0, timer:null, snapshot:null, busy:false, lastWorkspace:"files"
+    };
+    state.resilience = {
+      sourceFile:null, manifest:null, activeCurrentIndex:0,
+      recoveredFromCopy:null, recoveredRecords:new Set(), activeBaseBlob:null,
+      openedFromPrevious:null
+    };
+    privacyShieldHide();
+
     state.v1Vault = null;
     state.v2 = {
       fileRef: null,
@@ -4682,11 +6170,19 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     render();
   }
 
-  async function saveAsV2DownloadAndLogout(){
-    if (!state.unlocked || (state.mode === "v1" && !state.password)){
+  async function saveVaultDownload(logoutAfter=false){
+    if (!state.unlocked || state.privacyShield.locked || (state.mode === "v1" && !state.password)){
       toast("Nothing to save", true);
       return;
     }
+
+    // V2/V3 edits are encrypted as soon as they are committed. This migration
+    // catches any in-memory plaintext left by an older 2.1 code path before save.
+    await encryptPendingTextRecordsNow();
+
+    const priorBase = resiliencePriorBaseForHistory();
+    const olderPrevious = resilienceExistingPreviousBlobs();
+    const resilSettings = resilienceSettings(true);
 
     let kdfSalt, kdfIter, key, indexObj, oldFileRef, oldDataStart;
     let formatVersion = V2_VERSION;
@@ -4704,8 +6200,8 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       oldFileRef = state.v2.fileRef;
       oldDataStart = state.v2.dataStart;
     } else if (state.mode === "v1"){
-      // Legacy v1 keeps the original v2 upgrade path unless the user explicitly
-      // rekeys it to V3 from Settings during this unlocked session.
+      // Legacy v1 keeps the existing upgrade behavior: the first save upgrades
+      // the working session to a standard V2 encrypted container.
       kdfSalt = crypto.getRandomValues(new Uint8Array(16));
       kdfIter = KDF_ITER_DEFAULT;
       key = await deriveKeyPBKDF2(state.password, kdfSalt, kdfIter);
@@ -4733,23 +6229,25 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       state.v2.pendingRecords.clear();
       state.v2.pendingText.clear();
 
-      for (const it of v1.items){
-        if (it.kind === "folder") continue;
-        if (it.kind === "text" || it.kind === "password" || it.kind === "totp"){
-          state.v2.pendingText.set(it.id, it.text || "");
-          continue;
+      for (const oldItem of v1.items){
+        if (oldItem.kind === "folder") continue;
+        const target=indexObj.items.find(x=>x.id===oldItem.id);
+        if(!target) continue;
+        let plain;
+        if (oldItem.kind === "text" || oldItem.kind === "password" || oldItem.kind === "totp"){
+          plain=new TextEncoder().encode(oldItem.text || "");
+        }else if(oldItem.data){
+          plain=b64ToBytes(oldItem.data);
+        }else{
+          plain=new Uint8Array();
         }
-        if (it.data){
-          const plain = b64ToBytes(it.data);
-          try{
-            const rec = await v2EncryptRecord(key, plain);
-            state.v2.pendingRecords.set(it.id, rec);
-          } finally {
-            try { plain.fill(0); } catch {}
-          }
-        }
+        try{
+          const rec=await v2EncryptRecord(key,plain);
+          target.recLen=rec.byteLength;
+          target.size=plain.byteLength;
+          state.v2.pendingRecords.set(target.id,rec);
+        }finally{try{plain.fill(0)}catch{}}
       }
-
       oldFileRef = null;
       oldDataStart = 0;
     } else {
@@ -4762,7 +6260,6 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       return;
     }
 
-    // Pack each record without loading the complete vault plaintext into memory.
     let rel = 0;
     const dataParts = [];
 
@@ -4776,24 +6273,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       let part;
       let partLen = 0;
 
-      if (state.v2.pendingText.has(it.id)){
-        const plain = new TextEncoder().encode(state.v2.pendingText.get(it.id) || "");
-        try{
-          const rec = formatVersion === V3_VERSION
-            ? await v3EncryptRecordForItem(key, it, plain)
-            : await v2EncryptRecord(key, plain);
-          part = rec;
-          partLen = rec.byteLength;
-
-          if (it.kind === "text") it.mime = "text/plain";
-          if (it.kind === "password") it.mime = "application/vnd.vortex.password+json";
-          if (it.kind === "totp") it.mime = "application/vnd.vortex.totp+json";
-          it.size = plain.byteLength;
-          it.updated = Date.now();
-        } finally {
-          try { plain.fill(0); } catch {}
-        }
-      } else if (state.v2.pendingRecords.has(it.id)){
+      if (state.v2.pendingRecords.has(it.id)){
         const rec = state.v2.pendingRecords.get(it.id);
         part = rec;
         partLen = rec.byteLength;
@@ -4803,7 +6283,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
         part = oldFileRef.slice(oldAbs, oldAbs + it.recLen);
         partLen = it.recLen;
       } else {
-        toast(`Missing data for ${it.name}`, true);
+        toast(`Missing encrypted data for ${it.name}`, true);
         return;
       }
 
@@ -4814,6 +6294,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     }
 
     indexObj.meta.updated = Date.now();
+    indexObj.meta.resilience = {v:1,...resilSettings};
     if (formatVersion === V3_VERSION){
       indexObj.meta.protection = {
         version:3,
@@ -4848,12 +6329,69 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       });
     }
 
-    const blob = new Blob([header, indexCipher, ...dataParts], { type:"application/octet-stream" });
-    const outName = state.fileName || `${indexObj.meta.name || "vortex"}.vault`;
+    const baseBlob = new Blob([header, indexCipher, ...dataParts], { type:"application/octet-stream" });
+    const headerHash=bytesToB64(await sha256Bytes(header));
+    const archived = await resilienceBuildArchive(
+      baseBlob,resilSettings,priorBase,olderPrevious,
+      {headerLen:header.byteLength,headerHash}
+    );
+    const outName = timestampedVaultName(state.fileName || `${indexObj.meta.name || "vortex"}.vault`);
 
-    downloadBlob(blob, outName);
-    hardLogout(false);
-    toast("Vault saved and session cleared");
+    downloadBlob(archived.blob, outName);
+
+    if(logoutAfter){
+      hardLogout(false);
+      toast("Vault saved and session cleared");
+      return;
+    }
+
+    // Keep working from the newly written encrypted base without retaining stale
+    // plaintext edit buffers. Future saves can reuse unchanged encrypted records.
+    state.mode="v2";
+    state.v1Vault=null;
+    state.password=null;
+    state.v2.fileRef=baseBlob;
+    state.v2.formatVersion=formatVersion;
+    state.v2.kdfIter=kdfIter;
+    state.v2.kdfSalt=formatVersion===V2_VERSION?kdfSalt:null;
+    state.v2.cascadeCount=cascadeCount;
+    state.v2.cascadeSalts=cascadeSalts;
+    state.v2.vaultId=vaultId;
+    state.v2.key=key;
+    state.v2.index=indexObj;
+    state.v2.indexLen=indexCipher.byteLength;
+    state.v2.dataStart=header.byteLength+indexCipher.byteLength;
+    state.v2.pendingRecords.clear();
+    state.v2.pendingText.clear();
+    state.fileName=outName;
+    state.dirty=false;
+
+    state.resilience.sourceFile=archived.blob;
+    state.resilience.manifest=archived.manifest;
+    state.resilience.activeCurrentIndex=0;
+    state.resilience.recoveredFromCopy=null;
+    state.resilience.recoveredRecords=new Set();
+    state.resilience.activeBaseBlob=baseBlob;
+    state.resilience.openedFromPrevious=null;
+
+    render();
+    if(window.VortexVaultUltra?.refreshActiveFeature)window.VortexVaultUltra.refreshActiveFeature();
+    toast(`Vault saved · ${outName}`);
+  }
+
+  async function saveAsV2DownloadAndLogout(){
+    return saveVaultDownload(true);
+  }
+
+  async function saveVaultWithoutLogout(){
+    return saveVaultDownload(false);
+  }
+
+  function requestSaveAndLogout(){
+    if(!state.unlocked)return;
+    const ok=confirm("Save a new timestamped encrypted vault and log out? You will need your vault passphrase(s) to open it again.");
+    if(!ok)return;
+    saveAsV2DownloadAndLogout();
   }
 
 
@@ -5024,7 +6562,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     }
   }
 
-  function createTextNote(){
+  async function createTextNote(){
     if (!state.unlocked) return;
 
     const now = Date.now();
@@ -5046,7 +6584,13 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
         recRelOff: 0,
         recLen: 0
       });
-      state.v2.pendingText.set(id, "");
+      try{
+        await v2StoreEncryptedText(state.v2.index.items[state.v2.index.items.length - 1], "");
+      } catch (e){
+        state.v2.index.items = state.v2.index.items.filter(x => x.id !== id);
+        toast(e.message || "Could not create encrypted note", true);
+        return;
+      }
       state.v2.index.meta.updated = now;
       state.dirty = true;
       state.selectedId = id;
@@ -5073,7 +6617,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     toast("Text note created");
   }
 
-  function saveTextInline(id, nextName, nextText){
+  async function saveTextInline(id, nextName, nextText){
     const it = getItemById(id);
     if (!it) return;
 
@@ -5087,8 +6631,12 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
 
       it.kind = "text";
       it.mime = "text/plain";
-      it.size = nextText.length;
-      state.v2.pendingText.set(it.id, nextText);
+      try{
+        await v2StoreEncryptedText(it, nextText);
+      } catch (e){
+        toast(e.message || "Could not encrypt note", true);
+        return;
+      }
       state.v2.index.meta.updated = now;
       state.dirty = true;
       toast("Note saved");
@@ -5316,9 +6864,17 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
             recRelOff: 0,
             recLen: 0
           });
-          state.v2.pendingText.set(id, text);
+          const pastedItem = state.v2.index.items[state.v2.index.items.length - 1];
+          try{
+            await v2StoreEncryptedText(pastedItem, text);
+          } catch (e2){
+            state.v2.index.items = state.v2.index.items.filter(x => x.id !== id);
+            toast(e2.message || "Could not encrypt pasted text", true);
+            continue;
+          }
           state.v2.index.meta.updated = now;
           state.dirty = true;
+          lastAddedId = id;
           imported++;
         } else if (state.mode === "v1"){
           const now = Date.now();
@@ -5465,6 +7021,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       ui.pw.value = "";
       if (ui.pw2) ui.pw2.value = "";
       render();
+      privacyShieldAfterVaultUnlocked();
     } catch (e){
       console.error(e);
       toast(e.message || "Unlock failed", true);
@@ -5496,20 +7053,21 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
 
   async function unlockFromSelectedFile(file){
     state.fileName = sanitizeName(file.name, "vortex.vault");
-    state.pendingOpenFile = file;
+    const openFile = await resiliencePrepareOpen(file);
+    state.pendingOpenFile = openFile;
     state.pendingV3Header = null;
 
     try{
-      const probe = await readSlice(file, 0, Math.min(file.size, 5));
+      const probe = await readSlice(openFile, 0, Math.min(openFile.size, 5));
       const sig = probe.length >= 4 ? String.fromCharCode(probe[0], probe[1], probe[2], probe[3]) : "";
       if (sig === V2_MAGIC && probe.length >= 5 && probe[4] === V3_VERSION){
-        const headerU8 = await readSlice(file, 0, V3_HEADER_SIZE);
+        const headerU8 = await readSlice(openFile, 0, V3_HEADER_SIZE);
         const hdr = v3ParseHeader(headerU8);
-        validateV3HeaderOrThrow(hdr, file.size);
+        validateV3HeaderOrThrow(hdr, openFile.size);
         state.pendingV3Header = hdr;
 
         if (window.VortexVaultUltra && typeof window.VortexVaultUltra.openCascadeUnlock === "function"){
-          window.VortexVaultUltra.openCascadeUnlock(file, hdr);
+          window.VortexVaultUltra.openCascadeUnlock(openFile, hdr);
           return;
         }
         throw new Error("Cascade unlock UI is unavailable in this browser session");
@@ -6271,6 +7829,95 @@ function debounce(fn, ms=250){
     clearHashNoReload();
   }
 
+  function shareSafeInteger(value,min,max,label){
+    const n=Number(value);
+    if(!Number.isSafeInteger(n)||n<min||n>max)throw new Error(`${label} is invalid`);
+    return n;
+  }
+
+  function shareDecodeB64Field(value,expectedBytes,label,maxChars=256){
+    const s=String(value||"");
+    if(!s||s.length>maxChars||!/^[A-Za-z0-9+/]*={0,2}$/.test(s))throw new Error(`${label} is invalid`);
+    let out;try{out=b64ToBytes(s)}catch{throw new Error(`${label} is invalid`)}
+    if(expectedBytes!==null&&out.byteLength!==expectedBytes)throw new Error(`${label} is invalid`);
+    return out;
+  }
+
+  function shareValidateTextField(value,max,label,allowEmpty=true){
+    if(typeof value!=="string")throw new Error(`${label} is invalid`);
+    if(!allowEmpty&&!value.length)throw new Error(`${label} is required`);
+    if(value.length>max||/[\u0000-\u001f\u007f]/.test(value))throw new Error(`${label} is invalid`);
+    return value;
+  }
+
+  function shareValidateSingleMeta(msg){
+    if(!msg||typeof msg!=="object"||Array.isArray(msg)||msg.t!=="meta")throw new Error("Transfer metadata is invalid");
+    if(msg.v!==undefined&&msg.v!==1)throw new Error("Unsupported transfer protocol version");
+    if(msg.enc!=="aesgcm-pbkdf2")throw new Error("Unsupported transfer encryption");
+    if(Number(msg.iter)!==SHARE_KDF_ITER)throw new Error("Transfer KDF parameters are invalid");
+    const size=shareSafeInteger(msg.size,16,state.webrtc.recvLimitBytes,"Encrypted size");
+    const plainSize=shareSafeInteger(msg.plainSize,0,state.webrtc.recvLimitBytes,"Plain size");
+    if(size!==plainSize+16)throw new Error("Transfer size metadata is inconsistent");
+    const name=shareValidateTextField(String(msg.name||""),SHARE_MAX_NAME_CHARS,"File name",false);
+    const mime=shareValidateTextField(String(msg.mime||"application/octet-stream"),SHARE_MAX_MIME_CHARS,"MIME type",false);
+    const salt=shareDecodeB64Field(msg.salt,16,"Encryption salt",64);
+    const iv=shareDecodeB64Field(msg.iv,12,"Encryption IV",64);
+    return {...msg,v:1,name,mime,size,plainSize,iter:SHARE_KDF_ITER,__salt:salt,__iv:iv};
+  }
+
+  function shareValidateBundleMeta(msg){
+    if(!msg||typeof msg!=="object"||Array.isArray(msg)||msg.t!=="bundle-meta"||msg.v!==1)throw new Error("Bundle metadata is invalid");
+    if(Number(msg.iter)!==SHARE_KDF_ITER)throw new Error("Bundle KDF parameters are invalid");
+    const salt=shareDecodeB64Field(msg.salt,16,"Bundle salt",64);
+    if(!Array.isArray(msg.entries)||msg.entries.length<1||msg.entries.length>SHARE_MAX_MANIFEST_ENTRIES)throw new Error("Bundle manifest size is invalid");
+    const ids=new Set(), folders=new Set(), entries=[];
+    let computedTotal=0,fileCount=0;
+    for(const raw of msg.entries){
+      if(!raw||typeof raw!=="object"||Array.isArray(raw))throw new Error("Bundle entry is invalid");
+      const id=shareValidateTextField(String(raw.id||""),128,"Bundle entry id",false);
+      if(ids.has(id))throw new Error("Bundle manifest contains duplicate ids");
+      ids.add(id);
+      const kind=String(raw.kind||"");
+      if(!["folder","file","text","image","video"].includes(kind))throw new Error("Bundle entry type is invalid");
+      const parentId=raw.parentId===null||raw.parentId===undefined||raw.parentId===""?null:shareValidateTextField(String(raw.parentId),128,"Bundle parent id",false);
+      const name=shareValidateTextField(String(raw.name||""),SHARE_MAX_NAME_CHARS,"Bundle file name",false);
+      const mime=shareValidateTextField(String(raw.mime||""),SHARE_MAX_MIME_CHARS,"Bundle MIME type",true);
+      const size=kind==="folder"?0:shareSafeInteger(raw.size,0,state.webrtc.recvLimitBytes,"Bundle file size");
+      if(kind==="folder")folders.add(id);else{computedTotal+=size;fileCount++}
+      if(!Number.isSafeInteger(computedTotal))throw new Error("Bundle total size is invalid");
+      entries.push({id,parentId,kind,name,mime,size});
+    }
+    for(const e of entries){
+      if(e.parentId&&!folders.has(e.parentId))throw new Error("Bundle folder structure is invalid");
+    }
+    // Detect parent cycles/depth bombs before creating any folders.
+    const byId=new Map(entries.map(e=>[e.id,e]));
+    for(const e of entries){
+      let cur=e,depth=0,seen=new Set();
+      while(cur&&cur.parentId){
+        if(++depth>128||seen.has(cur.id))throw new Error("Bundle folder structure is cyclic or too deep");
+        seen.add(cur.id);cur=byId.get(cur.parentId);
+      }
+    }
+    const totalPlain=shareSafeInteger(msg.totalPlain,0,Number.MAX_SAFE_INTEGER,"Bundle total size");
+    if(totalPlain!==computedTotal)throw new Error("Bundle total size does not match its manifest");
+    return {entries,totalPlain,fileCount,salt};
+  }
+
+  function shareValidateBundleFile(msg,r){
+    if(!msg||typeof msg!=="object"||msg.t!=="bundle-file")throw new Error("Bundle file metadata is invalid");
+    if(r.current)throw new Error("Previous bundle file has not finished");
+    const id=shareValidateTextField(String(msg.id||""),128,"Bundle file id",false);
+    const entry=r.entries.find(x=>x.id===id&&x.kind!=="folder");
+    if(!entry)throw new Error("Bundle manifest mismatch");
+    if(r.receivedIds?.has(id))throw new Error("Duplicate bundle file");
+    const plainSize=shareSafeInteger(msg.plainSize,0,state.webrtc.recvLimitBytes,"Bundle plain size");
+    const cipherSize=shareSafeInteger(msg.cipherSize,16,state.webrtc.recvLimitBytes,"Bundle encrypted size");
+    if(plainSize!==entry.size||cipherSize!==plainSize+16)throw new Error("Bundle file size metadata is inconsistent");
+    const iv=shareDecodeB64Field(msg.iv,12,"Bundle IV",64);
+    return {entry,id,plainSize,cipherSize,iv};
+  }
+
   // base64 encode/decode for SDP blobs
   function encodeSignal(desc){
     const json = JSON.stringify(desc);
@@ -6280,26 +7927,70 @@ function debounce(fn, ms=250){
   function decodeSignal(txt){
     const s = extractSdpFromLinkOrCode(txt);
     if (!s) throw new Error("Empty code");
+    if (s.length > 1024 * 1024) throw new Error("Share signaling data is too large");
 
     let json;
-    if (s.startsWith("{")){
-      json = s;
-    } else {
-      json = decodeURIComponent(escape(atob(s)));
+    try{
+      if (s.startsWith("{")){
+        json = s;
+      } else {
+        if(!/^[A-Za-z0-9+/=]+$/.test(s))throw new Error();
+        json = decodeURIComponent(escape(atob(s)));
+      }
+    }catch{throw new Error("Share signaling data is invalid")}
+    if(json.length>1024*1024)throw new Error("Share signaling data is too large");
+    let obj;try{obj=JSON.parse(json)}catch{throw new Error("Share signaling data is invalid")}
+    if(!obj||typeof obj!=="object"||!["offer","answer"].includes(obj.type)||typeof obj.sdp!=="string"||obj.sdp.length>768*1024){
+      throw new Error("Share signaling description is invalid");
     }
-    return JSON.parse(json);
+    return {type:obj.type,sdp:obj.sdp};
   }
 
-  async function copyTextToClipboard(text){
-    const t = String(text || "");
-    if (!t) return;
+  async function reliableCopyText(text){
+    const t = String(text ?? "");
+    if (!t) return false;
+
+    // Modern Clipboard API first. It is the cleanest path on current Chrome,
+    // Edge, Firefox and Safari when the page has a user gesture/secure context.
     try{
-      await navigator.clipboard.writeText(t);
-      toast("Copied");
-    } catch {
-      // fallback: select text manually
-      toast("Clipboard blocked — select and copy manually.", true);
-    }
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === "function"){
+        await navigator.clipboard.writeText(t);
+        return true;
+      }
+    } catch {}
+
+    // Cross-browser fallback, including older iOS Safari/WebViews. Keep the
+    // temporary textarea inside the viewport, selectable, and remove it at once.
+    const ta = document.createElement("textarea");
+    ta.value = t;
+    ta.setAttribute("readonly","");
+    ta.setAttribute("aria-hidden","true");
+    ta.style.position = "fixed";
+    ta.style.left = "0";
+    ta.style.top = "0";
+    ta.style.width = "1px";
+    ta.style.height = "1px";
+    ta.style.opacity = "0";
+    ta.style.pointerEvents = "none";
+    ta.style.fontSize = "16px"; // avoids iOS focus zoom
+    document.body.appendChild(ta);
+
+    let ok = false;
+    try{
+      ta.focus({preventScroll:true});
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      ok = !!document.execCommand && document.execCommand("copy");
+    } catch {}
+    try { ta.value = ""; ta.remove(); } catch {}
+    return ok;
+  }
+
+  window.VortexVaultCopyText = reliableCopyText;
+
+  async function copyTextToClipboard(text){
+    const ok = await reliableCopyText(text);
+    toast(ok ? "Copied" : "Clipboard access was blocked by the browser.", !ok);
   }
 
   function setupPeerCommon(pc){
@@ -6397,32 +8088,52 @@ function debounce(fn, ms=250){
 
     // text = JSON control messages
     if (typeof data === "string"){
+      if(data.length>SHARE_MAX_CONTROL_BYTES){
+        webrtcSetStatus("Receive aborted: control message is too large.",true);webrtcCloseSession();return;
+      }
       let msg;
-      try { msg = JSON.parse(data); } catch { return; }
+      try { msg = JSON.parse(data); } catch { webrtcSetStatus("Receive aborted: invalid control message.",true);webrtcCloseSession();return; }
 
       if (msg.t === "meta"){
+        if(state.webrtc.recvMeta||state.webrtc.recvBytes){
+          webrtcSetStatus("Receive aborted: duplicate transfer metadata.",true);webrtcCloseSession();return;
+        }
+        try{msg=shareValidateSingleMeta(msg)}catch(e){webrtcSetStatus(`Receive aborted: ${e.message}`,true);webrtcCloseSession();return}
         shareStatsReset();
 
         state.webrtc.recvMeta = msg;
         state.webrtc.recvChunks = [];
         state.webrtc.recvBytes = 0;
-        state.webrtc.recvExpect = Number(msg.size || 0);
+        state.webrtc.recvExpect = msg.size;
 
-        ui.shareRecvInfo.textContent = `Receiving: ${msg.name} (${humanSize(msg.size || 0)})…`;
+        ui.shareRecvInfo.textContent = `Receiving: ${msg.name} (${humanSize(msg.plainSize || 0)})…`;
         shareProgressSet(0, "Receiving");
         webrtcSetStatus(`Receiving ${msg.name}…`);
+        return;
       }
 
       if (msg.t === "done"){
+        if(!state.webrtc.recvMeta||state.webrtc.recvBytes!==state.webrtc.recvExpect){
+          webrtcSetStatus("Receive aborted: transfer ended before the declared payload was complete.",true);webrtcCloseSession();return;
+        }
         webrtcTryFinalizeReceive();
+        return;
       }
+      webrtcSetStatus("Receive aborted: unsupported control message.",true);webrtcCloseSession();
       return;
+    }
+
+    if(!state.webrtc.recvMeta){
+      webrtcSetStatus("Receive aborted: binary data arrived before metadata.",true);webrtcCloseSession();return;
+    }
+    if(!(data instanceof ArrayBuffer)){
+      webrtcSetStatus("Receive aborted: invalid binary payload.",true);webrtcCloseSession();return;
     }
 
     // binary chunk
     const u8 = new Uint8Array(data);
-    if ((state.webrtc.recvBytes + u8.byteLength) > state.webrtc.recvLimitBytes){
-      webrtcSetStatus("Receive aborted: file too large for browser memory cap.", true);
+    if (!u8.byteLength || (state.webrtc.recvBytes + u8.byteLength) > state.webrtc.recvExpect || (state.webrtc.recvBytes + u8.byteLength) > state.webrtc.recvLimitBytes){
+      webrtcSetStatus("Receive aborted: payload exceeded the declared encrypted size.", true);
       webrtcCloseSession();
       return;
     }
@@ -6450,6 +8161,11 @@ function debounce(fn, ms=250){
     if (!expect) return;
 
     if (state.webrtc.recvBytes < expect) return;
+    if (state.webrtc.recvBytes !== expect) {
+      webrtcSetStatus("Transfer corrupted (encrypted size mismatch).",true);
+      webrtcCloseSession();
+      return;
+    }
 
     // prevent double-download
     if (state.webrtc.finalizing) return;
@@ -6483,15 +8199,9 @@ function debounce(fn, ms=250){
 
         const sessionPw = sessionSecretFromCodes(state.webrtc.myCode, peerCode);
 
-        const salt = b64ToBytes(meta.salt || "");
-        const iter = Number(meta.iter || 0) || 250000;
-        const iv   = b64ToBytes(meta.iv || "");
-
-        if (salt.byteLength !== 16 || iv.byteLength !== 12){
-          throw new Error("Bad encryption metadata (salt/iv).");
-        }
-
-        const key = await deriveKeyPBKDF2(sessionPw, salt, iter);
+        const salt = meta.__salt || shareDecodeB64Field(meta.salt,16,"Encryption salt",64);
+        const iv   = meta.__iv || shareDecodeB64Field(meta.iv,12,"Encryption IV",64);
+        const key = await deriveKeyPBKDF2(sessionPw, salt, SHARE_KDF_ITER);
 
         try{
           const t0 = performance.now();
@@ -6612,7 +8322,7 @@ function debounce(fn, ms=250){
     let sendBytes = plainBytes;
 
     const salt = crypto.getRandomValues(new Uint8Array(16));
-    const iter = 250000;
+    const iter = SHARE_KDF_ITER;
     const key = await deriveKeyPBKDF2(sessionPw, salt, iter);
     const iv = crypto.getRandomValues(new Uint8Array(12));
 
@@ -6641,6 +8351,7 @@ function debounce(fn, ms=250){
 
     const meta = {
       t: "meta",
+      v: 1,
       name: it.name || "file.bin",
       mime: it.mime || "application/octet-stream",
       size: sendBytes.byteLength,
@@ -6714,7 +8425,8 @@ function debounce(fn, ms=250){
     if (e.key === "Enter") doUnlock();
   });
 
-  ui.btnSave.onclick = () => saveAsV2DownloadAndLogout();
+  ui.btnSave.onclick = () => saveVaultWithoutLogout();
+  if (ui.btnSaveLogout) ui.btnSaveLogout.onclick = () => requestSaveAndLogout();
 
   ui.btnUp.onclick = () => goUp();
 
@@ -6974,7 +8686,7 @@ function debounce(fn, ms=250){
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s"){
       if (state.unlocked){
         e.preventDefault();
-        saveAsV2DownloadAndLogout();
+        saveVaultWithoutLogout();
       }
     }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "n"){
@@ -7239,10 +8951,10 @@ function debounce(fn, ms=250){
         body: `
           Vault contents are protected at rest using AES-256-GCM through WebCrypto. Decryption occurs only after you explicitly unlock the vault, and Vortex Vault does not intentionally persist decrypted vault contents to browser storage. Active plaintext can exist in browser/OS memory while in use, and the browser or operating system may use mechanisms such as swap, crash recovery, or media caches outside the application’s control.
 
-          When you click <b>Save &amp; log out</b>, an encrypted vortex.vault file is downloaded and Vortex Vault drops its active references, object URLs, pending plaintext records, and vault state from the page.
+          Committed edits are kept as encrypted pending records rather than plaintext edit buffers. <b>Save</b> downloads a timestamped encrypted vault while keeping the session open; <b>Save &amp; log out</b> saves the same way and then clears active vault references and session state from the page.
 
           <div class="onHintPill" style="margin-top:10px;">
-          <span class="onKbd">Ctrl</span> + <span class="onKbd">S</span> saves the current vortex.vault file
+          <span class="onKbd">Ctrl</span> + <span class="onKbd">S</span> downloads a timestamped encrypted save
           </div>
         `,
         checklist: true,
@@ -7273,7 +8985,7 @@ function debounce(fn, ms=250){
         title: "Organize like in a file explorer",
         body: `
           Double-click folders to open them. Add an item to any folder directly from the item preview window.
-          Your encrypted vault file is generated when you save and exit the Vortex Vault file explorer. All data is stored exclusively as ciphertext: attackers cannot read it, nor can they modify it without detection. We employ password-based key derivation using PBKDF2 with SHA-256 and a high iteration count to significantly slow and degrade the effectiveness of brute-force password attacks. Additionally, cryptographically secure random initialization vectors (IVs) are enforced throughout the system, ensuring that every encrypted record is assigned a fresh, random 12-byte IV. Even the index of your vortex.vault file is fully encrypted and protected by its own randomly generated IV.
+          Your encrypted vault file is generated whenever you save; saving no longer requires ending the session. All committed vault data is stored as ciphertext: attackers cannot read it, nor can they modify it without detection. We employ password-based key derivation using PBKDF2 with SHA-256 and a high iteration count to significantly slow and degrade the effectiveness of brute-force password attacks. Additionally, cryptographically secure random initialization vectors (IVs) are enforced throughout the system, ensuring that every encrypted record is assigned a fresh, random 12-byte IV. Even the index of your vortex.vault file is fully encrypted and protected by its own randomly generated IV.
           Use the breadcrumb trail to instantly navigate back through multiple folders.
         `,
         target: ["#pathLabel", "#tbody"]
@@ -7287,12 +8999,12 @@ function debounce(fn, ms=250){
         target: ["#previewPane"]
       },
       {
-        title: "Save & clear the session",
+        title: "Save without losing your session",
         body: `
-          When you're done, <b>Save &amp; log out</b> downloads your vortex.vault file and clears all data from the browser tab.
-          If you close the tab without saving, changes are lost.
+          <b>Save</b> downloads a timestamped encrypted vault and keeps your session open. <b>Save &amp; log out</b> asks for confirmation, saves the same way, then clears the browser session.
+          If you close the tab without saving, unsaved changes are lost.
         `,
-        target: ["#btnSave"]
+        target: ["#btnSave", "#btnSaveLogout"]
       }
     ];
 
@@ -7769,6 +9481,67 @@ function debounce(fn, ms=250){
     stopQrScan();
   }
 
+  function captureSensitiveUi(){
+    const out={
+      view:secureState.view,
+      selectedPasswordId:secureState.selectedPasswordId,
+      selectedTotpId:secureState.selectedTotpId,
+      search:secureSearch ? secureSearch.value : "",
+      credential:null,
+      totp:null
+    };
+    if(q("ovCredential")?.classList.contains("on")){
+      out.credential={
+        editingId:secureState.editingCredentialId,
+        name:q("credName").value||"",
+        username:q("credUser").value||"",
+        url:q("credUrl").value||"",
+        password:q("credPassword").value||"",
+        notes:q("credNotes").value||""
+      };
+    }
+    if(q("ovTotp")?.classList.contains("on")){
+      out.totp={
+        editingId:secureState.editingTotpId,
+        secret:q("totpSecret").value||"",
+        issuer:q("totpIssuer").value||"",
+        account:q("totpAccount").value||"",
+        algorithm:q("totpAlgorithm").value||"SHA-1",
+        digits:q("totpDigits").value||"6",
+        period:q("totpPeriod").value||"30"
+      };
+    }
+    return out;
+  }
+
+  async function restoreSensitiveUi(saved){
+    if(!saved || typeof saved!=="object") return;
+    secureState.selectedPasswordId=saved.selectedPasswordId||null;
+    secureState.selectedTotpId=saved.selectedTotpId||null;
+    if(saved.view && ["files","passwords","authenticator","library","share","settings"].includes(saved.view)){
+      setWorkspace(saved.view);
+    }
+    if(secureSearch && typeof saved.search==="string") secureSearch.value=saved.search;
+    if(saved.credential){
+      secureState.editingCredentialId=saved.credential.editingId||null;
+      await openCredentialEditor(saved.credential.editingId||null);
+      q("credName").value=saved.credential.name||"";
+      q("credUser").value=saved.credential.username||"";
+      q("credUrl").value=saved.credential.url||"";
+      q("credPassword").value=saved.credential.password||"";
+      q("credNotes").value=saved.credential.notes||"";
+    }else if(saved.totp){
+      secureState.editingTotpId=saved.totp.editingId||null;
+      await openTotpEditor(saved.totp.editingId||null);
+      q("totpSecret").value=saved.totp.secret||"";
+      q("totpIssuer").value=saved.totp.issuer||"";
+      q("totpAccount").value=saved.totp.account||"";
+      q("totpAlgorithm").value=saved.totp.algorithm||"SHA-1";
+      q("totpDigits").value=saved.totp.digits||"6";
+      q("totpPeriod").value=saved.totp.period||"30";
+    }
+  }
+
   function renderSecureHub(){
     refreshCounts();
     if (secureState.view === "files") return;
@@ -7902,7 +9675,7 @@ function debounce(fn, ms=250){
     return sanitizeName(issuer || account || "Authenticator","Authenticator");
   }
 
-  function writeSecurePayload(kind, id, payload){
+  async function writeSecurePayload(kind, id, payload){
     if (!state.unlocked) throw new Error("Unlock a vault first");
     const now = Date.now();
     const raw = JSON.stringify(payload);
@@ -7934,8 +9707,7 @@ function debounce(fn, ms=250){
     it.updated = now;
 
     if (state.mode === "v2"){
-      v2EnsurePendingCapacityOrThrow(size);
-      state.v2.pendingText.set(it.id,raw);
+      await v2StoreEncryptedText(it, raw);
       state.v2.index.meta.updated = now;
     } else {
       it.text = raw;
@@ -8063,12 +9835,9 @@ function debounce(fn, ms=250){
   }
 
   async function copySecret(value,message){
-    try{
-      await navigator.clipboard.writeText(String(value || ""));
-      toast(message || "Copied");
-    } catch {
-      toast("Clipboard access was blocked by the browser.",true);
-    }
+    const copyFn = window.VortexVaultCopyText;
+    const ok = copyFn ? await copyFn(String(value ?? "")) : false;
+    toast(ok ? (message || "Copied") : "Clipboard access was blocked by the browser.", !ok);
   }
 
   async function renderTotpDetail(){
@@ -8313,6 +10082,8 @@ function debounce(fn, ms=250){
     q("credPassword").value="";
     q("credPassword").type="password";
     q("credNotes").value="";
+    q("credGeneratorPanel").hidden=true;
+    loadGeneratorUi();
     if (id){
       try{
         const payload=await readSecurePayload(getItemById(id));
@@ -8326,19 +10097,48 @@ function debounce(fn, ms=250){
     openOverlay("ovCredential",q("credName"));
   }
 
-  function randomPassword(length=24){
+  function passwordGeneratorPrefs(){
+    const meta = getMeta();
+    const saved = meta && meta.passwordGenerator && typeof meta.passwordGenerator === "object"
+      ? meta.passwordGenerator : {};
+    return {
+      length: Math.max(8,Math.min(128,Number(saved.length||24))),
+      upper: saved.upper !== false,
+      lower: saved.lower !== false,
+      numbers: saved.numbers !== false,
+      symbols: saved.symbols !== false
+    };
+  }
+
+  function storePasswordGeneratorPrefs(prefs){
+    if(!state.unlocked) return;
+    getMeta().passwordGenerator = {
+      length:Math.max(8,Math.min(128,Number(prefs.length||24))),
+      upper:!!prefs.upper, lower:!!prefs.lower, numbers:!!prefs.numbers, symbols:!!prefs.symbols
+    };
+    markDirty();
+  }
+
+  function randomPassword(options={}){
     const upper="ABCDEFGHJKLMNPQRSTUVWXYZ";
     const lower="abcdefghijkmnopqrstuvwxyz";
     const digits="23456789";
     const symbols="!@#$%^&*()-_=+[]{}:,.?";
-    const all=upper+lower+digits+symbols;
+    const length=Math.max(8,Math.min(128,Number(options.length||24)));
+    const enabled=[];
+    if(options.upper!==false) enabled.push(upper);
+    if(options.lower!==false) enabled.push(lower);
+    if(options.numbers!==false) enabled.push(digits);
+    if(options.symbols!==false) enabled.push(symbols);
+    if(!enabled.length) throw new Error("Select at least one character type");
+    const all=enabled.join("");
     const pick=(set)=>{
       const lim=Math.floor(256/set.length)*set.length;
       let b;
       do{b=crypto.getRandomValues(new Uint8Array(1))[0];}while(b>=lim);
       return set[b%set.length];
     };
-    const chars=[pick(upper),pick(lower),pick(digits),pick(symbols)];
+    const chars=enabled.map(set=>pick(set));
     while(chars.length<length) chars.push(pick(all));
     for(let i=chars.length-1;i>0;i--){
       const lim=Math.floor(256/(i+1))*(i+1);
@@ -8346,6 +10146,47 @@ function debounce(fn, ms=250){
       const j=b%(i+1); [chars[i],chars[j]]=[chars[j],chars[i]];
     }
     return chars.join("");
+  }
+
+  function loadGeneratorUi(){
+    const p=passwordGeneratorPrefs();
+    q("credGenLength").value=String(p.length);
+    q("credGenLengthRange").value=String(p.length);
+    q("credGenUpper").checked=p.upper;
+    q("credGenLower").checked=p.lower;
+    q("credGenNumbers").checked=p.numbers;
+    q("credGenSymbols").checked=p.symbols;
+  }
+
+  function currentGeneratorUi(){
+    return {
+      length:Math.max(8,Math.min(128,Number(q("credGenLength").value||24))),
+      upper:q("credGenUpper").checked,
+      lower:q("credGenLower").checked,
+      numbers:q("credGenNumbers").checked,
+      symbols:q("credGenSymbols").checked
+    };
+  }
+
+  function ensureGeneratorChoice(changed){
+    const boxes=["credGenUpper","credGenLower","credGenNumbers","credGenSymbols"].map(q);
+    if(boxes.some(x=>x.checked)) return true;
+    if(changed) changed.checked=true;
+    toast("At least one character type must remain enabled",true);
+    return false;
+  }
+
+  function generateCredentialPassword(){
+    const prefs=currentGeneratorUi();
+    if(!ensureGeneratorChoice()) return;
+    prefs.length=Math.max(8,Math.min(128,prefs.length));
+    q("credGenLength").value=String(prefs.length);
+    q("credGenLengthRange").value=String(prefs.length);
+    try{
+      q("credPassword").value=randomPassword(prefs);
+      storePasswordGeneratorPrefs(prefs);
+      q("credPassword").dispatchEvent(new Event("input",{bubbles:true}));
+    }catch(e){toast(e.message||"Could not generate password",true)}
   }
 
   async function saveCredentialEditor(){
@@ -8360,10 +10201,10 @@ function debounce(fn, ms=250){
       notes:q("credNotes").value||""
     };
     try{
-      const it=writeSecurePayload("password",secureState.editingCredentialId,payload);
+      const it=await writeSecurePayload("password",secureState.editingCredentialId,payload);
       secureState.selectedPasswordId=it.id;
       closeOverlay("ovCredential");
-      q("credPassword").value="";
+      for(const id of ["credName","credUser","credUrl","credPassword","credNotes"]){const n=q(id);if(n)n.value="";}
       toast(secureState.editingCredentialId?"Credential updated":"Credential added");
       secureState.editingCredentialId=null;
       renderSecureHub();
@@ -8424,10 +10265,10 @@ function debounce(fn, ms=250){
     try{
       secureState.totpKeyCache.clear();
       await generateTotp(parsed);
-      const it=writeSecurePayload("totp",secureState.editingTotpId,parsed);
+      const it=await writeSecurePayload("totp",secureState.editingTotpId,parsed);
       secureState.selectedTotpId=it.id;
       closeOverlay("ovTotp");
-      q("totpSecret").value="";
+      for(const id of ["totpSecret","totpIssuer","totpAccount"]){const n=q(id);if(n)n.value="";}
       toast(secureState.editingTotpId?"Authenticator updated":"Authenticator added");
       secureState.editingTotpId=null;
       renderSecureHub();
@@ -8562,7 +10403,22 @@ function debounce(fn, ms=250){
     secureAddBtn.addEventListener("click",()=>openEditor(secureState.view==="passwords"?"password":"totp",null));
 
     q("credSaveBtn").addEventListener("click",saveCredentialEditor);
-    q("credGenerateBtn").addEventListener("click",()=>{q("credPassword").value=randomPassword(24);});
+    q("credGenerateBtn").addEventListener("click",()=>{
+      const panel=q("credGeneratorPanel");
+      panel.hidden=!panel.hidden;
+      if(!panel.hidden) loadGeneratorUi();
+    });
+    q("credGenerateNowBtn").addEventListener("click",generateCredentialPassword);
+    q("credGenLengthRange").addEventListener("input",()=>{
+      q("credGenLength").value=q("credGenLengthRange").value;
+    });
+    q("credGenLength").addEventListener("input",()=>{
+      const n=Math.max(8,Math.min(128,Number(q("credGenLength").value||8)));
+      q("credGenLengthRange").value=String(n);
+    });
+    for(const id of ["credGenUpper","credGenLower","credGenNumbers","credGenSymbols"]){
+      q(id).addEventListener("change",e=>ensureGeneratorChoice(e.currentTarget));
+    }
     q("credRevealBtn").addEventListener("click",()=>{
       secureState.passwordVisible=!secureState.passwordVisible;
       q("credPassword").type=secureState.passwordVisible?"text":"password";
@@ -8584,6 +10440,19 @@ function debounce(fn, ms=250){
     document.addEventListener("click",(e)=>{
       const c=e.target && e.target.closest ? e.target.closest('[data-close="ovQrScan"]') : null;
       if (c) stopQrScan();
+    });
+    document.addEventListener("click",(e)=>{
+      const c=e.target && e.target.closest ? e.target.closest("[data-close]") : null;
+      if(!c) return;
+      if(c.dataset.close==="ovCredential"){
+        for(const id of ["credName","credUser","credUrl","credPassword","credNotes"]){const n=q(id);if(n)n.value="";}
+        secureState.editingCredentialId=null;
+      }
+      if(c.dataset.close==="ovTotp"){
+        for(const id of ["totpSecret","totpIssuer","totpAccount"]){const n=q(id);if(n)n.value="";}
+        secureState.editingTotpId=null;
+        secureState.totpKeyCache.clear();
+      }
     });
     document.addEventListener("keydown",(e)=>{
       if (e.key==="Escape") stopQrScan();
@@ -8609,9 +10478,7 @@ function debounce(fn, ms=250){
 
       if (e.key==="Escape"){
         stopQrScan();
-        try{closeOverlay("ovCredential");}catch{}
-        try{closeOverlay("ovTotp");}catch{}
-        try{closeOverlay("ovQrScan");}catch{}
+        scrubSecureEditors();
       }
     },true);
 
@@ -8643,6 +10510,10 @@ function debounce(fn, ms=250){
   // Expose a small non-secret diagnostic surface for manual testing.
   window.VortexVaultSecureWorkspace = {
     setWorkspace,
+    captureSensitiveUi,
+    restoreSensitiveUi,
+    scrubSensitiveUi:()=>{ stopTotpTimer(); clearSecureMemory(); scrubSecureEditors(); },
+    currentWorkspace:()=>secureState.view,
     parseTotpInput,
     generateTotp: async (secret,options={}) => generateTotp({
       secret,
@@ -9114,7 +10985,7 @@ function debounce(fn, ms=250){
       width:100%;
       min-width:0;
       display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-template-columns:repeat(5,minmax(0,1fr));
       gap:6px;
     }
     .controls .pill{display:none}
@@ -10069,6 +11940,7 @@ function debounce(fn, ms=250){
       refreshMediaCount();
       if(window.VortexVaultSecureWorkspace) window.VortexVaultSecureWorkspace.setWorkspace("files");
       toast(count===1?"New vault created":"Cascade-protected vault created");
+      privacyShieldAfterVaultUnlocked();
     }catch(e){
       closeCryptoProgress();
       toast(e.message||"Could not create vault",true);
@@ -10143,6 +12015,7 @@ function debounce(fn, ms=250){
       refreshMediaCount();
       if(window.VortexVaultSecureWorkspace) window.VortexVaultSecureWorkspace.setWorkspace("files");
       toast("Cascade Lock verified · vault unlocked");
+      privacyShieldAfterVaultUnlocked();
     }catch(e){
       closeCryptoProgress();
       if(s.chain){try{s.chain.fill(0)}catch{}}
@@ -10178,7 +12051,7 @@ function debounce(fn, ms=250){
     const inner=make("div","featureInner");
     const head=make("div","featureHead");
     const hm=make("div","featureHeadMain");
-    hm.append(make("div","featureEyebrow","Vault security"),make("h1","featureTitle","Settings"),make("div","featureSub","Change the unlock cascade without changing where your vault lives. Migration happens locally, record by record, then the new encrypted file is written when you Save & log out."));
+    hm.append(make("div","featureEyebrow","Vault security"),make("h1","featureTitle","Settings"),make("div","featureSub","Change the unlock cascade without changing where your vault lives. Migration happens locally, record by record, then the new encrypted file is written when you Save."));
     head.append(hm);
     const grid=make("div","settingsGrid");
 
@@ -10209,7 +12082,77 @@ function debounce(fn, ms=250){
     side.append(securityLine(I.layers,"Order-sensitive chain","Each derived secret is folded through HMAC-SHA-256. No intermediate password has a success verifier."));
     side.append(securityLine(I.shield,"AES-256-GCM","Authenticated encryption detects incorrect keys and ciphertext tampering."));
     side.append(securityLine(I.chip,"Non-extractable session key","Plaintext master passphrases are not retained in application state after key construction."));
-    grid.append(main,side);inner.append(head,grid);settingsHub.append(inner);
+
+    const resil=resilienceSettings();
+    const resilienceCard=make("div","settingsCard");
+    resilienceCard.style.gridColumn="1 / -1";
+    resilienceCard.append(make("h3","","Vault Resilience"),make("p","","Keep authenticated encrypted duplicate copies inside the same vault file. Vortex can transparently recover from a damaged current copy and preserve earlier saved vault versions for file-level recovery."));
+    const resilSection=make("div","vv22SettingSection");
+
+    const currentRow=make("div","vv22SettingRow");
+    const currentTx=make("div","");
+    currentTx.append(make("div","h","Current encrypted copies"),make("div","s","1 minimizes file size. 2 is the default. 3 provides maximum current-version redundancy."));
+    const currentSel=document.createElement("select");currentSel.className="vv22Select";
+    for(let i=1;i<=3;i++){const o=document.createElement("option");o.value=String(i);o.textContent=`${i} full ${i===1?"copy":"copies"}`;currentSel.appendChild(o)}
+    currentSel.value=String(resil.currentCopies);
+    currentSel.onchange=()=>{
+      const s=resilienceSettings();s.currentCopies=Number(currentSel.value);
+      getMeta().resilience={v:1,...resilienceClampSettings(s)};markDirty();toast("Resilience setting updated · Save to commit");
+    };
+    currentRow.append(currentTx,currentSel);
+
+    const prevRow=make("div","vv22SettingRow");
+    const prevTx=make("div","");
+    prevTx.append(make("div","h","Previous saved vault versions"),make("div","s","Keep 0–3 complete encrypted earlier versions inside the next saved vault for rollback and file-version recovery."));
+    const prevSel=document.createElement("select");prevSel.className="vv22Select";
+    for(let i=0;i<=3;i++){const o=document.createElement("option");o.value=String(i);o.textContent=i===0?"None":`${i} previous ${i===1?"version":"versions"}`;prevSel.appendChild(o)}
+    prevSel.value=String(resil.previousVersions);
+    prevSel.onchange=()=>{
+      const s=resilienceSettings();s.previousVersions=Number(prevSel.value);
+      getMeta().resilience={v:1,...resilienceClampSettings(s)};markDirty();toast("Resilience setting updated · Save to commit");
+    };
+    prevRow.append(prevTx,prevSel);
+    resilSection.append(currentRow,prevRow);
+
+    const healthWrap=make("div","vv22SettingSection");
+    const recovery=state.resilience.recoveredFromCopy || state.resilience.recoveredRecords.size;
+    const recoveredSource=state.resilience.recoveredFromCopy;
+    const sourceText=typeof recoveredSource==="number"?`opened from current copy ${recoveredSource}`:(recoveredSource?`opened from ${recoveredSource}`:"");
+    const health=make("div","vvHealthBadge"+(recovery?" warn":""),
+      recovery
+        ? `Recovery active · ${sourceText||`${state.resilience.recoveredRecords.size} record${state.resilience.recoveredRecords.size===1?"":"s"} recovered`}`
+        : "No corruption has been detected in this session");
+    healthWrap.appendChild(health);
+    if(recovery){
+      const heal=make("button","btn primary compact","Save healed vault");heal.type="button";heal.style.marginLeft="10px";heal.onclick=()=>saveVaultWithoutLogout();healthWrap.appendChild(heal);
+    }
+    resilienceCard.append(resilSection,healthWrap);
+
+    const privacyCard=make("div","settingsCard");
+    privacyCard.style.gridColumn="1 / -1";
+    const psCfg=privacyShieldConfig();
+    const psStatus=window.VortexVaultPrivacyShield?.status?.()||{configured:false,active:false,locked:false};
+    privacyCard.append(make("h3","","Privacy Shield"),make("p","","Optional quick session protection. Once configured and saved in the vault, Privacy Shield automatically arms after every successful full vault unlock. Vortex blacks out immediately when backgrounded; after 60 seconds, decrypted session state is AES-256-GCM encrypted in memory and quick unlock requires the separate Privacy Shield passphrase."));
+    const psSection=make("div","vv22SettingSection");
+    const psRow=make("div","vv22SettingRow");
+    const psTx=make("div","");
+    psTx.append(make("div","h",psCfg?.enabled?"Privacy Shield enabled":"Legacy session behavior"),
+      make("div","s",psCfg?.enabled
+        ? (psStatus.active
+          ? (psCfg?.v===2?"Automatically armed from this vault's encrypted Privacy Shield configuration.":"Active now · save/upgrade the Privacy Shield configuration to enable automatic activation on future unlocks.")
+          : (psCfg?.v===1?"This older Privacy Shield configuration needs a one-time upgrade before automatic activation is available.":"Automatic activation needs repair; use the Privacy Shield passphrase once to restore it."))
+        : "The vault remains unlocked while this tab stays open unless you enable Privacy Shield."));
+    const psActs=make("div","");psActs.style.cssText="display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end";
+    if(psCfg?.enabled){
+      if(!psStatus.active){const a=make("button","btn primary compact",psCfg?.v===1?"Upgrade Privacy Shield":"Repair activation");a.type="button";a.onclick=()=>window.VortexVaultPrivacyShield.activate();psActs.appendChild(a)}
+      const change=make("button","btn compact","Change passphrase");change.type="button";change.onclick=()=>window.VortexVaultPrivacyShield.configure();psActs.appendChild(change);
+      const disable=make("button","btn ghost compact","Disable");disable.type="button";disable.onclick=()=>window.VortexVaultPrivacyShield.disable();psActs.appendChild(disable);
+    }else{
+      const enable=make("button","btn primary compact","Enable Privacy Shield");enable.type="button";enable.onclick=()=>window.VortexVaultPrivacyShield.configure();psActs.appendChild(enable);
+    }
+    psRow.append(psTx,psActs);psSection.appendChild(psRow);privacyCard.appendChild(psSection);
+
+    grid.append(main,side,resilienceCard,privacyCard);inner.append(head,grid);settingsHub.append(inner);
   }
 
   function securityLine(icon,title,sub){
@@ -10237,7 +12180,7 @@ function debounce(fn, ms=250){
         const frac=info.total?info.done/info.total:1;
         updateCryptoProgress("Re-encrypting vault",`Securing ${info.name} · ${info.done} of ${info.total}`,50+Math.round(frac*46));
       });
-      updateCryptoProgress("Protection ready","Migration complete. Save & log out to write the new vault file.",100);
+      updateCryptoProgress("Protection ready","Migration complete. Save to write the new vault file.",100);
       await new Promise(r=>setTimeout(r,220));
       closeOverlay("ovRekeyUltra"); closeCryptoProgress();
       renderSettings();
@@ -10597,7 +12540,7 @@ function debounce(fn, ms=250){
     const totalPlain=files.reduce((n,e)=>n+Number(e.size||0),0);
     const sessionPw=sessionSecretFromCodes(state.webrtc.myCode,peerCode);
     const salt=crypto.getRandomValues(new Uint8Array(16));
-    const iter=250000;
+    const iter=SHARE_KDF_ITER;
     const key=await deriveKeyPBKDF2(sessionPw,salt,iter);
 
     const manifest=spec.entries.map(({sourceId,...safe})=>safe);
@@ -10609,7 +12552,13 @@ function debounce(fn, ms=250){
     const waiters=new Map();
     const onMessage=(ev)=>{
       if(typeof ev.data!=="string")return;
-      try{const m=JSON.parse(ev.data);if(m.t==="bundle-ack"&&waiters.has(m.id)){waiters.get(m.id)();waiters.delete(m.id)}}catch{}
+      if(ev.data.length>4096)return;
+      try{
+        const m=JSON.parse(ev.data);
+        if(m&&m.t==="bundle-ack"&&typeof m.id==="string"&&m.id.length<=128&&waiters.has(m.id)){
+          waiters.get(m.id)();waiters.delete(m.id);
+        }
+      }catch{}
     };
     dc.addEventListener("message",onMessage);
     let sentPlain=0;
@@ -10654,8 +12603,8 @@ function debounce(fn, ms=250){
   }
 
   function isBundleControl(data){
-    if(typeof data!=="string") return false;
-    try{const m=JSON.parse(data);return ["bundle-meta","bundle-file","bundle-file-end","bundle-done"].includes(m.t)}catch{return false}
+    if(typeof data!=="string" || data.length>SHARE_MAX_CONTROL_BYTES) return false;
+    try{const m=JSON.parse(data);return !!m&&["bundle-meta","bundle-file","bundle-file-end","bundle-done"].includes(m.t)}catch{return false}
   }
 
   function shouldHandleBundleMessage(data){
@@ -10665,23 +12614,45 @@ function debounce(fn, ms=250){
 
   async function handleBundleIncoming(data){
     if(typeof data!=="string"){
-      const r=state.webrtc.bundleRecv;if(!r||!r.current)return;
+      const r=state.webrtc.bundleRecv;
+      if(!r||!r.current){
+        webrtcSetStatus("Receive aborted: bundle data arrived before file metadata.",true);
+        webrtcCloseSession();return;
+      }
+      if(!(data instanceof ArrayBuffer)){
+        webrtcSetStatus("Receive aborted: invalid bundle binary payload.",true);
+        webrtcCloseSession();return;
+      }
       const u8=new Uint8Array(data);
-      if(r.current.bytes+u8.byteLength>state.webrtc.recvLimitBytes){webrtcSetStatus("Receive aborted: file exceeds browser memory cap.",true);webrtcCloseSession();return}
+      if(!u8.byteLength || r.current.bytes+u8.byteLength>r.current.cipherSize || r.current.bytes+u8.byteLength>state.webrtc.recvLimitBytes){
+        webrtcSetStatus("Receive aborted: bundle file exceeded its declared encrypted size.",true);
+        webrtcCloseSession();return;
+      }
       r.current.chunks.push(u8);r.current.bytes+=u8.byteLength;
       const overall=r.totalPlain?((r.donePlain + (r.current.plainSize*(r.current.bytes/Math.max(1,r.current.cipherSize))))/r.totalPlain)*100:0;
       shareProgressSet(overall,`Receiving ${r.doneFiles+1} of ${r.fileCount}`);
       return;
     }
-    let msg;try{msg=JSON.parse(data)}catch{return}
+
+    if(data.length>SHARE_MAX_CONTROL_BYTES){
+      webrtcSetStatus("Receive aborted: bundle control message is too large.",true);webrtcCloseSession();return;
+    }
+    let msg;try{msg=JSON.parse(data)}catch{
+      webrtcSetStatus("Receive aborted: invalid bundle control message.",true);webrtcCloseSession();return;
+    }
+
     if(msg.t==="bundle-meta"){
+      if(state.webrtc.bundleRecv){
+        webrtcSetStatus("Receive aborted: duplicate bundle metadata.",true);webrtcCloseSession();return;
+      }
       const peerCode=ui.sharePeerCode?ui.sharePeerCode.value:"";
-      if(!normalizeShareCode(peerCode)){webrtcSetStatus("Security code missing from share link.",true);return}
-      const key=await deriveKeyPBKDF2(sessionSecretFromCodes(state.webrtc.myCode,peerCode),b64ToBytes(msg.salt||""),Number(msg.iter||250000));
-      const entries=Array.isArray(msg.entries)?msg.entries:[];
+      if(!normalizeShareCode(peerCode)){webrtcSetStatus("Security code missing from share link.",true);webrtcCloseSession();return}
+      let valid;
+      try{valid=shareValidateBundleMeta(msg)}catch(e){webrtcSetStatus(`Receive aborted: ${e.message}`,true);webrtcCloseSession();return}
+      const key=await deriveKeyPBKDF2(sessionSecretFromCodes(state.webrtc.myCode,peerCode),valid.salt,SHARE_KDF_ITER);
       state.webrtc.bundleRecv={
-        key,entries,totalPlain:Number(msg.totalPlain||0),donePlain:0,doneFiles:0,
-        fileCount:entries.filter(e=>e.kind!=="folder").length,current:null,folderMap:new Map()
+        key,entries:valid.entries,totalPlain:valid.totalPlain,donePlain:0,doneFiles:0,
+        fileCount:valid.fileCount,current:null,folderMap:new Map(),receivedIds:new Set()
       };
       U.bundleMessageActive=true;
       if(state.unlocked) createIncomingFolderStructure(state.webrtc.bundleRecv);
@@ -10689,34 +12660,58 @@ function debounce(fn, ms=250){
       if(ui.shareRecvInfo)ui.shareRecvInfo.textContent=`Receiving secure bundle · ${state.webrtc.bundleRecv.fileCount} files`;
       return;
     }
-    const r=state.webrtc.bundleRecv;if(!r)return;
+
+    const r=state.webrtc.bundleRecv;
+    if(!r){
+      webrtcSetStatus("Receive aborted: bundle message arrived before its manifest.",true);webrtcCloseSession();return;
+    }
+
     if(msg.t==="bundle-file"){
-      const e=r.entries.find(x=>x.id===msg.id);if(!e){webrtcSetStatus("Bundle manifest mismatch",true);return}
-      r.current={entry:e,iv:b64ToBytes(msg.iv||""),cipherSize:Number(msg.cipherSize||0),plainSize:Number(msg.plainSize||0),chunks:[],bytes:0};
+      let valid;
+      try{valid=shareValidateBundleFile(msg,r)}catch(e){webrtcSetStatus(`Receive aborted: ${e.message}`,true);webrtcCloseSession();return}
+      r.current={entry:valid.entry,iv:valid.iv,cipherSize:valid.cipherSize,plainSize:valid.plainSize,chunks:[],bytes:0};
       return;
     }
+
     if(msg.t==="bundle-file-end"){
-      if(!r.current||r.current.entry.id!==msg.id)return;
+      if(!r.current||typeof msg.id!=="string"||r.current.entry.id!==msg.id){
+        webrtcSetStatus("Receive aborted: bundle file boundary mismatch.",true);webrtcCloseSession();return;
+      }
+      if(r.current.bytes!==r.current.cipherSize){
+        webrtcSetStatus("Receive aborted: bundle file ended before its declared payload was complete.",true);webrtcCloseSession();return;
+      }
       try{
-        const c=new Uint8Array(r.current.bytes);let off=0;for(const chunk of r.current.chunks){c.set(chunk,off);off+=chunk.byteLength}
+        const c=new Uint8Array(r.current.bytes);let off=0;
+        for(const chunk of r.current.chunks){c.set(chunk,off);off+=chunk.byteLength}
         const aad=aadForEntry(r.current.entry);
         const plain=new Uint8Array(await crypto.subtle.decrypt({name:"AES-GCM",iv:r.current.iv,additionalData:aad},r.key,c));
         if(plain.byteLength!==r.current.plainSize) throw new Error("Received file size mismatch");
         await acceptBundleFile(r.current.entry,plain,r);
-        r.donePlain+=plain.byteLength;r.doneFiles++;
+        r.donePlain+=plain.byteLength;r.doneFiles++;r.receivedIds.add(r.current.entry.id);
         try{plain.fill(0);c.fill(0)}catch{}
         if(state.webrtc.dc&&state.webrtc.dc.readyState==="open")state.webrtc.dc.send(JSON.stringify({t:"bundle-ack",id:msg.id}));
         r.current=null;
         shareProgressSet(r.totalPlain?(r.donePlain/r.totalPlain)*100:100,`Received ${r.doneFiles} of ${r.fileCount}`);
-      }catch(e){webrtcSetStatus(e.message||"Could not decrypt received file",true)}
+      }catch(e){
+        webrtcSetStatus(e.message||"Could not decrypt received file",true);
+        webrtcCloseSession();return;
+      }
       return;
     }
+
     if(msg.t==="bundle-done"){
+      if(r.current||r.doneFiles!==r.fileCount||r.donePlain!==r.totalPlain){
+        webrtcSetStatus("Receive aborted: bundle completion did not match its authenticated manifest.",true);webrtcCloseSession();return;
+      }
       state.webrtc.__completed=true;shareProgressSet(100,"Complete");webrtcSetStatus("Multi-item transfer complete.");
       if(ui.shareRecvInfo)ui.shareRecvInfo.textContent=state.unlocked?`Imported ${r.doneFiles} files into your vault.`:`Downloaded ${r.doneFiles} files.`;
       toast(state.unlocked?`Received ${r.doneFiles} files`:`Downloaded ${r.doneFiles} files`);
       state.webrtc.bundleRecv=null;U.bundleMessageActive=false;render();refreshActiveFeature();
+      return;
     }
+
+    webrtcSetStatus("Receive aborted: unsupported bundle control message.",true);
+    webrtcCloseSession();
   }
 
   function createIncomingFolderStructure(r){
@@ -10833,7 +12828,8 @@ function debounce(fn, ms=250){
     handleBundleIncoming,
     renderLibrary,
     renderSettings,
-    renderShareWorkspace
+    renderShareWorkspace,
+    closeMediaViewer
   };
 })();
 </script>
