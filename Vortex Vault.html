@@ -2576,7 +2576,9 @@
 
   // Vortex Vault 2.2 session/privacy/share hardening.
   const PRIVACY_SHIELD_KDF_ITER = 350000;
-  const PRIVACY_SHIELD_GRACE_MS = 60 * 1000;
+  const PRIVACY_SHIELD_MIN_GRACE_MS = 120 * 1000;
+  const PRIVACY_SHIELD_MAX_GRACE_MS = 10 * 60 * 1000;
+  const PRIVACY_SHIELD_ACTIVITY_SAMPLE_MS = 4 * 1000;
   const PRIVACY_SHIELD_MIN_LEN = 8;
   const SHARE_KDF_ITER = 250000;
   const SHARE_MAX_CONTROL_BYTES = 4 * 1024 * 1024;
@@ -2752,18 +2754,21 @@
     dirty: false,
 
     // 2.2 Privacy Shield keeps no passphrase string. A derived key exists only
-    // while the unlocked session is active; after a 60s background lock it is
-    // discarded and must be re-derived from the separate Privacy Shield phrase.
+    // while the unlocked session is active; after the adaptive background lock it
+    // is discarded and must be re-derived from the separate Privacy Shield phrase.
     privacyShield: {
       active: false,
       locked: false,
       guardKey: null,
       config: null,
       hiddenAt: 0,
+      hiddenAtPerf: 0,
       timer: null,
       snapshot: null,
+      pendingReturnElapsed: 0,
       busy: false,
-      lastWorkspace: "files"
+      lastWorkspace: "files",
+      adaptive: null
     },
 
     // Optional in-file redundancy archive. The standard V2/V3 payload remains
@@ -4570,7 +4575,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       go.textContent = legacyConfig ? "Upgrade & activate" : "Activate & repair";
     }else{
       title.textContent = mode==="configure" ? "Configure Privacy Shield" : "Set up Privacy Shield";
-      sub.textContent = "Optional: use a separate, easier-to-remember passphrase for quick unlock. The screen blacks out immediately when Vortex Vault is backgrounded; after 60 seconds, decrypted session state is AES-GCM encrypted in RAM.";
+      sub.textContent = "Optional: use a separate, easier-to-remember passphrase for quick unlock. The screen blacks out immediately when Vortex Vault is backgrounded; the encrypted in-memory lock then adapts automatically from about 30 seconds up to 10 minutes based on this vault's observed activity and return patterns.";
       pw.placeholder = "New Privacy Shield passphrase";
       pw2.style.display = "";
       later.style.display = "";
@@ -4804,6 +4809,8 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
         state.privacyShield.guardKey=made.key;
         state.privacyShield.active=true;
         state.privacyShield.locked=false;
+        privacyShieldAdaptiveEnsureSession();
+        if(document.visibilityState==="visible") privacyShieldAdaptiveResumeForeground(Date.now());
         markDirty();
         privacyShieldHide();
         if(window.VortexVaultUltra?.refreshActiveFeature) window.VortexVaultUltra.refreshActiveFeature();
@@ -4822,6 +4829,8 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
           state.privacyShield.guardKey=made.key;
           state.privacyShield.active=true;
           state.privacyShield.locked=false;
+          privacyShieldAdaptiveEnsureSession();
+          if(document.visibilityState==="visible") privacyShieldAdaptiveResumeForeground(Date.now());
           markDirty();
           privacyShieldHide();
           if(window.VortexVaultUltra?.refreshActiveFeature) window.VortexVaultUltra.refreshActiveFeature();
@@ -4842,6 +4851,8 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
             state.privacyShield.guardKey=key;
             state.privacyShield.active=true;
             state.privacyShield.locked=false;
+            privacyShieldAdaptiveEnsureSession();
+            if(document.visibilityState==="visible") privacyShieldAdaptiveResumeForeground(Date.now());
             markDirty();
           }finally{
             try{if(raw)raw.fill(0)}catch{}
@@ -4855,6 +4866,8 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
           state.privacyShield.guardKey=key;
           state.privacyShield.active=true;
           state.privacyShield.locked=false;
+          privacyShieldAdaptiveEnsureSession();
+          if(document.visibilityState==="visible") privacyShieldAdaptiveResumeForeground(Date.now());
           privacyShieldHide();
           toast("Privacy Shield active");
         }
@@ -4929,6 +4942,239 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     }
   }
 
+
+  function privacyShieldAdaptiveClamp(value,min,max){
+    const n=Number(value);
+    if(!Number.isFinite(n)) return min;
+    return Math.max(min,Math.min(max,n));
+  }
+
+  function privacyShieldAdaptiveNormalize(raw){
+    const r=raw&&typeof raw==="object"?raw:{};
+    return {
+      v:1,
+      samples:Math.round(privacyShieldAdaptiveClamp(r.samples||0,0,64)),
+      meanAwayMs:privacyShieldAdaptiveClamp(r.meanAwayMs||0,0,PRIVACY_SHIELD_MAX_GRACE_MS),
+      deviationAwayMs:privacyShieldAdaptiveClamp(r.deviationAwayMs||0,0,PRIVACY_SHIELD_MAX_GRACE_MS/2),
+      quickReturnRate:privacyShieldAdaptiveClamp(r.quickReturnRate||0,0,1),
+      sessions:Math.round(privacyShieldAdaptiveClamp(r.sessions||0,0,1000000)),
+      lastSessionForegroundMs:privacyShieldAdaptiveClamp(r.lastSessionForegroundMs||0,0,24*60*60*1000),
+      lastSessionInteractionRate:privacyShieldAdaptiveClamp(r.lastSessionInteractionRate||0,0,30),
+      lastSessionSwitchRate:privacyShieldAdaptiveClamp(r.lastSessionSwitchRate||0,0,120)
+    };
+  }
+
+  function privacyShieldAdaptiveStartSession(){
+    const now=Date.now();
+    const meta=getMeta();
+    const profile=privacyShieldAdaptiveNormalize(meta?.privacyShieldAdaptive);
+    profile.sessions=Math.min(1000000,profile.sessions+1);
+    state.privacyShield.adaptive={
+      sessionStartedAt:now,
+      foregroundStartedAt:document.visibilityState==="visible"?now:0,
+      foregroundMs:0,
+      interactionPulses:0,
+      lastInteractionSampleAt:0,
+      departures:0,
+      returns:0,
+      plannedTimeoutMs:PRIVACY_SHIELD_MIN_GRACE_MS,
+      profile
+    };
+  }
+
+  function privacyShieldAdaptiveEnsureSession(){
+    if(!state.privacyShield.adaptive) privacyShieldAdaptiveStartSession();
+    return state.privacyShield.adaptive;
+  }
+
+  function privacyShieldAdaptiveForegroundMs(now=Date.now()){
+    const a=state.privacyShield.adaptive;
+    if(!a) return 0;
+    const live=a.foregroundStartedAt?Math.max(0,now-a.foregroundStartedAt):0;
+    return Math.max(0,a.foregroundMs+live);
+  }
+
+  function privacyShieldAdaptivePauseForeground(now=Date.now()){
+    const a=state.privacyShield.adaptive;
+    if(!a || !a.foregroundStartedAt) return;
+    a.foregroundMs+=Math.max(0,now-a.foregroundStartedAt);
+    a.foregroundStartedAt=0;
+  }
+
+  function privacyShieldAdaptiveResumeForeground(now=Date.now()){
+    const a=privacyShieldAdaptiveEnsureSession();
+    if(!a.foregroundStartedAt) a.foregroundStartedAt=now;
+  }
+
+  function privacyShieldAdaptiveNoteInteraction(){
+    if(!state.unlocked || !state.privacyShield.active || state.privacyShield.locked || document.visibilityState!=="visible") return;
+    const a=privacyShieldAdaptiveEnsureSession();
+    const now=Date.now();
+    if(a.lastInteractionSampleAt && now-a.lastInteractionSampleAt<PRIVACY_SHIELD_ACTIVITY_SAMPLE_MS) return;
+    a.lastInteractionSampleAt=now;
+    a.interactionPulses++;
+  }
+
+  function privacyShieldAdaptiveRecordReturn(elapsedMs,wasLocked=false){
+    const a=privacyShieldAdaptiveEnsureSession();
+    if(!Number.isFinite(elapsedMs) || elapsedMs<500) return;
+    a.returns++;
+
+    const p=a.profile;
+    const quickReturn=elapsedMs<=90*1000?1:0;
+    let observed=privacyShieldAdaptiveClamp(elapsedMs,1000,PRIVACY_SHIELD_MAX_GRACE_MS);
+
+    // An absence that already crossed the adaptive lock line is useful evidence,
+    // but it must not teach the model to become dramatically more permissive.
+    // Learn it cautiously, bounded near the threshold that just proved too short.
+    if(wasLocked){
+      const cautiousCeiling=Math.max(
+        60*1000,
+        Math.min(PRIVACY_SHIELD_MAX_GRACE_MS,(a.plannedTimeoutMs||PRIVACY_SHIELD_MIN_GRACE_MS)*1.35)
+      );
+      observed=Math.min(observed,cautiousCeiling);
+    }
+
+    // Once a pattern is established, winsorize isolated extremes. This keeps a
+    // single unusual interruption from poisoning the learned return-time model.
+    if(p.samples>=4 && p.meanAwayMs>0){
+      const spread=Math.max(15*1000,p.deviationAwayMs||0);
+      const lo=Math.max(1000,p.meanAwayMs-(3.5*spread));
+      const hi=Math.min(PRIVACY_SHIELD_MAX_GRACE_MS,p.meanAwayMs+(3.5*spread));
+      observed=privacyShieldAdaptiveClamp(observed,lo,hi);
+    }
+
+    if(p.samples<=0){
+      p.samples=1;
+      p.meanAwayMs=observed;
+      p.deviationAwayMs=Math.max(5000,Math.min(60*1000,observed*0.25));
+      p.quickReturnRate=quickReturn;
+      return;
+    }
+
+    const alpha=p.samples<5 ? 1/(p.samples+1) : 0.18;
+    const previousMean=p.meanAwayMs;
+    const delta=observed-previousMean;
+    p.meanAwayMs=privacyShieldAdaptiveClamp(previousMean+(alpha*delta),0,PRIVACY_SHIELD_MAX_GRACE_MS);
+    const absDelta=Math.abs(delta);
+    p.deviationAwayMs=privacyShieldAdaptiveClamp(
+      (p.deviationAwayMs||0)+(alpha*(absDelta-(p.deviationAwayMs||0))),
+      0,
+      PRIVACY_SHIELD_MAX_GRACE_MS/2
+    );
+    p.quickReturnRate=privacyShieldAdaptiveClamp(
+      p.quickReturnRate+(alpha*(quickReturn-p.quickReturnRate)),
+      0,
+      1
+    );
+    p.samples=Math.min(64,p.samples+1);
+  }
+
+  function privacyShieldAdaptiveTimeoutMs(now=Date.now()){
+    const a=privacyShieldAdaptiveEnsureSession();
+    const p=a.profile;
+    const activeMs=privacyShieldAdaptiveForegroundMs(now);
+
+    const sessionMinutes=Math.max(activeMs/60000,0.5);
+    const sessionHours=Math.max(activeMs/3600000,1/12);
+    const interactionRate=a.interactionPulses/sessionMinutes;
+    const switchRate=a.returns/sessionHours;
+
+    const currentInteractionScore=privacyShieldAdaptiveClamp(interactionRate/4,0,1);
+    const historicalInteractionScore=privacyShieldAdaptiveClamp((p.lastSessionInteractionRate||0)/4,0,1);
+    const interactionScore=privacyShieldAdaptiveClamp(
+      (currentInteractionScore*0.82)+(historicalInteractionScore*0.18),
+      0,1
+    );
+
+    const returnCountScore=privacyShieldAdaptiveClamp(a.returns/4,0,1);
+    const currentSwitchScore=privacyShieldAdaptiveClamp(switchRate/12,0,1);
+    const historicalSwitchScore=privacyShieldAdaptiveClamp((p.lastSessionSwitchRate||0)/12,0,1);
+    const quickPatternScore=p.samples>=2?privacyShieldAdaptiveClamp(p.quickReturnRate||0,0,1):0;
+    const switchScore=privacyShieldAdaptiveClamp(
+      (returnCountScore*0.42)+(currentSwitchScore*0.30)+(historicalSwitchScore*0.13)+(quickPatternScore*0.15),
+      0,1
+    );
+
+    const currentTenureScore=privacyShieldAdaptiveClamp(activeMs/(30*60*1000),0,1);
+    const historicalTenureScore=privacyShieldAdaptiveClamp((p.lastSessionForegroundMs||0)/(30*60*1000),0,1);
+    const tenureScore=privacyShieldAdaptiveClamp(
+      (currentTenureScore*0.88)+(historicalTenureScore*0.12),
+      0,1
+    );
+
+    // Cold-start rule: an early, unusual departure with no return history stays
+    // conservative at ~30s. A genuinely long, interactive foreground session
+    // can earn a few minutes even before the first tab/app switch.
+    if(p.samples===0 && a.returns===0){
+      if(activeMs<10*60*1000) return PRIVACY_SHIELD_MIN_GRACE_MS;
+      const longUseScore=privacyShieldAdaptiveClamp((activeMs-(10*60*1000))/(30*60*1000),0,1);
+      const earned=PRIVACY_SHIELD_MIN_GRACE_MS+
+        longUseScore*((120*1000)+(90*1000*currentInteractionScore));
+      return Math.round(privacyShieldAdaptiveClamp(
+        earned,
+        PRIVACY_SHIELD_MIN_GRACE_MS,
+        4*60*1000
+      )/1000)*1000;
+    }
+
+    const engagementScore=privacyShieldAdaptiveClamp(
+      (tenureScore*0.35)+(interactionScore*0.30)+(switchScore*0.35),
+      0,1
+    );
+    const engagementAllowance=PRIVACY_SHIELD_MIN_GRACE_MS+(engagementScore*270*1000);
+
+    let patternAllowance=PRIVACY_SHIELD_MIN_GRACE_MS;
+    if(p.samples>0 && p.meanAwayMs>0){
+      const confidence=privacyShieldAdaptiveClamp(p.samples/4,0,1);
+      const rawPattern=Math.max(
+        PRIVACY_SHIELD_MIN_GRACE_MS,
+        p.meanAwayMs+Math.max(20*1000,1.5*(p.deviationAwayMs||0))
+      );
+      patternAllowance=PRIVACY_SHIELD_MIN_GRACE_MS+
+        (confidence*(rawPattern-PRIVACY_SHIELD_MIN_GRACE_MS));
+      patternAllowance*=1+(0.35*switchScore);
+    }
+
+    let target=Math.max(
+      PRIVACY_SHIELD_MIN_GRACE_MS,
+      engagementAllowance,
+      patternAllowance
+    );
+
+    // With enough return samples, "unusually long" gets a hard behavioral ceiling:
+    // the model can accommodate the user's normal away time but not drift forever.
+    if(p.samples>=3 && p.meanAwayMs>0){
+      const abnormalCeiling=Math.max(
+        60*1000,
+        p.meanAwayMs+Math.max(
+          30*1000,
+          2.4*(p.deviationAwayMs||0),
+          0.55*p.meanAwayMs
+        )
+      );
+      target=Math.min(target,abnormalCeiling);
+    }
+
+    return Math.round(privacyShieldAdaptiveClamp(
+      target,
+      PRIVACY_SHIELD_MIN_GRACE_MS,
+      PRIVACY_SHIELD_MAX_GRACE_MS
+    )/1000)*1000;
+  }
+
+  function privacyShieldAdaptivePersistForSave(meta){
+    const a=state.privacyShield.adaptive;
+    if(!meta || !a || !a.profile || !privacyShieldConfig()?.enabled) return;
+    const activeMs=privacyShieldAdaptiveForegroundMs(Date.now());
+    const minutes=Math.max(activeMs/60000,0.5);
+    const hours=Math.max(activeMs/3600000,1/12);
+    a.profile.lastSessionForegroundMs=privacyShieldAdaptiveClamp(activeMs,0,24*60*60*1000);
+    a.profile.lastSessionInteractionRate=privacyShieldAdaptiveClamp(a.interactionPulses/minutes,0,30);
+    a.profile.lastSessionSwitchRate=privacyShieldAdaptiveClamp(a.returns/hours,0,120);
+    meta.privacyShieldAdaptive={...privacyShieldAdaptiveNormalize(a.profile)};
+  }
+
   async function privacyShieldLockNow(){
     if(!state.unlocked || !state.privacyShield.active || state.privacyShield.locked || state.privacyShield.busy) return;
     const key=state.privacyShield.guardKey;
@@ -4946,6 +5192,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
         currentFolderId:state.currentFolderId,
         selectedId:state.selectedId,
         dirty:!!state.dirty,
+        adaptive:state.privacyShield.adaptive,
         transient:privacyShieldCaptureTransientUi()
       };
       const plain=new TextEncoder().encode(JSON.stringify(snapshotObj));
@@ -4957,12 +5204,14 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       state.privacyShield.snapshot={iv,cipher};
       state.privacyShield.guardKey=null;
       state.privacyShield.locked=true;
+      state.privacyShield.adaptive=null;
       if(state.mode==="v2") state.v2.index=null;
       if(state.mode==="v1"){state.v1Vault=null;state.password=null}
       state.currentFolderId=null;
       state.selectedId=null;
       state.fileName=null;
       privacyShieldScrubDom();
+      if(document.visibilityState==="visible") privacyShieldShow("locked");
     }catch(e){
       console.error(e);
       // If an in-memory lock cannot be completed, never pretend it was. Keep the
@@ -4999,10 +5248,30 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     state.currentFolderId=saved.currentFolderId||null;
     state.selectedId=saved.selectedId||null;
     state.dirty=!!saved.dirty;
+    if(saved.adaptive && typeof saved.adaptive==="object"){
+      state.privacyShield.adaptive={
+        sessionStartedAt:Number(saved.adaptive.sessionStartedAt||Date.now()),
+        foregroundStartedAt:0,
+        foregroundMs:Math.max(0,Number(saved.adaptive.foregroundMs||0)),
+        interactionPulses:Math.max(0,Math.round(Number(saved.adaptive.interactionPulses||0))),
+        lastInteractionSampleAt:0,
+        departures:Math.max(0,Math.round(Number(saved.adaptive.departures||0))),
+        returns:Math.max(0,Math.round(Number(saved.adaptive.returns||0))),
+        plannedTimeoutMs:privacyShieldAdaptiveClamp(saved.adaptive.plannedTimeoutMs||PRIVACY_SHIELD_MIN_GRACE_MS,PRIVACY_SHIELD_MIN_GRACE_MS,PRIVACY_SHIELD_MAX_GRACE_MS),
+        profile:privacyShieldAdaptiveNormalize(saved.adaptive.profile)
+      };
+    }else{
+      privacyShieldAdaptiveStartSession();
+    }
+    const pendingReturnElapsed=Math.max(0,Number(state.privacyShield.pendingReturnElapsed||0));
+    state.privacyShield.pendingReturnElapsed=0;
+    if(pendingReturnElapsed>0) privacyShieldAdaptiveRecordReturn(pendingReturnElapsed,true);
     state.privacyShield.guardKey=key;
     state.privacyShield.snapshot=null;
     state.privacyShield.locked=false;
     state.privacyShield.hiddenAt=0;
+    state.privacyShield.hiddenAtPerf=0;
+    privacyShieldAdaptiveResumeForeground(Date.now());
     privacyShieldHide();
     render();
 
@@ -5035,40 +5304,79 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     toast("Privacy Shield unlocked");
   }
 
+  function privacyShieldHiddenElapsed(now=Date.now()){
+    const wall=state.privacyShield.hiddenAt?Math.max(0,now-state.privacyShield.hiddenAt):0;
+    let mono=0;
+    try{
+      mono=state.privacyShield.hiddenAtPerf?Math.max(0,performance.now()-state.privacyShield.hiddenAtPerf):0;
+    }catch{}
+    return Math.max(wall,mono);
+  }
+
   function privacyShieldBeginBackground(){
     if(!state.unlocked || !state.privacyShield.active || state.privacyShield.locked) return;
     if(state.privacyShield.hiddenAt) return;
-    state.privacyShield.hiddenAt=Date.now();
+    const now=Date.now();
+    const adaptive=privacyShieldAdaptiveEnsureSession();
+    privacyShieldAdaptivePauseForeground(now);
+    adaptive.departures++;
+    adaptive.plannedTimeoutMs=privacyShieldAdaptiveTimeoutMs(now);
+    state.privacyShield.hiddenAt=now;
+    try{state.privacyShield.hiddenAtPerf=performance.now()}catch{state.privacyShield.hiddenAtPerf=0}
     privacyShieldShow("grace");
     if(state.privacyShield.timer)clearTimeout(state.privacyShield.timer);
     state.privacyShield.timer=setTimeout(async()=>{
       state.privacyShield.timer=null;
       if(!state.unlocked || !state.privacyShield.active || state.privacyShield.locked) return;
-      if((Date.now()-state.privacyShield.hiddenAt)>=PRIVACY_SHIELD_GRACE_MS){
+      const elapsed=privacyShieldHiddenElapsed(Date.now());
+      if(elapsed>=adaptive.plannedTimeoutMs){
         await privacyShieldLockNow();
       }
-    },PRIVACY_SHIELD_GRACE_MS+50);
+    },adaptive.plannedTimeoutMs+50);
   }
 
   async function privacyShieldReturnForeground(){
     if(!state.unlocked || !state.privacyShield.active) return;
-    if(state.privacyShield.locked){
-      privacyShieldShow("locked");
+    if(state.privacyShield.busy && !state.privacyShield.locked){
+      privacyShieldShow("grace");
       return;
     }
-    const elapsed=state.privacyShield.hiddenAt?Date.now()-state.privacyShield.hiddenAt:0;
+    const now=Date.now();
+    const elapsed=privacyShieldHiddenElapsed(now);
+    const adaptive=state.privacyShield.adaptive;
+    const planned=Math.max(
+      PRIVACY_SHIELD_MIN_GRACE_MS,
+      Number(adaptive?.plannedTimeoutMs||PRIVACY_SHIELD_MIN_GRACE_MS)
+    );
     if(state.privacyShield.timer){clearTimeout(state.privacyShield.timer);state.privacyShield.timer=null}
-    if(elapsed>=PRIVACY_SHIELD_GRACE_MS){
-      await privacyShieldLockNow();
+
+    if(state.privacyShield.locked){
+      if(elapsed>0) state.privacyShield.pendingReturnElapsed=elapsed;
+      state.privacyShield.hiddenAt=0;
+      state.privacyShield.hiddenAtPerf=0;
       privacyShieldShow("locked");
       return;
     }
+
+    if(elapsed>=planned){
+      await privacyShieldLockNow();
+      if(state.privacyShield.locked) state.privacyShield.pendingReturnElapsed=elapsed;
+      state.privacyShield.hiddenAt=0;
+      state.privacyShield.hiddenAtPerf=0;
+      privacyShieldShow("locked");
+      return;
+    }
+
+    if(elapsed>0) privacyShieldAdaptiveRecordReturn(elapsed,false);
     state.privacyShield.hiddenAt=0;
+    state.privacyShield.hiddenAtPerf=0;
+    privacyShieldAdaptiveResumeForeground(now);
     privacyShieldHide();
   }
 
   function privacyShieldAfterVaultUnlocked(){
     if(!state.unlocked) return;
+    privacyShieldAdaptiveStartSession();
     if(state.resilience.recoveredFromCopy){
       const src=state.resilience.recoveredFromCopy;
       const label=typeof src==="number"?`redundant current copy ${src}`:String(src);
@@ -5079,6 +5387,8 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     state.privacyShield.locked=false;
     state.privacyShield.snapshot=null;
     state.privacyShield.hiddenAt=0;
+    state.privacyShield.hiddenAtPerf=0;
+    state.privacyShield.pendingReturnElapsed=0;
     state.privacyShield.guardKey=null;
     state.privacyShield.active=false;
 
@@ -5095,6 +5405,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
         state.privacyShield.guardKey=key;
         state.privacyShield.active=true;
         state.privacyShield.locked=false;
+        if(document.visibilityState==="visible") privacyShieldAdaptiveResumeForeground(Date.now());
         privacyShieldHide();
         if(window.VortexVaultUltra?.refreshActiveFeature) window.VortexVaultUltra.refreshActiveFeature();
         if(document.visibilityState==="hidden") privacyShieldBeginBackground();
@@ -5128,6 +5439,9 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     state.privacyShield.locked=false;
     state.privacyShield.guardKey=null;
     state.privacyShield.snapshot=null;
+    state.privacyShield.hiddenAt=0;
+    state.privacyShield.hiddenAtPerf=0;
+    state.privacyShield.pendingReturnElapsed=0;
     state.privacyShield.config={...getMeta().privacyShield};
     if(state.privacyShield.timer){clearTimeout(state.privacyShield.timer);state.privacyShield.timer=null}
     privacyShieldHide();
@@ -5156,6 +5470,10 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
   window.addEventListener("focus",()=>{if(document.visibilityState==="visible")privacyShieldReturnForeground()});
   window.addEventListener("pagehide",()=>privacyShieldBeginBackground());
   window.addEventListener("pageshow",()=>{if(document.visibilityState==="visible")privacyShieldReturnForeground()});
+
+  for(const eventName of ["pointerdown","keydown","input","wheel"]){
+    document.addEventListener(eventName,privacyShieldAdaptiveNoteInteraction,{capture:true,passive:true});
+  }
 
   document.addEventListener("keydown",(e)=>{
     if(!state.privacyShield?.locked)return;
@@ -6133,7 +6451,8 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
     if (state.privacyShield.timer) try{ clearTimeout(state.privacyShield.timer); }catch{}
     state.privacyShield = {
       active:false, locked:false, guardKey:null, config:null,
-      hiddenAt:0, timer:null, snapshot:null, busy:false, lastWorkspace:"files"
+      hiddenAt:0, hiddenAtPerf:0, timer:null, snapshot:null, pendingReturnElapsed:0,
+      busy:false, lastWorkspace:"files", adaptive:null
     };
     state.resilience = {
       sourceFile:null, manifest:null, activeCurrentIndex:0,
@@ -6293,6 +6612,7 @@ const MAX_PENDING_BYTES = Math.floor(3 * 1024 * 1024 * 1024);
       dataParts.push(part);
     }
 
+    privacyShieldAdaptivePersistForSave(indexObj.meta);
     indexObj.meta.updated = Date.now();
     indexObj.meta.resilience = {v:1,...resilSettings};
     if (formatVersion === V3_VERSION){
@@ -10852,7 +11172,25 @@ function debounce(fn, ms=250){
     padding:8px 58px;
     display:grid;
     place-items:center;
+    touch-action:pan-y pinch-zoom;
+    overscroll-behavior:contain;
+    cursor:grab;
   }
+  .mediaStage.vvSwiping{cursor:grabbing}
+  .mediaSwipeFrame{
+    width:100%;
+    height:100%;
+    min-width:0;
+    min-height:0;
+    display:grid;
+    place-items:center;
+    transform:translate3d(0,0,0);
+    opacity:1;
+    will-change:transform,opacity;
+    transition:transform .22s cubic-bezier(.2,.82,.2,1),opacity .18s ease;
+  }
+  .mediaSwipeFrame.vvEnterNext{transform:translate3d(10%,0,0);opacity:.18}
+  .mediaSwipeFrame.vvEnterPrev{transform:translate3d(-10%,0,0);opacity:.18}
   .mediaStage img,.mediaStage video{
     display:block;
     width:auto;
@@ -11739,6 +12077,8 @@ function debounce(fn, ms=250){
     mediaIds:[],
     mediaIndex:0,
     mediaUrl:null,
+    mediaRenderSeq:0,
+    mediaEnterDir:0,
     shareSelected:new Set(),
     unlockSession:null,
     rekeyCount:1,
@@ -12132,7 +12472,7 @@ function debounce(fn, ms=250){
     privacyCard.style.gridColumn="1 / -1";
     const psCfg=privacyShieldConfig();
     const psStatus=window.VortexVaultPrivacyShield?.status?.()||{configured:false,active:false,locked:false};
-    privacyCard.append(make("h3","","Privacy Shield"),make("p","","Optional quick session protection. Once configured and saved in the vault, Privacy Shield automatically arms after every successful full vault unlock. Vortex blacks out immediately when backgrounded; after 60 seconds, decrypted session state is AES-256-GCM encrypted in memory and quick unlock requires the separate Privacy Shield passphrase."));
+    privacyCard.append(make("h3","","Privacy Shield"),make("p","","Optional quick session protection. Once configured and saved in the vault, Privacy Shield automatically arms after every successful full vault unlock. Vortex blacks out immediately when backgrounded, then uses a bounded adaptive delay—about 30 seconds to at most 10 minutes—based on encrypted local activity and return-pattern statistics before sealing decrypted session state in memory."));
     const psSection=make("div","vv22SettingSection");
     const psRow=make("div","vv22SettingRow");
     const psTx=make("div","");
@@ -12322,19 +12662,159 @@ function debounce(fn, ms=250){
     }catch{}
   }
 
+
+  const mediaSwipe={
+    active:false,
+    dragging:false,
+    pointerId:null,
+    startX:0,
+    startY:0,
+    lastX:0,
+    startedAt:0,
+    suppressClickUntil:0
+  };
+
+  function mediaSwipeFrame(){
+    return q("mediaStage")?.querySelector(".mediaSwipeFrame")||null;
+  }
+
+  function resetMediaSwipe(animateBack=false){
+    const stage=q("mediaStage");
+    const frame=mediaSwipeFrame();
+    if(frame){
+      frame.style.transition=animateBack
+        ?"transform .2s cubic-bezier(.2,.82,.2,1), opacity .16s ease"
+        :"";
+      frame.style.transform="";
+      frame.style.opacity="";
+    }
+    if(stage) stage.classList.remove("vvSwiping");
+    mediaSwipe.active=false;
+    mediaSwipe.dragging=false;
+    mediaSwipe.pointerId=null;
+  }
+
+  function mediaSwipePointerDown(e){
+    const stage=q("mediaStage");
+    if(!stage || !q("mediaLightbox").classList.contains("on") || U.mediaIds.length<2) return;
+    if(e.pointerType==="mouse" && e.button!==0) return;
+
+    // Keep the native video transport controls easy to use. Swiping still works
+    // on the rest of the video surface and everywhere else in the media stage.
+    const video=stage.querySelector("video");
+    if(video && e.target===video){
+      const r=video.getBoundingClientRect();
+      if(e.clientY>=r.bottom-Math.min(64,Math.max(42,r.height*0.16))) return;
+    }
+
+    mediaSwipe.active=true;
+    mediaSwipe.dragging=false;
+    mediaSwipe.pointerId=e.pointerId;
+    mediaSwipe.startX=e.clientX;
+    mediaSwipe.startY=e.clientY;
+    mediaSwipe.lastX=e.clientX;
+    mediaSwipe.startedAt=performance.now();
+  }
+
+  function mediaSwipePointerMove(e){
+    if(!mediaSwipe.active || e.pointerId!==mediaSwipe.pointerId) return;
+    const stage=q("mediaStage");
+    const frame=mediaSwipeFrame();
+    if(!stage || !frame){resetMediaSwipe(false);return}
+
+    const dx=e.clientX-mediaSwipe.startX;
+    const dy=e.clientY-mediaSwipe.startY;
+    mediaSwipe.lastX=e.clientX;
+
+    if(!mediaSwipe.dragging){
+      if(Math.abs(dx)<8 && Math.abs(dy)<8) return;
+      if(Math.abs(dy)>Math.abs(dx)*1.12){
+        resetMediaSwipe(false);
+        return;
+      }
+      mediaSwipe.dragging=true;
+      stage.classList.add("vvSwiping");
+      try{stage.setPointerCapture(e.pointerId)}catch{}
+    }
+
+    e.preventDefault();
+    const width=Math.max(1,stage.clientWidth);
+    const drag=dx/(1+(Math.abs(dx)/(width*1.65)));
+    const distance=Math.min(1,Math.abs(drag)/width);
+    frame.style.transition="none";
+    frame.style.transform=`translate3d(${drag}px,0,0) scale(${1-(distance*0.018)})`;
+    frame.style.opacity=String(1-(distance*0.24));
+  }
+
+  function mediaSwipePointerEnd(e,cancelled=false){
+    if(!mediaSwipe.active || e.pointerId!==mediaSwipe.pointerId) return;
+    const stage=q("mediaStage");
+    const frame=mediaSwipeFrame();
+    const dx=e.clientX-mediaSwipe.startX;
+    const dt=Math.max(1,performance.now()-mediaSwipe.startedAt);
+    const velocity=dx/dt;
+    const width=Math.max(1,stage?.clientWidth||window.innerWidth||1);
+    const threshold=Math.min(125,Math.max(52,width*0.14));
+    const commit=!cancelled && mediaSwipe.dragging &&
+      (Math.abs(dx)>=threshold || (Math.abs(velocity)>=0.55 && Math.abs(dx)>=28));
+
+    try{if(stage?.hasPointerCapture(e.pointerId))stage.releasePointerCapture(e.pointerId)}catch{}
+
+    if(!commit || !frame || !stage){
+      resetMediaSwipe(!!mediaSwipe.dragging);
+      return;
+    }
+
+    const direction=dx<0?1:-1;
+    mediaSwipe.suppressClickUntil=Date.now()+420;
+    mediaSwipe.active=false;
+    mediaSwipe.dragging=false;
+    mediaSwipe.pointerId=null;
+    stage.classList.remove("vvSwiping");
+
+    const exitX=(direction>0?-1:1)*Math.max(width*0.46,240);
+    frame.style.transition="transform .17s cubic-bezier(.32,.72,.25,1), opacity .15s ease";
+    frame.style.transform=`translate3d(${exitX}px,0,0) scale(.985)`;
+    frame.style.opacity="0";
+    setTimeout(()=>mediaMove(direction,true),155);
+  }
+
+  function initMediaSwipe(){
+    const stage=q("mediaStage");
+    if(!stage || stage.dataset.vvSwipeReady==="1") return;
+    stage.dataset.vvSwipeReady="1";
+    stage.addEventListener("pointerdown",mediaSwipePointerDown);
+    stage.addEventListener("pointermove",mediaSwipePointerMove,{passive:false});
+    stage.addEventListener("pointerup",e=>mediaSwipePointerEnd(e,false));
+    stage.addEventListener("pointercancel",e=>mediaSwipePointerEnd(e,true));
+    stage.addEventListener("dragstart",e=>e.preventDefault());
+    stage.addEventListener("click",e=>{
+      if(Date.now()<mediaSwipe.suppressClickUntil){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+    },true);
+  }
+
   async function openMediaViewer(ids,index){
     U.mediaIds=ids.slice();U.mediaIndex=Math.max(0,Math.min(ids.length-1,index));
+    U.mediaEnterDir=0;
     q("mediaLightbox").classList.add("on");
+    initMediaSwipe();
     await renderMediaViewer();
   }
 
   function closeMediaViewer(){
+    U.mediaRenderSeq++;
+    resetMediaSwipe(false);
     q("mediaLightbox").classList.remove("on");
     q("mediaStage").innerHTML="";
     if(U.mediaUrl){try{URL.revokeObjectURL(U.mediaUrl)}catch{};U.mediaUrl=null}
   }
 
   async function renderMediaViewer(){
+    const renderSeq=++U.mediaRenderSeq;
+    resetMediaSwipe(false);
     const id=U.mediaIds[U.mediaIndex], it=getItemById(id);
     if(!it){closeMediaViewer();return}
     if(U.mediaUrl){try{URL.revokeObjectURL(U.mediaUrl)}catch{};U.mediaUrl=null}
@@ -12351,19 +12831,42 @@ function debounce(fn, ms=250){
     try{
       const bytes=await v2OrV1PlainBytes(it);
       const blob=new Blob([bytes],{type:it.mime||(it.kind==="video"?"video/mp4":"image/png")});
-      U.mediaUrl=URL.createObjectURL(blob);
-      stage.innerHTML="";
-      if(it.kind==="video"){
-        const v=document.createElement("video");v.src=U.mediaUrl;v.controls=true;v.autoplay=false;v.playsInline=true;stage.append(v);
-      }else{
-        const img=document.createElement("img");img.src=U.mediaUrl;img.alt=it.name||"Photo";stage.append(img);
+      const nextUrl=URL.createObjectURL(blob);
+      if(renderSeq!==U.mediaRenderSeq || !q("mediaLightbox").classList.contains("on")){
+        try{URL.revokeObjectURL(nextUrl)}catch{}
+        return;
       }
-    }catch(e){stage.innerHTML="";stage.append(make("div","secretPageSub","Could not open this media item."));toast(e.message||"Preview failed",true)}
+      U.mediaUrl=nextUrl;
+      stage.innerHTML="";
+      const frame=make("div","mediaSwipeFrame");
+      const enterDir=Number(U.mediaEnterDir||0);
+      U.mediaEnterDir=0;
+      if(enterDir>0) frame.classList.add("vvEnterNext");
+      if(enterDir<0) frame.classList.add("vvEnterPrev");
+      if(it.kind==="video"){
+        const v=document.createElement("video");v.src=U.mediaUrl;v.controls=true;v.autoplay=false;v.playsInline=true;frame.append(v);
+      }else{
+        const img=document.createElement("img");img.src=U.mediaUrl;img.alt=it.name||"Photo";img.draggable=false;frame.append(img);
+      }
+      stage.append(frame);
+      if(enterDir){
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{
+          if(renderSeq!==U.mediaRenderSeq)return;
+          frame.classList.remove("vvEnterNext","vvEnterPrev");
+        }));
+      }
+    }catch(e){
+      if(renderSeq!==U.mediaRenderSeq)return;
+      stage.innerHTML="";
+      stage.append(make("div","secretPageSub","Could not open this media item."));
+      toast(e.message||"Preview failed",true);
+    }
   }
 
-  function mediaMove(delta){
+  function mediaMove(delta,smoothEntry=false){
     if(!U.mediaIds.length) return;
     U.mediaIndex=(U.mediaIndex+delta+U.mediaIds.length)%U.mediaIds.length;
+    U.mediaEnterDir=smoothEntry?Math.sign(delta):0;
     renderMediaViewer();
   }
 
@@ -12767,15 +13270,15 @@ function debounce(fn, ms=250){
   q("albumCreateName").addEventListener("keydown",e=>{if(e.key==="Enter")createAlbum()});
   q("ultraConfirmGo").addEventListener("click",()=>{const fn=U.confirmAction;U.confirmAction=null;closeOverlay("ovUltraConfirm");if(fn)fn()});
   q("mediaLbClose").addEventListener("click",closeMediaViewer);
-  q("mediaLbPrev").addEventListener("click",()=>mediaMove(-1));
-  q("mediaLbNext").addEventListener("click",()=>mediaMove(1));
+  q("mediaLbPrev").addEventListener("click",()=>mediaMove(-1,true));
+  q("mediaLbNext").addEventListener("click",()=>mediaMove(1,true));
 
   document.addEventListener("keydown",e=>{
     const lb=q("mediaLightbox");
     if(lb.classList.contains("on")){
       if(e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();closeMediaViewer();return}
-      if(e.key==="ArrowLeft"){e.preventDefault();mediaMove(-1);return}
-      if(e.key==="ArrowRight"){e.preventDefault();mediaMove(1);return}
+      if(e.key==="ArrowLeft"){e.preventDefault();mediaMove(-1,true);return}
+      if(e.key==="ArrowRight"){e.preventDefault();mediaMove(1,true);return}
     }
     if(e.key==="Escape"){
       if(q("ovCascadeUnlock").classList.contains("on")){e.preventDefault();e.stopImmediatePropagation();cancelCascadeUnlock();return}
